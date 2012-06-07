@@ -6,7 +6,7 @@
  * 	helper functions such as reslving positon names and numbers, building common
  *	stat queries and display lists and more.
  *
- * 	@author 	All functions are written by Frank Holmes unless otherwise noted.
+ * 	@author 	All functions are written by Frank Esselink unless otherwise noted.
  */
 /**
  *	PLAYERS STAT QUERY BUILDER
@@ -200,7 +200,8 @@ function player_stat_fields_list($player_type = 1, $query_type = QUERY_STANDARD,
  *
  *	Based on the stat selected, handles converting the raw data output to display ready HTML.
  *
- * 	@author	Frank Holmes
+ * 	@todo	Remove fantasy specific references and code
+ *	@author	Frank Esselink
  * 	@author	Jeff Fox
  *	@since	1.0
  */
@@ -383,6 +384,9 @@ function formatStatsForDisplay($player_stats = array(), $fields = array(), $conf
  *	Converts standard OOTP injury data (found in the player profile data object and injuries
 										in the database) into a human readbale string.
  *
+ *	@param	$row		Array 	Array of player data with injuriy fields
+ *	@return				String	Injury String text
+ *
  * 	@author	Jeff Fox
  *	@since	1.0.2
  */
@@ -414,6 +418,9 @@ function makeInjuryStatusString($row) {
  *
  *	Converts an array of positions into a readable list of position acroymns.
  *
+ *	@param	$positions	Array 	List of positions
+ *	@return				String	Position list String
+ *
  * 	@author	Jeff Fox
  *	@since	1.0
  */
@@ -430,6 +437,18 @@ function makeElidgibilityString($positions) {
 	}
 	return $gmPos;
 }
+/**
+ *	CALCULATE RATING
+ *
+ *	@param	$rating		int			Rating Value INT
+ *	@param	$ratOrTal	int			Rate or Tally INT
+ *	@param	$max		varchar		Max Value
+ *	@return				String		Rating Value
+ *
+ *	@todo	Rewrite this so settings can be in DB, remove session component
+ * 	@author	Frank Esselink
+ * 	@since	1.0
+ */
 function calc_rating($rating,$ratOrTal=0,$max="")
  {
    if ($rating==0) {return 0;}
@@ -493,6 +512,16 @@ function calc_rating($rating,$ratOrTal=0,$max="")
    return $rat;
  }
 
+/**
+ *	FORMAT BYTES.
+ *
+ *	@param	$bytes		int			Bytes value
+ *	@param	$precision	int			Math Round Precicion Value
+ *	@return				String		Bytes String
+ *
+ *	@author	Frank Esselink
+ * 	@since	1.0
+ */
 function formatBytes($bytes, $precision = 1) {
     $units = array('B', 'KB', 'MB', 'GB', 'TB');
 
@@ -505,12 +534,35 @@ function formatBytes($bytes, $precision = 1) {
     return round($bytes, $precision) . ' ' . $units[$pow];
 }
 
+/**
+ *	CALCULATE MOVEMENT.
+ *
+ *	@param	$mvmnt		int			Bytes value
+ *	@param	$gb			int			Math Round Precicion Value
+ *	@return				int			Movement Rating
+ *
+ *	@author	Frank Esselink
+ * 	@since	1.0
+ */
 function calc_movement($mvmnt,$gb)
  {
    $rat=200.5-(5*((18+(54-$gb)*.6)+((200-$mvmnt)/6))/2);
    return $rat;
  }
 
+/**
+ *	GET PITCH RATING.
+ *
+ *	@param	$pitch		String	Pitch type	
+ *	@param	$ir			int			
+ *	@param	$gb			int			
+ *	@param	$mvmnt		int		Movement Int
+ *	@param	$velo		int		Velocity int
+ *	@return				int		Rating Value		
+ *
+ *	@author	Frank Esselink
+ * 	@since	1.0
+ */
 function get_pitch_rating($pitch,$ir,$gb,$mvmnt,$velo)
 {
    $velo=$velo*10;
@@ -544,6 +596,16 @@ function get_pitch_rating($pitch,$ir,$gb,$mvmnt,$velo)
    return $rat;
  }
 
+/**
+ *	GET LEAGUE LEVEL.
+ *	Returns a text string name for the level passed.
+ *
+ *	@param	$lvl	int		Level index
+ *	@return			String	level name
+ *
+ *	@author	Frank Esselink
+ * 	@since	1.0
+ */
 function get_level($lvl)
  {
    switch ($lvl)
@@ -564,6 +626,16 @@ function get_level($lvl)
    return $txt;
  }
 
+/**
+ *	GET AWARD.
+ *	Returns a award string name for the level passed.
+ *
+ *	@param	$awid	int		Award type ID
+ *	@return			String	Award name Value
+ *
+ *	@author	Frank Esselink
+ * 	@since	1.0
+ */
 function get_award($awid)
  {
     switch ($awid)
@@ -605,6 +677,16 @@ function get_award($awid)
     return $txt;
  }
 
+/**
+ *	GET POSITION.
+ *	Returns a position string name for the position passed.
+ *
+ *	@param	$pos		int		Position index int
+ *	@return				String	Position name
+ *
+ *	@author	Frank Esselink
+ * 	@since	1.0
+ */
 function get_pos($pos)
  {
    switch ($pos)
@@ -678,6 +760,17 @@ function get_pos($pos)
     }
    return $txt;
  }
+/**
+ *	GET POSITION NUMBER.
+ *	A reverse of the get_pos() function that returns a position number for the position
+ *	string name passed.
+ *
+ *	@param	$pos		String	Position name
+ *	@return				int		Position index int
+ *
+ *	@author	Jeff Fox
+ * 	@since	1.0
+ */
 function get_pos_num($pos)
  {
    switch ($pos)
@@ -749,6 +842,16 @@ function get_pos_num($pos)
     }
    return $txt;
  }
+/**
+ *	GET VELOCITY.
+ *	Converts a velocity index int into a text string.
+ *
+ *	@param	$velo	int		Velocity Int
+ *	@return			String	Velocity String
+ *
+ *	@author	Frank Esselink
+ * 	@since	1.0
+ */
 function get_velo($velo)
  {
   switch ($velo)
@@ -777,6 +880,15 @@ function get_velo($velo)
   return $txt;
  }
 
+/**
+ *	HALL OF FAME POSITION.
+ *
+ *	@param	$pos		pos Int
+ *	@return			int		Positon Value
+ *
+ *	@author	Frank Esselink
+ * 	@since	1.0
+ */
 function hof_pos($pos)
  {
    switch ($pos)
@@ -794,6 +906,15 @@ function hof_pos($pos)
    return $val;
  }
 
+/**
+ *	ALL STAR POSITION.
+ *
+ *	@param	$pos	int		pos Int
+ *	@return			int		Positon Value
+ *
+ *	@author	Frank Esselink
+ * 	@since	1.0
+ */
 function ss_pos($pos)
  {
    switch ($pos)
@@ -811,6 +932,16 @@ function ss_pos($pos)
    return $val;
  }
 
+/**
+ *	DATE DIFFERENCE.
+ *
+ *	@param	$start		String 	Start Date 
+ *	@param	$end		String 	End Date 
+ *	@return				int		Difference in days
+ *
+ *	@author	Frank Esselink
+ * 	@since	1.0
+ */
 function datediff($start,$end)
  {
    $start_ts = strtotime($start);
@@ -820,6 +951,17 @@ function datediff($start,$end)
    return round($diff / 86400);
  }
 
+/**
+ *	GET LL CAT.
+ *
+ *	@param	$catID		int 		Category Int
+ *	@param	$forSQL		boolean		TRUE to use SQL friendly names, FALSE for general names
+ *	@return				String		Category Name
+ *
+ *	@author	Frank Esselink
+ *	@author	Jeff Fox
+ * 	@since	1.0
+ */
 function get_ll_cat($catID,$forSQL = false)
  {
    switch ($catID)
@@ -897,6 +1039,17 @@ function get_ll_cat($catID,$forSQL = false)
    return $txt;
  }
 
+/**
+ *	ORDINAL SUFFIX.
+ *	Determines a suffix based on the value passed.
+ *
+ *	@param	$value		int 		Numeric Value
+ *	@param	$sup		int			1 to wrap return value in <Sup> tags, 0 to not
+ *	@return				String		String value with ordinal
+ *
+ *	@author	Frank Esselink
+ * 	@since	1.0
+ */
 function ordinal_suffix($value, $sup = 0) {
     if(substr($value, -2, 2) == 11 || substr($value, -2, 2) == 12 || substr($value, -2, 2) == 13){
         $suffix = "th";
@@ -919,6 +1072,16 @@ function ordinal_suffix($value, $sup = 0) {
     return $value . $suffix;
 }
 
+/**
+ *	GET HAND.
+ *	Converts a hand index ID to a string.
+ *
+ *	@param	$handID		int 		Hand Index
+ *	@return				String		String value
+ *
+ *	@author	Frank Esselink
+ * 	@since	1.0
+ */
 function get_hand($handID)
  {
   switch ($handID)
@@ -931,6 +1094,16 @@ function get_hand($handID)
   return $hand;
  }
 
+/**
+ *	CENTIMETERS TO FEET/INCHES.
+ *	Converts a centimeter value to a feet and inches string.
+ *
+ *	@param	$len		int 		Length value in centimeters
+ *	@return				String		String value
+ *
+ *	@author	Frank Esselink
+ * 	@since	1.0
+ */
 function cm_to_ft_in($len)
  {
    $in=$len/2.54;
@@ -940,15 +1113,37 @@ function cm_to_ft_in($len)
    $txt=$ft."' ".$in."\"";
    return $txt;
  }
- function average($array)
+/**
+ *	AVERAGE.
+ *	Creates an average based on the values of the array passed.
+ *
+ *	@param	$array		Array 		Contains int values
+ *	@return				Int			Average value
+ *
+ *	@author	Frank Esselink
+ * 	@since	1.0
+ */
+function average($array)
  {
    $sum   = array_sum($array);
    $count = count($array);
    return $sum/$count;
  }
 
+/**
+ *	DEVIATION.
+ *	Creates a standard deviation based on the values of the array passed. This function 
+ * 	is helpful when trying to determine if a value is higher or lower than the standard 
+ *	deviation from a median value.
+ *
+ *	@param	$array		Array 		Contains int values
+ *	@return				Int			Average value
+ *
+ *	@author	Frank Esselink
+ * 	@since	1.0
+ */
 function deviation($array)
- {
+{
    $avg = average($array);
    foreach ($array as $value)
     {
@@ -956,7 +1151,17 @@ function deviation($array)
      }
    $deviation = sqrt(average($variance));
    return $deviation;
- }
+}
+/**
+ *	RETURN BYTES.
+ *	Cronverts a file size string into a byte value.
+ *
+ *	@param	$val		String 		String file size value 
+ *	@return				Int			Bytes value
+ *
+ *	@author	Frank Esselink
+ * 	@since	1.0
+ */
 function return_bytes($val) {
 	$val = trim($val);
 	$last = strtolower($val[strlen($val)-1]);

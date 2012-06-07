@@ -1,12 +1,33 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 /**
- *	PLAYER MODEL CLASS.
+ *	PLAYERS MODEL CLASS.
  *
  *	@author			Jeff Fox <jfox015 (at) gmail (dot) com>
  *  @copyright   	(c)2009-11 Jeff Fox/Aeolian Digital Studios
  *	@version		1.0
  *
  */
+/*
+	Copyright (c) 2012 Jeff Fox.
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in
+	all copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+	THE SOFTWARE.
+*/
 require_once(dirname(dirname(__FILE__)).'/models/base_ootp_model.php');
 class Players_model extends Base_ootp_model {
 
@@ -50,7 +71,10 @@ class Players_model extends Base_ootp_model {
      /	PUBLIC FUNCTIONS
      /
      /-------------------------------------------------*/
-    // SPECIAL QUERIES
+    
+	//---------------------------------------------------------------
+	
+	// SPECIAL QUERIES
     /**
      * 	GET PLAYER CONUNT.
      *	Test function to assure that players have been imported from the OOTP players file
@@ -66,7 +90,18 @@ class Players_model extends Base_ootp_model {
         if (!$this->use_prefix) $this->db->dbprefix = $this->dbprefix;
         return $count;
     }
-    public function getPlayerDetails($player_id = false) {
+    
+	//---------------------------------------------------------------
+	
+	/**
+	 *	GET PLAYER DETAILS.
+	 *
+	 *	Returns and array of players details values.
+	 *
+	 *	@param	$player_id	int		Player ID
+	 *	@return				Array	Array of player detail values
+	 */
+	public function get_player_details($player_id = false) {
 
         if ($player_id === false) { return; }
         $details = array();
@@ -114,7 +149,19 @@ class Players_model extends Base_ootp_model {
         if (!$this->use_prefix) $this->db->dbprefix = $this->dbprefix;
         return $details;
     }
-    public function getPlayersDetails($players = array()) {
+    
+	//---------------------------------------------------------------
+	
+	/**
+	 *	GET PLAYERS DETAILS.
+	 *
+	 *	Similar to get_player_details, but accepts an array of player ids and returns and array
+	 *	of players details objects.
+	 *
+	 *	@param	$players	Array	Array of Player IDs
+	 *	@return				Array	Array of player detail value arrays
+	 */
+	public function get_players_details($players = array()) {
 
         if (sizeof($players) == 0) { return; }
         $playersInfo = array();
@@ -126,7 +173,17 @@ class Players_model extends Base_ootp_model {
         return $playersInfo;
     }
 
-    public function getPlayerName($player_id = false) {
+	//---------------------------------------------------------------
+	
+	/**
+	 *	GET PLAYER NAME.
+	 *
+	 *	Returns the	players name.
+	 *
+	 *	@param	$player_id	Int		Player ID
+	 *	@return				String	The players name
+	 */
+	public function get_player_name($player_id = false) {
 
         if ($player_id === false) { $player_id = $this->player_id; }
 
@@ -144,9 +201,20 @@ class Players_model extends Base_ootp_model {
         $query->free_result();
         $this->db->dbprefix = $oldprefix;
         return $name;
-
     }
-    public function getPlayerPosition($player_id = false) {
+    
+	//---------------------------------------------------------------
+	
+	/**
+	 *	GET PLAYER POSITION.
+	 *
+	 *	Returns a players position ID. Requires the ganerla_helper <code>get_pos</code> function to covert to 
+	 *	a human readable name.
+	 *
+	 *	@param	$player_id	Int		Player ID
+	 *	@return				int		The player position ID.
+	 */
+	public function getPlayerPosition($player_id = false) {
 
         if ($player_id === false) { $player_id = $this->player_id; }
 
@@ -166,12 +234,22 @@ class Players_model extends Base_ootp_model {
         return $pos;
 
     }
-    public function getTeam($player_id = false) {
+
+	//---------------------------------------------------------------
+	
+	/**
+	 *	GET TEAM.
+	 *	Returns a given players team ID.
+	 *	
+	 *	@param	$player_id	int	The Player ID
+	 *	@return				int	Team ID
+	 */
+	public function get_player_team($player_id = false) {
 
         if ($player_id === false) { $player_id = $this->player_id; }
 
         $team_id = -1;
-        // GET PLAYER POSITION
+        // GET PLAYER TEAM ID
         if (!$this->use_prefix) $this->db->dbprefix = '';
         $this->db->select('team_id');
         $this->db->where('player_id',$player_id);
@@ -183,19 +261,25 @@ class Players_model extends Base_ootp_model {
         $query->free_result();
         if (!$this->use_prefix) $this->db->dbprefix = $this->dbprefix;
         return $team_id;
-
     }
 
-    public function getActivePlayers($league_id = false,$searchType = 'all', $searchParam = false,$current_scoring_period = 1, $nonFreeAgents = array()) {
-        return $this->getPlayers($league_id,$searchType, $searchParam,$current_scoring_period, $nonFreeAgents,1);
-    }
-    public function getPlayers($league_id = false,$searchType = 'all', $searchParam = false,$current_scoring_period = 1, $nonFreeAgents = array(),
-                               $playerStatus = false, $selectBox = false) {
+	//---------------------------------------------------------------
+	
+	/**
+	 *	GET PLAYERS.
+	 *	Returns an array of players based on the passed arguments.
+	 *	
+	 *	@param	$league_id		int			he League ID
+	 *	@param	$player_active	Boolean		TRUE = active, FALSE = retired
+	 *	@param	$selectBox		Boolean		TRUE to return players for select box, FALSE for normal return
+	 *	@return					Array		Array of player data values
+	 *
+	 */
+    public function get_players($league_id = false, $player_active = true, $selectBox = false) {
         $players = array();
         if (!$this->use_prefix) $this->db->dbprefix = '';
         $this->db->select('players.player_id, first_name, last_name, players.position, players.role, players.injury_is_injured, players.injury_dtd_injury, players.injury_career_ending, players.injury_dl_left, players.injury_left, players.injury_id, ');
 
-        //$this->db->join('players','players.player_id = fantasy_players.player_id','left');
         switch ($searchType) {
             case 'alpha':
                 $this->db->like('players.last_name', $searchParam, 'after');
@@ -250,137 +334,107 @@ class Players_model extends Base_ootp_model {
         return $players;
     }
 
-    /**
-     *	GET PLAYER STATS FOR PERIOD
-     *	Returns player stats from OOTP game data based on a fixed time period or a year.
-     *	@since	1.0.1.9
-     *	@param	$playerType			1= Batters, 2 = Pitchers
-     *	@parsm	$scoring_period		Scoring Period Array object
-     *	@param	$rules				Scoring Rules Array
-     *	@param	$players			Players List Array, generated by TeamModel->GetBatters() or TeamModel->getPitchers()
-     *	@param	$excludeList		Array of Player Ids to exclude
-     *	@param	$batting_sort		Batting Stats sort column
-     *	@param	$pitching_sort 		Pitching Stats sort column
-     *	@return						Stats array object
-     *	@see	TeamModel
+	//---------------------------------------------------------------
+	
+	/**
+     *	GET ACTIVE PLAYERS.
+     *	Custom Alias of get_players that filters out only active players.
+     *
+     *	@param	$league_id		int			League ID
+     *	@param	$select_box		Boolean		TRUE to return players for select box
+     *	@return					Array		Array of player values
      *
      */
-    public function getStatsforPeriod($playerType = 1, $scoring_period = array(), $rules = array(),
-                                      $players = array(),$excludeList = array(), $searchType = 'all', $searchParam = false,
-                                      $query_type = QUERY_STANDARD, $stats_range = -1, $limit = -1, $startIndex = 0,
-                                      $batting_sort = false, $pitching_sort = false) {
-        $stats = array();
-
-        $playerList = "(";
-        if (is_array($players) && sizeof($players) > 0) {
-            foreach($players as $player_id => $playerData) {
-                if ($playerList != "(") { $playerList .= ","; }
-                $playerList .= $player_id;
-            }
-        }
-        $playerList .= ")";
-
-        $excludeLostStr = "(";
-        if (is_array($excludeList) && sizeof($excludeList) > 0) {
-            foreach($excludeList as $player_id) {
-                if ($excludeLostStr != "(") { $excludeLostStr .= ","; }
-                $excludeLostStr .= $player_id;
-            }
-        }
-        $excludeLostStr .= ")";
-        if (!$this->use_prefix) $this->db->dbprefix = '';
-        // BUILD QUERY TO PULL CURRENT GAME DATA FOR THIS PLAYER
-        $sql = 'SELECT players.player_id, players.position, players.role, players.player_id ,first_name, last_name,players.injury_is_injured, players.injury_dtd_injury, players.injury_career_ending, players.injury_dl_left, players.injury_left, players.injury_id,rating,';
-        $sql .= player_stat_query_builder($playerType, $query_type, $rules);
-        if ($playerType == 1) {
-            $sql .= ",players.position as pos ";
-            $tblName = 'players_game_batting';
-            $posType = 'players.position';
-            if ($batting_sort !== false) $order = $batting_sort;
-            $order = 'ab';
-        } else {
-            $sql .= ",players.role as pos ";
-            $tblName = 'players_game_pitching_stats';
-            $posType = 'players.role';
-            if ($pitching_sort !== false) $order = $pitching_sort;
-            $order = 'ip';
-        }
-        $sql .= "FROM games ";
-        $sql .= 'LEFT JOIN '.$tblName.' ON games.game_id = '.$tblName.'.game_id ';
-        $sql .= 'RIGHT OUTER JOIN players ON players.player_id = '.$tblName.'.player_id ';
-        //$sql .= 'RIGHT OUTER JOIN fantasy_players ON players.player_id = fantasy_players.player_id ';
-        if (sizeof($rules) > 0 && isset($rules['scoring_type']) && $rules['scoring_type'] == LEAGUE_SCORING_HEADTOHEAD) {
-            $order = 'fpts';
-        }
-        if (sizeof($scoring_period) > 0 && $stats_range == -1) {
-            $sql .= "WHERE DATEDIFF('".$scoring_period['date_start']."',games.date)<= 0 ";
-            $sql .= "AND DATEDIFF('".$scoring_period['date_end']."',games.date)>= 0 ";
-        } else if (sizeof($scoring_period) == 0 && $stats_range != -1) {
-            $year_time = (60*60*24*365);
-            if ($stats_range != 4) {
-                $sql .= ' AND games.year = '.date('Y',time()-($year_time * $stats_range));
-            } else {
-                $sql .= ' AND (games.year = '.date('Y',time()-($year_time)).' OR games.year = '.date('Y',time()-($year_time * 2)).' OR games.year = '.date('Y',time()-($year_time * 3)).")";
-            }
-        }
-        switch ($searchType) {
-            case 'alpha':
-                $sql .= ' AND players.last_name LIKE "'.$searchParam.'%" ';
-                break;
-            case 'pos':
-                $col = "position";
-                if ($searchParam == 11 || $searchParam == 12 || $searchParam == 13) {
-                    $col = "role";
-                }
-                if ($searchParam == 20) {
-                    $sql .= ' AND (players.position = 7 OR players.position = 8 OR players.position = 9) ';
-                } else if ($searchParam == 12 || $searchParam == 13) {
-                    $sql .= ' AND (players.role = 12 OR players.role = 13) ';
-                } else {
-                    $sql .= ' AND players.'.$col.' = '.$searchParam." ";
-                }
-                break;
-            case 'all':
-            default:
-                break;
-        } // END switch
-        if ($playerList != "()") {
-            $sql .= "AND ".$tblName.".player_id IN ".$playerList.' ';
-        }
-        if ($excludeLostStr != "()") {
-            $sql .= "AND ".$tblName.".player_id NOT IN ".$excludeLostStr.' ';
-        }
-        $sql .= "GROUP BY ".$tblName.'.player_id ';
-        $sql .= "ORDER BY ".$order." DESC ";
-        if ($limit != -1 && $startIndex == 0) {
-            $sql.="LIMIT ".$limit;
-        } else if ($limit != -1 && $startIndex > 0) {
-            $sql.="LIMIT ".$startIndex.", ".$limit;
-        }
-        $gQuery = $this->db->query($sql);
-        //echo($sql."<br />");
-        if ($gQuery->num_rows() > 0) {
-            $fields = $gQuery->list_fields();
-            foreach ($gQuery->result() as $sRow) {
-                $player = array();
-                foreach($fields as $field) {
-                    $player[$field] = $sRow->$field;
-                }
-                $player['player_name'] = $sRow->first_name." ".$sRow->last_name;
-                if ($sRow->position == 1) {
-                    $player['pos'] = $sRow->role;
-                } else {
-                    $player['pos'] = $sRow->position;
-                }
-                array_push($stats,$player);
-            }
-        }
-        $gQuery->free_result();
-        if (!$this->use_prefix) $this->db->dbprefix = $this->dbprefix;
-        return $stats;
+   public function get_active_players($league_id = false, $select_box = false) {
+        return $this->get_players($league_id, true, $select_box);
     }
 
-    /**
+	//---------------------------------------------------------------
+	
+	/**
+     *	GET RETIRED PLAYERS.
+     *	Custom Alias of get_players that filters out only retired players.
+     *
+     *	@param	$league_id		int			League ID
+     *	@param	$select_box		Boolean		TRUE to return players for select box
+     *	@return					Array		Array of player values
+     *
+     */
+    public function get_retired_players($league_id = false, $select_box = false) {
+        return $this->get_players($league_id, false, $select_box);
+    }
+
+	//---------------------------------------------------------------
+	
+	/**
+     *	GET PLAYER AWARDS.
+     *	Returns all awards won by the players broken out by award type.
+     *
+     *	@param	$ootp_league_id		OOTP League ID value
+     *	@param	$player_id			Player Id, defaults to current player id if empty
+     *	@return						Award Array
+     *	@since						1.0
+     *	@version					1.0.1
+     *
+     */
+    public function get_player_awards($ootp_league_id, $player_id = false) {
+
+        if ($player_id === false) { $player_id = $this->player_id; }
+
+        $awards = array();
+        if (!$this->use_prefix) $this->db->dbprefix = '';
+        $this->db->select("award_id,year,position");
+        $this->db->from('players_awards');
+        $this->db->where('league_id',$ootp_league_id);
+        $this->db->where('player_id',$player_id);
+        $this->db->where_in('award_id',array(4,5,6,7,9));
+        $this->db->order_by('award_id','award_id,year,position');
+        $query = $this->db->get();
+        $prevAW=-1;
+        $cnt=0;
+        if ($query->num_rows > 0) {
+            $awardsByYear = array();
+            $poy = array();
+            $boy = array();
+            $roy = array();
+            $gg = array();
+            $as = array();
+            foreach($query->result_array() as $row) {
+                $awid=$row['award_id'];
+                $yr=$row['year'];
+                $pos=$row['position'];
+                if ($prevAW!=$awid) {
+                    $awardsByYear[$awid]=$yr;
+                } else {
+                    $awardsByYear[$awid]=$awardsByYear[$awid].", ".$yr;
+                } // END if
+
+                switch ($awid) {
+                    case 4: $poy[$yr]=1; break;
+                    case 5: $boy[$yr]=1; break;
+                    case 6: $roy[$yr]=1; break;
+                    case 7: $gg[$yr][$pos]=1; break;
+                    case 9: $as[$yr]=1; break;
+                } // END switch
+                $cnt++;
+                $prevAW=$awid;
+
+
+            } // END foreach
+            $awards['byYear'] = $awardsByYear;
+            $awards['poy'] = $poy;
+            $awards['boy'] = $boy;
+            $awards['roy'] = $roy;
+            $awards['gg'] = $gg;
+            $awards['as'] = $as;
+        } // END if
+        if (!$this->use_prefix) $this->db->dbprefix = $this->dbprefix;
+        return $awards;
+    }
+	
+	//---------------------------------------------------------------
+	
+	/**
      *	UPDATE PLAYER RATINGS.
      *	Loads players tstistical performance for the period in days specififed to compute the average
      *	and standard population deviation values. Then, all players compiled stats for the given
@@ -396,7 +450,7 @@ class Players_model extends Base_ootp_model {
      *	@see						Controller->Admin->playerRatings()
      *
      */
-    public function updatePlayerRatings($ratingsPeriod = 15, $scoring_period = false, $ootp_league_id = 100) {
+    public function update_player_ratings($ratingsPeriod = 15, $scoring_period = false, $league_id = 100) {
         if (($scoring_period === false|| sizeof($scoring_period) < 1)) { return false; } // END if
 
         $this->lang->load('admin');
@@ -425,16 +479,16 @@ class Players_model extends Base_ootp_model {
         $summary .= str_replace('[DAYS]',$ratingsPeriod,$period_str);
         if (!$this->use_prefix) $this->db->dbprefix = '';
         /*--------------------------------------
-          /
-          /	2.0 STAT AVG,STDDEV LOOP
-          /
-          /-------------------------------------*/
+        /
+        /	2.0 STAT AVG,STDDEV LOOP
+        /
+        /-------------------------------------*/
         if (sizeof($player_list) > 0) {
             $summary .= str_replace('[PLAYER_COUNT]',sizeof($player_list),$this->lang->line('sim_player_rating_count'));
             $processCount = 0;
             /*-------------------------------------------
-               /	2.1 BUOLD LIST OF ACTIVE PLAYERS
-               /-------------------------------------------*/
+            /	2.1 BUOLD LIST OF ACTIVE PLAYERS
+            /-------------------------------------------*/
             $players_str = "(";
             foreach($player_list as $row) {
                 if ($players_str != "(") { $players_str .= ","; }
@@ -442,8 +496,8 @@ class Players_model extends Base_ootp_model {
             }
             $players_str .= ")";
             /*-------------------------------
-               /	2.2 SWITCH ON PLAYER TYPE
-               /------------------------------*/
+            /	2.2 SWITCH ON PLAYER TYPE
+            /------------------------------*/
             $statTotals = array(1=>array(),2=>array());
             $statSummaries = array(1=>array(),2=>array());
             $summary .= $this->lang->line('sim_player_rating_statload');
@@ -459,8 +513,8 @@ class Players_model extends Base_ootp_model {
                     $minQualify = 1;
                 } // END if
                 /*-------------------------------
-                    /	2.2.1 INDIVIDUAL STAT LOOP
-                    /------------------------------*/
+                /	2.2.1 INDIVIDUAL STAT LOOP
+                /------------------------------*/
                 // BUILD QUERY TO PULL CURRENT GAME DATA FOR THIS PLAYER
                 $ratingsCats = $ratingsCats + array($typeId => get_stats_for_ratings($typeId));
                 $localStats = array();
@@ -487,8 +541,8 @@ class Players_model extends Base_ootp_model {
                     } // END switch
                     if (!empty($stat)) { $tmpSelect .= 'SUM(g) as sum_g, SUM('.$stat.') as sum_'.$stat.', SUM('.$qualifier.') as sum_'.$qualifier; }
                     /*-----------------------------------------
-                         /	2.2.1.1 EXECUTE THE QUERY FOR THIS STAT
-                         /----------------------------------------*/
+                    /	2.2.1.1 EXECUTE THE QUERY FOR THIS STAT
+                    /----------------------------------------*/
                     $this->db->dbprefix = '';
                     $this->db->flush_cache();
                     $this->db->select($tmpSelect);
@@ -631,8 +685,148 @@ class Players_model extends Base_ootp_model {
         if (!$this->use_prefix) $this->db->dbprefix = $this->dbprefix;
         return array($result,$summary);
     }
+	
+	/*---------------------------------------------------------------
+	/
+	/	STATS
+	/
+	/-------------------------------------------------------------*/
+	
+	//---------------------------------------------------------------
+	
+	/**
+     *	GET PLAYER STATS FOR PERIOD
+     *	Returns player stats from OOTP game data based on a fixed time period or a year.
+     *	@since	1.0.1.9
+     *	@param	$playerType			1= Batters, 2 = Pitchers
+     *	@parsm	$scoring_period		Scoring Period Array object
+     *	@param	$rules				Scoring Rules Array
+     *	@param	$players			Players List Array, generated by TeamModel->GetBatters() or TeamModel->getPitchers()
+     *	@param	$excludeList		Array of Player Ids to exclude
+     *	@param	$batting_sort		Batting Stats sort column
+     *	@param	$pitching_sort 		Pitching Stats sort column
+     *	@return						Stats array object
+     *	@see	TeamModel
+     *
+     */
+    public function getStatsforPeriod($playerType = 1, $scoring_period = array(), $rules = array(),
+                                      $players = array(),$excludeList = array(), $searchType = 'all', $searchParam = false,
+                                      $query_type = QUERY_STANDARD, $stats_range = -1, $limit = -1, $startIndex = 0,
+                                      $batting_sort = false, $pitching_sort = false) {
+        $stats = array();
 
-    /**
+        $playerList = "(";
+        if (is_array($players) && sizeof($players) > 0) {
+            foreach($players as $player_id => $playerData) {
+                if ($playerList != "(") { $playerList .= ","; }
+                $playerList .= $player_id;
+            }
+        }
+        $playerList .= ")";
+
+        $excludeLostStr = "(";
+        if (is_array($excludeList) && sizeof($excludeList) > 0) {
+            foreach($excludeList as $player_id) {
+                if ($excludeLostStr != "(") { $excludeLostStr .= ","; }
+                $excludeLostStr .= $player_id;
+            }
+        }
+        $excludeLostStr .= ")";
+        if (!$this->use_prefix) $this->db->dbprefix = '';
+        // BUILD QUERY TO PULL CURRENT GAME DATA FOR THIS PLAYER
+        $sql = 'SELECT players.player_id, players.position, players.role, players.player_id ,first_name, last_name,players.injury_is_injured, players.injury_dtd_injury, players.injury_career_ending, players.injury_dl_left, players.injury_left, players.injury_id,rating,';
+        $sql .= player_stat_query_builder($playerType, $query_type, $rules);
+        if ($playerType == 1) {
+            $sql .= ",players.position as pos ";
+            $tblName = 'players_game_batting';
+            $posType = 'players.position';
+            if ($batting_sort !== false) $order = $batting_sort;
+            $order = 'ab';
+        } else {
+            $sql .= ",players.role as pos ";
+            $tblName = 'players_game_pitching_stats';
+            $posType = 'players.role';
+            if ($pitching_sort !== false) $order = $pitching_sort;
+            $order = 'ip';
+        }
+        $sql .= "FROM games ";
+        $sql .= 'LEFT JOIN '.$tblName.' ON games.game_id = '.$tblName.'.game_id ';
+        $sql .= 'RIGHT OUTER JOIN players ON players.player_id = '.$tblName.'.player_id ';
+        //$sql .= 'RIGHT OUTER JOIN fantasy_players ON players.player_id = fantasy_players.player_id ';
+        if (sizeof($rules) > 0 && isset($rules['scoring_type']) && $rules['scoring_type'] == LEAGUE_SCORING_HEADTOHEAD) {
+            $order = 'fpts';
+        }
+        if (sizeof($scoring_period) > 0 && $stats_range == -1) {
+            $sql .= "WHERE DATEDIFF('".$scoring_period['date_start']."',games.date)<= 0 ";
+            $sql .= "AND DATEDIFF('".$scoring_period['date_end']."',games.date)>= 0 ";
+        } else if (sizeof($scoring_period) == 0 && $stats_range != -1) {
+            $year_time = (60*60*24*365);
+            if ($stats_range != 4) {
+                $sql .= ' AND games.year = '.date('Y',time()-($year_time * $stats_range));
+            } else {
+                $sql .= ' AND (games.year = '.date('Y',time()-($year_time)).' OR games.year = '.date('Y',time()-($year_time * 2)).' OR games.year = '.date('Y',time()-($year_time * 3)).")";
+            }
+        }
+        switch ($searchType) {
+            case 'alpha':
+                $sql .= ' AND players.last_name LIKE "'.$searchParam.'%" ';
+                break;
+            case 'pos':
+                $col = "position";
+                if ($searchParam == 11 || $searchParam == 12 || $searchParam == 13) {
+                    $col = "role";
+                }
+                if ($searchParam == 20) {
+                    $sql .= ' AND (players.position = 7 OR players.position = 8 OR players.position = 9) ';
+                } else if ($searchParam == 12 || $searchParam == 13) {
+                    $sql .= ' AND (players.role = 12 OR players.role = 13) ';
+                } else {
+                    $sql .= ' AND players.'.$col.' = '.$searchParam." ";
+                }
+                break;
+            case 'all':
+            default:
+                break;
+        } // END switch
+        if ($playerList != "()") {
+            $sql .= "AND ".$tblName.".player_id IN ".$playerList.' ';
+        }
+        if ($excludeLostStr != "()") {
+            $sql .= "AND ".$tblName.".player_id NOT IN ".$excludeLostStr.' ';
+        }
+        $sql .= "GROUP BY ".$tblName.'.player_id ';
+        $sql .= "ORDER BY ".$order." DESC ";
+        if ($limit != -1 && $startIndex == 0) {
+            $sql.="LIMIT ".$limit;
+        } else if ($limit != -1 && $startIndex > 0) {
+            $sql.="LIMIT ".$startIndex.", ".$limit;
+        }
+        $gQuery = $this->db->query($sql);
+        //echo($sql."<br />");
+        if ($gQuery->num_rows() > 0) {
+            $fields = $gQuery->list_fields();
+            foreach ($gQuery->result() as $sRow) {
+                $player = array();
+                foreach($fields as $field) {
+                    $player[$field] = $sRow->$field;
+                }
+                $player['player_name'] = $sRow->first_name." ".$sRow->last_name;
+                if ($sRow->position == 1) {
+                    $player['pos'] = $sRow->role;
+                } else {
+                    $player['pos'] = $sRow->position;
+                }
+                array_push($stats,$player);
+            }
+        }
+        $gQuery->free_result();
+        if (!$this->use_prefix) $this->db->dbprefix = $this->dbprefix;
+        return $stats;
+    }
+
+	//---------------------------------------------------------------
+	
+	/**
      *	GET CAREER STATS.
      *	Returns players career statistics.
      *
@@ -679,72 +873,10 @@ class Players_model extends Base_ootp_model {
         if (!$this->use_prefix) $this->db->dbprefix = $this->dbprefix;
         return $career_stats;
     }
-    /**
-     *	GET PLAYER AWARDS.
-     *	Returns all awards won by the players broken out by award type.
-     *
-     *	@param	$ootp_league_id		OOTP League ID value
-     *	@param	$player_id			Player Id, defaults to current player id if empty
-     *	@return						Award Array
-     *	@since						1.0
-     *	@version					1.0.1
-     *
-     */
-    public function getPlayerAwards($ootp_league_id, $player_id = false) {
 
-        if ($player_id === false) { $player_id = $this->player_id; }
-
-        $awards = array();
-        if (!$this->use_prefix) $this->db->dbprefix = '';
-        $this->db->select("award_id,year,position");
-        $this->db->from('players_awards');
-        $this->db->where('league_id',$ootp_league_id);
-        $this->db->where('player_id',$player_id);
-        $this->db->where_in('award_id',array(4,5,6,7,9));
-        $this->db->order_by('award_id','award_id,year,position');
-        $query = $this->db->get();
-        $prevAW=-1;
-        $cnt=0;
-        if ($query->num_rows > 0) {
-            $awardsByYear = array();
-            $poy = array();
-            $boy = array();
-            $roy = array();
-            $gg = array();
-            $as = array();
-            foreach($query->result_array() as $row) {
-                $awid=$row['award_id'];
-                $yr=$row['year'];
-                $pos=$row['position'];
-                if ($prevAW!=$awid) {
-                    $awardsByYear[$awid]=$yr;
-                } else {
-                    $awardsByYear[$awid]=$awardsByYear[$awid].", ".$yr;
-                } // END if
-
-                switch ($awid) {
-                    case 4: $poy[$yr]=1; break;
-                    case 5: $boy[$yr]=1; break;
-                    case 6: $roy[$yr]=1; break;
-                    case 7: $gg[$yr][$pos]=1; break;
-                    case 9: $as[$yr]=1; break;
-                } // END switch
-                $cnt++;
-                $prevAW=$awid;
-
-
-            } // END foreach
-            $awards['byYear'] = $awardsByYear;
-            $awards['poy'] = $poy;
-            $awards['boy'] = $boy;
-            $awards['roy'] = $roy;
-            $awards['gg'] = $gg;
-            $awards['as'] = $as;
-        } // END if
-        if (!$this->use_prefix) $this->db->dbprefix = $this->dbprefix;
-        return $awards;
-    }
-    public function getRecentGameStats($ootp_league_id, $last_date, $lgyear, $days = 7, $player_id = false) {
+	//---------------------------------------------------------------
+	
+	public function getRecentGameStats($ootp_league_id, $last_date, $lgyear, $days = 7, $player_id = false) {
 
         if ($player_id === false) { $player_id = $this->player_id; }
 
@@ -820,7 +952,10 @@ class Players_model extends Base_ootp_model {
         return $stats;
 
     }
-    public function get_current_stats($position = 1, $league_id = false, $league_year = false, $team_id = false) {
+
+	//---------------------------------------------------------------
+	
+	public function get_current_stats($position = 1, $league_id = false, $league_year = false, $team_id = false) {
        
 		$players_list = array();
         if (!$this->use_prefix) $this->db->dbprefix = '';

@@ -1,9 +1,14 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
+/**
+ *	Human Managers Model.
+ *
+ *	Deals with human team owner information from OOTP games for online leagues.
+ *
+ *	@author			Jeff Fox <jfox015 (at) gmail (dot) com>
+ *  @copyright   	(c)2009-12 Jeff Fox/Aeolian Digital Studios
+ *	@version		1.0.3
+ */
 /*
-	Class: Human_managers_model
-
-	Deals with human team owner information from OOTP games for online leagues.
-	
 	Copyright (c) 2012 Jeff Fox.
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
