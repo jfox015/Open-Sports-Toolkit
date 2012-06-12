@@ -1,12 +1,16 @@
-# OOTP Web Toolkit
+# Open Sports Toolkit
 
-A collection of helper data models, helper functions and standard language files for OOTP web mopd authors.
+Formerly know as the _OOTP Web Toolkit_, this module is a collection of helpers, data models, classes, views and standard language files for sports mod developers to use
+as a starting point to build sports based web sites.
 
 ## Features
 
-- Data Models for working with OOTP data tables like Teams, Players, Leagues, League Events and more
-- Helper function library for getting OOTP data and presenting it tot he user
-- Standard langauge files and trsnslations (where available)
+- Abstract sports statistics generation and display system. You specify the sport and source and the system gets the stats.
+- Standard sats library API for adding additional sports and data sources.
+- Standardized data models for working with statstic and meta based data sources
+- Helper functions library that serves as specific drivers for selected data sources
+- Standard langauge files and trsnslations
+- General Twitter Bootsrap ready display views
 
 ## Keep Current on the Mod
 
