@@ -97,12 +97,13 @@ class Stats
 	
 	//--------------------------------------------------------------------
 
-    /**
-     * __construct.
-     * This if here solely for CI loading to work. Just calls the init( ) method.
-     *
-     * @return void
-     */
+	/**
+	 * Constructor
+	 *
+	 * This if here solely for CI loading to work. Just calls the init( ) method.
+	 *
+	 * @return void
+	 */
 	public function __construct()
 	{
 		self::$ci =& get_instance();
@@ -124,6 +125,7 @@ class Stats
      * @param bool $source
      * @return void
      */
+
 	public static function init($sport = false, $source = false)
 	{
         if ($sport !== false)
@@ -132,11 +134,13 @@ class Stats
 			self::load_sport_helper();
 			self::$ci->lang->load('open_sports_toolkit/stats_'.self::$sport);
 			self::$stat_list = stat_list();
+
         }
 		if ($source !== false)
         {
             self::$source = $source;
 			self::load_source_helper();
+
 			self::$stat_list = array_merge(self::$stat_list,field_map());
         }
 	} //end init()
@@ -169,6 +173,7 @@ class Stats
 		}
 		
 		$stats = array();
+
 		$where = array();
 		$where["league_id"] = $league_id;
 
@@ -417,19 +422,11 @@ class Stats
             }
         }
         return $query;
-	
+
 	}	
 	
 	//---------------------------------------------------------------
 
-	/**
-	 *	GET Extended Fields.
-	 *	Returns a list of extended information fields that accompany stats. These are divided into groups or can be queried
-	 *	together (group = all).
-	 *	@param		$stat_type	int			1 = Batter, All Else = Pitcher
-	 *	@param		$group			int			The class of stats to use
-	 *	@return						Array		Array of stat definitions
-	 */
     /**
      * GET Extended Fields.
      * Returns a list of extended information fields that accompany stats. These are divided into groups or can be queried
@@ -464,7 +461,7 @@ class Stats
 		}
 		return $fieldList;
 	}
-	
+
 	//---------------------------------------------------------------
 		
 	/**
@@ -487,6 +484,7 @@ class Stats
 		$sql = '';
 		$sqlOperator = 'SUM';
 		if ($scope === STATS_SEASON_AVG) { $sqlOperator = 'AVG'; }
+
 		foreach ($categories as $cat) {
 			if ($sql != '') { $sql .= ','; } // END if
 			if (isset($stat_list[$stat_type][$cat]['formula']) && !empty($stat_list[$stat_type][$cat]['formula']))
