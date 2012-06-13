@@ -60,7 +60,7 @@ class Leagues_model extends Base_ootp_model {
 	 */
 	public function get_leagues_array()
 	{
-		$leagues = array():
+		$leagues = array();
 		$query = $this->db->get($this->table);
 		if ($query->num_rows() > 0) 
 		{
