@@ -34,7 +34,7 @@ $lang['RISP']	= 'Runners in Scoring Position';
 // SPECIALTY (PITCHING)
 $lang['W']		= 'Wins';
 $lang['L']		= 'Losses';
-$lang['Win%']	= 'Winning Percentage';
+$lang['PCT']	= 'Winning Percentage';
 $lang['SV']		= 'Saves';
 $lang['HLD']	= 'Holds';
 $lang['IPI']	= 'Innings Pitched';
@@ -86,9 +86,19 @@ $lang['ROE']	= 'Reached On Error';
 $lang['FP']		= 'Fielding Percentage';
 $lang['RF']		= 'Range Factor';
 //INJURUES
-$lang['I']		= 'Player is Injure';
+$lang['I']		= 'Player is Injury';
 $lang['DTD']	= 'Day-to-Day Injury';
 $lang['CE']		= 'Career Ending Injury';
 $lang['DL']		= 'Days Remaining on DL';
 $lang['DAYS']	= 'Days Remaining for Injury';
 $lang['ID']		= 'Injury Description';
+//TEAMS/STANDINGS
+$lang['GB']		= 'Games back';
+$lang['HOME']		= 'Home record';
+$lang['ROAD']		= 'Road record';
+$lang['RS']		= 'Runs scored';
+$lang['RA']		= 'Runs allowed';
+$lang['DIFF']		= 'Run differential';
+$lang['STRK']		= 'Current streak';
+$lang['L10']		= 'Last 10 games';
+$lang['POFF']		= '% chance of making the Playoffs';

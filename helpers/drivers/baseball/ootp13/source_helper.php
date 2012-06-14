@@ -6,7 +6,7 @@
  *	This source driver is scustom tuned for OOTP baseball version 13 and up.
  *
  * 	@sport 		Baseball
- *	@source		OOTP
+ *	@source		OOTP 13
  *	@author		Jeff Fox <jfox015@gmail.com>
  *
  */
@@ -35,6 +35,28 @@
 //---------------------------------------------------------------
 
 /**
+ *	ID MAP.
+ *	This function returns an array that maps the specific types of data identifers 
+ *	keys in WHERE statements, to their specific identifier in the source data structure.
+ *
+ *	@return		Array	ID source values for league, team, players, etc.
+ */
+if(!function_exists('identifier_map')) 
+{
+	function identifier_map() 
+	{
+		$fields = array(
+			'league'		=>		'league_id',
+			'team'			=>		'team_id',
+			'player'		=>		'player_id',
+			'game'			=>		'game_id'
+		);
+        return $fields;
+	}
+}
+//---------------------------------------------------------------
+
+/**
  *	TABLE MAP.
  *	This function returns an array that maps the specific type of carrer scopes
  * 	to their corresponding database tables or data endpoints.
@@ -48,23 +70,23 @@ if(!function_exists('table_map'))
 		$fields = array('offense'=>
 			array(
                 STATS_CAREER => 'players_career_batting_stats',
-                STATS_SEASON => 'players_batting',
+                STATS_SEASON => 'players_career_batting_stats',
                 STATS_GAME => 'players_game_batting',
-                STATS_SEASON_AVG => 'players_batting'
+                STATS_SEASON_AVG => 'players_career_batting_stats'
 			),
 			'specialty'=>
 			array(
                 STATS_CAREER => 'players_career_pitching_stats',
-                STATS_SEASON => 'players_pitching',
+                STATS_SEASON => 'players_career_pitching_stats',
                 STATS_GAME => 'players_game_pitching_stats',
-                STATS_SEASON_AVG => 'players_pitching'
+                STATS_SEASON_AVG => 'players_career_pitching_stats'
 			),
 			'defense'=>
 			array(
                 STATS_CAREER => 'players_career_fielding_stats',
-                STATS_SEASON => 'players_fielding',
+                STATS_SEASON => 'players_career_fielding_stats',
                 STATS_GAME => 'players_game_fielding',
-                STATS_SEASON_AVG => 'players_fielding'
+                STATS_SEASON_AVG => 'players_career_fielding_stats'
 			),
 			'injury'=>
 			array(
@@ -131,16 +153,16 @@ if(!function_exists('field_map'))
                 "GS" => array('id' => 28, 'field' => 'gs'),
                 "W" => array('id' => 29, 'field' => 'w'),
                 "L" => array('id' => 30, 'field' => 'l'),
-                "Win%" => array('id' => 31, 'formula' => 'if([OPERATOR](gs)=0,0, ([OPERATOR](w)/[OPERATOR](gs)) as win%'),
+                "PCT" => array('id' => 31, 'field' => 'pct', 'formula' => 'if([OPERATOR](gs)=0,0, ([OPERATOR](w)/[OPERATOR](gs)) as pct'),
                 "SV" => array('id' => 32, 'field' => 's'),
                 "HLD" => array('id' => 33, 'field' => 'hld'),
-                "IP" => array('id' => 34, 'formula' => '([OPERATOR](ip)+([OPERATOR](ipf)/3)) as ip'),
+                "IP" => array('id' => 34, 'field' => 'ip', 'formula' => '([OPERATOR](ip)+([OPERATOR](ipf)/3)) as ip'),
                 "BF" => array('id' => 35, 'field' => 'bf'),
                 "HRA" => array('id' => 36, 'field' => 'hra'),
                 "BB" => array('id' => 37, 'field' => 'bb'),
                 "SO" => array('id' => 38, 'field' => 'k'),
                 "WP" => array('id' => 39, 'field' => 'wp'),
-                "ERA" => array('id' => 40, 'formula' => 'if(([OPERATOR](ip)+([OPERATOR](ipf)/3))=0,0,9*[OPERATOR](er)/([OPERATOR](ip)+([OPERATOR](ipf)/3))) as era'),
+                "ERA" => array('id' => 40, 'field' => 'era', 'formula' => 'if(([OPERATOR](ip)+([OPERATOR](ipf)/3))=0,0,9*[OPERATOR](er)/([OPERATOR](ip)+([OPERATOR](ipf)/3))) as era'),
                 "BABIP" => array('id' => 41, 'formula' => 'if(([OPERATOR](ab)-[OPERATOR](k)-[OPERATOR](hra)+[OPERATOR](sf))=0,0,([OPERATOR](ha)-[OPERATOR](hra))/([OPERATOR](ab)-[OPERATOR](k)-[OPERATOR](hra)+[OPERATOR](sf))) as babip'),
                 "WHIP" => array('id' => 42, 'formula' => 'if(([OPERATOR](ip)+([OPERATOR](ipf)/3))=0,0,([OPERATOR](ha)+[OPERATOR](bb))/([OPERATOR](ip)+([OPERATOR](ipf)/3))) as whip'),
                 "SO_BB" => array('id' => 43,  'formula' => 'if (([OPERATOR](bb)=0,0,([OPERATOR](k))/[OPERATOR](bb)) as k/bb)'),
@@ -171,37 +193,56 @@ if(!function_exists('field_map'))
             
             ),
 			"defense"=>
-			array(
-				"TC" => array('id' => 63, 'field' => 'tc'),
-				"A" => array('id' => 64, 'field' => 'a'),
-				"PO" => array('id' => 65, 'field' => 'po'),
-				"ER" => array('id' => 66, 'field' => 'er'),
-				"IP" => array('id' => 67, 'formula' => '([OPERATOR](ip)+([OPERATOR](ipf)/3)) as ip'),
-				"G" => array('id' => 68, 'field' => 'g'),
-				"GS" => array('id' => 69, 'field' => 'gs'),
-				"E" => array('id' => 70, 'field' => 'e'),
-				"DP" => array('id' => 71, 'field' => 'dp'),
-				"TP" => array('id' => 72, 'field' => 'tp'),
-				"PB" => array('id' => 73, 'field' => 'pb'),
-				"SBA" => array('id' => 74, 'field' => 'sba'),
-				"RTO" => array('id' => 75, 'field' => 'rto'),
-				"IPF" => array('id' => 76, 'field' => 'ipf'),
-				"PLAYS" => array('id' => 77, 'field' => 'plays'),
-				"PLAYS_BASE" => array('id' => 78, 'field' => 'plays_base'),
-				"ROE" => array('id' => 79, 'field' => 'roe'),
-				"FP" => array('id' => 89, 'formula' => 'if([OPERATOR](tc)=0,0,(if([OPERATOR](tc)=0,0,[OPERATOR](tc)-[OPERATOR](e)))-[OPERATOR](tc)) as fp'),
-				"RF" => array('id' => 90, 'formula' => 'if([OPERATOR](ip)=0,0,((9*([OPERATOR](po)+[OPERATOR](a)))/([OPERATOR](ip)+([OPERATOR](ipf)/3)) as rf'),
-			),
+				array(
+					"TC" => array('id' => 63, 'field' => 'tc'),
+					"A" => array('id' => 64, 'field' => 'a'),
+					"PO" => array('id' => 65, 'field' => 'po'),
+					"ER" => array('id' => 66, 'field' => 'er'),
+					"IP" => array('id' => 67, 'formula' => '([OPERATOR](ip)+([OPERATOR](ipf)/3)) as ip'),
+					"G" => array('id' => 68, 'field' => 'g'),
+					"GS" => array('id' => 69, 'field' => 'gs'),
+					"E" => array('id' => 70, 'field' => 'e'),
+					"DP" => array('id' => 71, 'field' => 'dp'),
+					"TP" => array('id' => 72, 'field' => 'tp'),
+					"PB" => array('id' => 73, 'field' => 'pb'),
+					"SBA" => array('id' => 74, 'field' => 'sba'),
+					"RTO" => array('id' => 75, 'field' => 'rto'),
+					"IPF" => array('id' => 76, 'field' => 'ipf'),
+					"PLAYS" => array('id' => 77, 'field' => 'plays'),
+					"PLAYS_BASE" => array('id' => 78, 'field' => 'plays_base'),
+					"ROE" => array('id' => 79, 'field' => 'roe'),
+					"FP" => array('id' => 89, 'formula' => 'if([OPERATOR](tc)=0,0,(if([OPERATOR](tc)=0,0,[OPERATOR](tc)-[OPERATOR](e)))-[OPERATOR](tc)) as fp'),
+					"RF" => array('id' => 90, 'formula' => 'if([OPERATOR](ip)=0,0,((9*([OPERATOR](po)+[OPERATOR](a)))/([OPERATOR](ip)+([OPERATOR](ipf)/3)) as rf'),
+				),
             "injury"=>
-            array(
-                "I" => array('id' => 91, 'field' => 'injury_is_injured'),
-                "DTD" => array('id' => 92, 'field' => 'injury_dtd_injury'),
-                "CE" => array('id' => 93, 'field' => 'injury_career_ending'),
-                "DL" => array('id' => 94, 'field' => 'injury_dl_left'),
-                "DAYS" => array('id' => 95, 'field' => 'injury_left'),
-                "ID" => array('id' => 96, 'field' => 'injury_id')
-            )
+				array(
+					"I" => array('id' => 91, 'field' => 'injury_is_injured'),
+					"DTD" => array('id' => 92, 'field' => 'injury_dtd_injury'),
+					"CE" => array('id' => 93, 'field' => 'injury_career_ending'),
+					"DL" => array('id' => 94, 'field' => 'injury_dl_left'),
+					"DAYS" => array('id' => 95, 'field' => 'injury_left'),
+					"ID" => array('id' => 96, 'field' => 'injury_id')
+				)
+			,
+            "team"=>
+				array(
+					"W" => array('id' => 97, 'field' => 'w'),
+					"L" => array('id' => 98, 'field' => 'l'),
+					"PCT" => array('id' => 99, 'field' => 'pct'),
+					"GB" => array('id' => 100, 'field' => 'gb'),
+					"HOME" => array('id' => 101, 'field' => 'home'),
+					"ROAD" => array('id' => 102, 'field' => 'road'),
+					"RS" => array('id' => 102, 'field' => 'rs'),
+					"RA" => array('id' => 102, 'field' => 'ra'),
+					"DIFF" => array('id' => 102, 'field' => 'diff'),
+					"STRK" => array('id' => 102, 'field' => 'strk'),
+					"L10" => array('id' => 102, 'field' => 'l10') ,
+					"POFF" => array('id' => 102, 'field' => 'poff')
+				)
 		);
 		return $stats;
 	}
 }
+
+/* End of file source_helper.php */
+/* Location: ./open_sports_toolkit/helpers/drivers/baseball/ootp13/source_helper.php */

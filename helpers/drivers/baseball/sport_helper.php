@@ -85,7 +85,7 @@ if(!function_exists('stat_list'))
                     "GS" => array('lang' => "GS"),
                     "W" => array('lang' => "W"),
                     "L" => array('lang' => "L"),
-                    "Win%" => array('lang' => "Win%"),
+                    "PCT" => array('lang' => "PCT"),
                     "SV" => array('lang' => "SV"),
                     "HLD" => array('lang' => "HLD"),
                     "IP" => array('lang' => "IPI"),
@@ -154,7 +154,22 @@ if(!function_exists('stat_list'))
                     "DL" => array('lang' => 'DL'),
                     "DAYS" => array('lang' => 'DAYS'),
                     "ID" => array('lang' => 'ID')
-                )
+                ),
+			"team"=>
+				array(
+					"W" => array('lang' => 'W'),
+					"L" => array('lang' => 'L'),
+					"PCT" => array('lang' => 'PCT'),
+					"GB" => array('lang' => 'GB'),
+					"HOME" => array('lang' => 'HOME'),
+					"ROAD" => array('lang' => 'ROAD'),
+					"RS" => array('lang' => 'RS'),
+					"RA" => array('lang' => 'RA'),
+					"DIFF" => array('lang' => 'DIFF'),
+					"STRK" => array('lang' => 'STRK'),
+					"L10" => array('lang' => 'L10'),
+					"POFF" => array('lang' => 'POFF')
+				)
 		);
 		return $stats;
 	} // END function
@@ -238,3 +253,7 @@ if(!function_exists('stats_class'))
 		return $fieldList;
 	} // END function
 } // END if
+
+
+/* End of file sport_helper.php */
+/* Location: ./open_sports_toolkit/helpers/drivers/baseball/sport_helper.php */

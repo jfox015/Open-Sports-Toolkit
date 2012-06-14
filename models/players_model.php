@@ -841,7 +841,7 @@ class Players_model extends Base_ootp_model {
      *	@version					1.0.2
      *
      */
-    public function getCareerStats($ootp_league_id, $player_id = false) {
+    public function get_career_stats($ootp_league_id, $player_id = false) {
         if ($player_id === false) { $player_id = $this->player_id; }
 
         $career_stats = array();
@@ -958,6 +958,51 @@ class Players_model extends Base_ootp_model {
     }
 
 	//---------------------------------------------------------------
+	
+	public function get_current_player_stats($player_id = false, $stats_type = Stats::TYPE_OFFENSE, $stats_class = CLASS_STANDARD, $params = array())
+	{
+		if ($player_id === false)
+		{
+			$this->error = "A player id value was not received.";
+			return false;
+		}
+		
+		if (Stats::get_sport() === false)
+		{
+			Stats::init('baseball','ootp13');
+		}
+		$stats = array();
+		$sql = Stats::get_player_stats($player_id, $stats_type, $stats_class, STATS_SEASON, $params);
+
+        $query = $this->db->query($sql);
+        if ($query->num_rows() > 0)
+        {
+            $stats = $query->result();
+        }
+        $query->free_result();
+		return $stats;
+	}
+	
+
+	//---------------------------------------------------------------
+	
+	public function get_current_players_stats($player_ids = false, $stats_type = Stats::TYPE_OFFENSE, $stats_class = CLASS_STANDARD, $params = array())
+	{
+		if ($player_ids === false)
+		{
+			$this->error = "An array of player id values was not received.";
+			return false;
+		}
+		
+		if (Stats::get_sport() === false)
+		{
+			Stats::init('baseball','ootp13');
+		}
+		
+		$query = Stats::get_players_stats($player_ids, $stats_type, $stats_class, STATS_SEASON, $params);
+	
+		return $query;
+	}	
 	
 	public function get_current_stats($position = 1, $league_id = false, $league_year = false, $team_id = false) {
        
