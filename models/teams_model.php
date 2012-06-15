@@ -276,6 +276,15 @@ class Teams_model extends Base_ootp_model {
 	
 	//---------------------------------------------------------------
 	
+		
+	/**
+	 *	DELETE TEAM OWNER.
+	 *	Removes an owner from a team
+	 *	@param		$team_id	Team Int ID
+	 *	@param		$league_id	League Int ID
+	 *	@return					TRUE if set, FALSE on error
+	 *
+	 */
 	public function delete_team_owner($team_id = false, $league_id = false)
 	{
 		if ($team_id === false)
@@ -295,4 +304,27 @@ class Teams_model extends Base_ootp_model {
 		return true;
 	}
 
+	/*---------------------------------------------------------
+	/	!STATS
+	/--------------------------------------------------------*/
+	
+	//---------------------------------------------------------------
+	
+	public function get_current_team_stats($team_id = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $params = array())
+	{
+		if ($player_ids === false)
+		{
+			$this->error = "A team id value was not received.";
+			return false;
+		}
+		
+		if (Stats::get_sport() === false)
+		{
+			Stats::init('baseball','ootp13');
+		}
+		
+		$query = Stats::get_team_stats($team_id, $stats_type, $stats_class, STATS_SEASON, $params);
+	
+		return $query;
+	}	
 }

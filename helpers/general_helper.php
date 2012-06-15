@@ -10,189 +10,6 @@
  */
 
 /**
- *	FORMAT STATS FOR DISPLAY
- *
- *	Based on the stat selected, handles converting the raw data output to display ready HTML.
- *
- * 	@todo	Remove fantasy specific references and code
- *	@author	Frank Esselink
- * 	@author	Jeff Fox
- *	@since	1.0
- */
-function formatStatsForDisplay($player_stats = array(), $fields = array(), $config = array(), $league_id = -1, $player_teams = array(), $team_list = array(), $statsOnly = false, $showTrans = false, $showDraft = false,
-								$pick_team_id = false,  $user_team_id = false, $draftStatus = false, $accessLevel = false, $isCommish = false, $draftDate = EMPTY_DATE_TIME_STR) {
-	$count = 10;
-	$newStats = array();
-	foreach($player_stats as $row) {
-		$newRow = array();
-		foreach ($fields as $col) {
-			if (isset($row[$col]) && !empty($row[$col])) {
-				$newRow['id'] = $id = $row['id'];
-				switch ($col) {
-					case 'add':
-						if ($showTrans === true) {
-							$newRow[$col] = '<a href="#" rel="itemPick" id="'.$row['id'].'"><img src="'.$config['fantasy_web_root'].'images/icons/add.png" width="16" height="16" alt="Add" title="Add" /></td>';
-						}
-						break;
-					case 'draft':
-						if ($showDraft === true) {
-							if (($pick_team_id == $user_team_id && ($draftStatus >= 2 && $draftStatus < 4)) || (($accessLevel == ACCESS_ADMINISTRATE || $isCommish) && ($draftDate != EMPTY_DATE_TIME_STR && time() > strtotime($draftDate)))) {
-								$newRow[$col] = '<a href="#" rel="draft" id="'.$row['id'].'"><img src="'.$config['fantasy_web_root'].'images/icons/next.png" width="16" height="16" alt="Draft Player" title="Draft Player" /></a>';
-							} else {
-								$newRow[$col] = '- -';
-							}
-						}
-						break;
-					case 'player_name':
-
-						if ($statsOnly === false) {
-							$link = '/players/profile/';
-							if (isset($league_id) && !empty($league_id) && $league_id != -1) {
-								$link .= 'player_id/'.$id.'/league_id/'.$league_id;
-							} else {
-								$link .= $id;
-							}
-							$val = anchor($link,$row['first_name']." ".$row['last_name'],array('target'=>'_blank')).' <span style="font-size:smaller;">'.makeElidgibilityString($row['positions']).'</span>';
-
-							// INJURY STATUS
-							$injStatus = "";
-							if ($row['injury_is_injured'] == 1) {
-								$injStatus = makeInjuryStatusString($row);
-							}
-							if (!empty($injStatus)){
-								if (isset($row['injury_dl_left']) && $row['injury_dl_left'] > 0) {
-									$val .= '&nbsp;<img src="'.$config['fantasy_web_root'].'images/icons/red_cross.gif" width="7" height="7" align="absmiddle" alt="'.$injStatus.'" title="'.$injStatus.'" />&nbsp; ';
-								} else if (isset($row['injury_dtd_injury']) && $row['injury_dtd_injury'] != 0) {
-									$val .= '&nbsp;<acronym style="font-size:smaller;text-decoration:none, outline:none;font-weight:bold; color:#C00;" title="'.$injStatus.'">DTD</acronym>';
-								}
-							}
-							if (isset($row['on_waivers']) && $row['on_waivers'] == 1) {
-								$val .= '&nbsp;<b style="color:#ff6600;">W</b>&nbsp; ';
-							}
-							$newRow[$col] = $val;
-						} else {
-							$newRow[$col] = $row[$col];
-							if (isset($row['on_waivers']) && $row['on_waivers'] == 1) {
-								$newRow['on_waivers'] = 1;
-							}
-							if (isset($row['injury_dl_left']) && $row['injury_dl_left'] > 0) {
-								$newRow['injury_dl_left'] = $row['injury_dl_left'];
-							}
-							if (isset($row['injury_left']) && $row['injury_left'] > 0) {
-								$newRow['injury_left'] = $row['injury_left'];
-							}
-							if (isset($row['injury_id'])) {
-								$newRow['injury_id'] = $row['injury_id'];
-							}
-							if (isset($row['injury_is_injured'])) {
-								$newRow['injury_is_injured'] = $row['injury_is_injured'];
-							}
-							if (isset($row['injury_career_ending'])) {
-								$newRow['injury_career_ending'] = $row['injury_career_ending'];
-							}
-							if (isset($row['injury_dtd_injury'])) {
-								$newRow['injury_dtd_injury'] = $row['injury_dtd_injury'];
-							}
-						}
-						break;
-					case 'teamname':
-						if ($statsOnly === false) {
-							if ($league_id != -1) {
-									if (isset($player_teams[$id])) {
-									$team_obj = $team_list[$player_teams[$id]];
-									$val = anchor('/team/info/'.$player_teams[$id],$team_obj['teamname']." ".$team_obj['teamnick'])."</td>";
-								} else {
-									$val = "Free Agent";
-								}
-							} else {
-								$val = '';
-							}
-							$newRow[$col] = $val;
-						}
-						break;
-					case 'bats':
-					case 'throws':
-						$newRow[$col] = get_hand($row[$col]);
-						break;
-					case 'pos':
-					case 'positions':
-						if (strpos($row[$col],":")) {
-							$newRow[$col] = makeElidgibilityString($row[$col]);
-						} else {
-							$newRow[$col] = get_pos($row[$col]);
-						}
-						break;
-					case 'position':
-					case 'role':
-						$newRow[$col] = get_pos($row[$col]);
-						break;
-					case 'level_id':
-						$newRow[$col] = get_level($row[$col]);
-						break;
-					case 'avg':
-					case 'obp':
-					case 'slg':
-					case 'ops':
-					case 'wOBA':
-					case 'oavg':
-					case 'babip':
-						$val=sprintf("%.3f",$row[$col]);
-						if ($val<1) {$val=strstr($val,".");}
-						$newRow[$col] = $val;
-						break;
-					case 'era':
-					case 'whip':
-					case 'k9':
-					case 'bb9':
-					case 'hr9':
-					case 'rating':
-						$val=sprintf("%.2f",$row[$col]);
-						if (($val<1)&&($col=='whip')) {$val=strstr($val,".");}
-						$newRow[$col] = $val;
-						break;
-					/*case 'rating':
-						$val=sprintf("%.2f",$row[$col]);
-						if ($rating > 0) {
-							$color = "#080";
-						} else if ($rating < 0) {
-							$color = "#C00";
-						} else {
-							$color = "#000";
-						}
-						$val = '<span style="color:'.$color.';">'.$rating.'</span>';
-						$newRow[$col] = $val;
-						break;*/
-					case 'ip':
-					case 'vorp':
-						$val=sprintf("%.1f",$row[$col]);
-						$newRow[$col] = $val;
-						break;
-					case 'walk':
-					case 'wiff':
-						$newRow[$col] = intval($row[$col])."%";
-						break;
-					default:
-						$newRow[$col] = intval($row[$col]);
-						break;
-				} // END switch
-
-				// DEBUGGING
-				if ($count < 5) {
-					if (isset($newRow[$col])) {
-						echo($col." = ".$newRow[$col]."<br />");
-					}
-				}
-
-			} else {
-				$newRow[$col] = 0;
-			}
-		} // END foreach
-		array_push($newStats, $newRow);
-		$count++;
-	} // END foreach
-	return $newStats;
-}
-/**
  *	MAKE INJURY STATUS STRING
  *
  *	Converts standard OOTP injury data (found in the player profile data object and injuries
@@ -490,172 +307,6 @@ function get_award($awid)
      }
     return $txt;
  }
-
-/**
- *	GET POSITION.
- *	Returns a position string name for the position passed.
- *
- *	@param	$pos		int		Position index int
- *	@return				String	Position name
- *
- *	@author	Frank Esselink
- * 	@since	1.0
- */
-function get_pos($pos)
- {
-   switch ($pos)
-    {
-      case -1:
-	  	$txt="All";
-	break;
-	  case 0:
-        $txt="PH";
-	break;
-      case 1:
-        $txt="P";
-	break;
-      case 2:
-        $txt="C";
-	break;
-      case 3:
-        $txt="1B";
-	break;
-      case 4:
-        $txt="2B";
-	break;
-      case 5:
-        $txt="3B";
-	break;
-      case 6:
-        $txt="SS";
-	break;
-      case 7:
-        $txt="LF";
-	break;
-      case 8:
-        $txt="CF";
-	break;
-      case 9:
-        $txt="RF";
-	break;
-      case 10:
-        $txt="DH";
-	break;
-      case 11:
-        $txt="SP";
-	break;
-      case 12:
-        $txt="MR";
-	break;
-      case 13:
-        $txt="CL";
-	break;
-	  case 20:
-	     $txt="OF";
-	break;
-	  case 21:
-	     $txt="RP";
-	break;
-	  case 22:
-	     $txt="IF";
-	break;
-	  case 23:
-	     $txt="MI";
-	break;
-	case 24:
-	     $txt="CI";
-	break;
-	case 25:
-	     $txt="U";
-	break;
-      default:
-        $txt="-";
-	break;
-    }
-   return $txt;
- }
-/**
- *	GET POSITION NUMBER.
- *	A reverse of the get_pos() function that returns a position number for the position
- *	string name passed.
- *
- *	@param	$pos		String	Position name
- *	@return				int		Position index int
- *
- *	@author	Jeff Fox
- * 	@since	1.0
- */
-function get_pos_num($pos)
- {
-   switch ($pos)
-    {
-	  case "PH":
-        $txt=0;
-	break;
-      case "P":
-        $txt=1;
-	break;
-      case "C":
-        $txt=2;
-	break;
-      case "1B":
-        $txt=3;
-	break;
-      case "2B":
-        $txt=4;
-	break;
-      case "3B":
-        $txt=5;
-	break;
-      case "SS":
-        $txt=6;
-	break;
-      case "LF":
-        $txt=7;
-	break;
-      case "CF":
-        $txt=8;
-	break;
-      case "RF":
-        $txt=9;
-	break;
-      case "DH":
-        $txt=10;
-	break;
-      case "SP":
-        $txt=11;
-	break;
-      case "MR":
-        $txt=12;
-	break;
-      case "CL":
-        $txt=13;
-	break;
-	  case "OF":
-	     $txt=20;
-	break;
-	  case "RP":
-	     $txt=21;
-	break;
-	  case "IF":
-	     $txt=22;
-	break;
-	  case "MI":
-	     $txt=23;
-	break;
-	case "CI":
-	     $txt=24;
-	break;
-	case "U":
-	     $txt=25;
-	break;
-      default:
-	case "All":
-	  	$txt=-1;
-		break;
-    }
-   return $txt;
- }
 /**
  *	GET VELOCITY.
  *	Converts a velocity index int into a text string.
@@ -704,7 +355,7 @@ function get_velo($velo)
  * 	@since	1.0
  */
 function hof_pos($pos)
- {
+{
    switch ($pos)
     {
       case 2: $val=20;break;
@@ -718,7 +369,7 @@ function hof_pos($pos)
       default: $val=0;break;
     }
    return $val;
- }
+}
 
 /**
  *	ALL STAR POSITION.
@@ -730,7 +381,7 @@ function hof_pos($pos)
  * 	@since	1.0
  */
 function ss_pos($pos)
- {
+{
    switch ($pos)
     {
       case 2: $val=20;break;
@@ -744,7 +395,29 @@ function ss_pos($pos)
       default: $val=0;break;
     }
    return $val;
- }
+}
+ 
+/**
+ *	GET HAND.
+ *	Converts a hand index ID to a string.
+ *
+ *	@param	$handID		int 		Hand Index
+ *	@return				String		String value
+ *
+ *	@author	Frank Esselink
+ * 	@since	1.0
+ */
+function get_hand($handID)
+{
+  switch ($handID)
+   {
+     case 3: $hand="S"; break;
+     case 2: $hand="L"; break;
+     case 1: $hand="R"; break;
+     default: $hand="U"; break;
+   }
+  return $hand;
+}
 
 /**
  *	DATE DIFFERENCE.
@@ -763,94 +436,6 @@ function datediff($start,$end)
 
    $diff = $end_ts - $start_ts;
    return round($diff / 86400);
- }
-
-/**
- *	GET LL CAT.
- *
- *	@param	$catID		int 		Category Int
- *	@param	$forSQL		boolean		TRUE to use SQL friendly names, FALSE for general names
- *	@return				String		Category Name
- *
- *	@author	Frank Esselink
- *	@author	Jeff Fox
- * 	@since	1.0
- */
-function get_ll_cat($catID,$forSQL = false)
- {
-   switch ($catID)
-    {
-      ## Batter Stats
-      case 0: $txt="GS"; break;
-      case 1: $txt="PA"; break;
-      case 2: $txt="AB"; break;
-      case 3: $txt="H"; break;
-      case 4: $txt="K"; break;
-      case 5: $txt="TB"; break;
-      case 6: if($forSQL) $txt="d"; else $txt="2B"; break;
-      case 7: if($forSQL) $txt="t"; else $txt="3B"; break;
-      case 8: $txt="HR"; break;
-      case 9: $txt="SB"; break;
-      case 10: $txt="RBI"; break;
-      case 11: $txt="R"; break;
-      case 12: $txt="BB"; break;
-      case 13: $txt="IBB"; break;
-      case 14: if($forSQL) $txt="hp"; else $txt="HBP"; break;
-      case 15: $txt="SH"; break;
-      case 16: $txt="SF"; break;
-      case 17: $txt="EBH"; break;
-      case 18: $txt="AVG"; break;
-      case 19: $txt="OBP"; break;
-      case 20: $txt="SLG"; break;
-      case 21: $txt="RC"; break;
-      case 22: $txt="RC/27"; break;
-      case 23: $txt="ISO"; break;
-      case 24: $txt="TAVG"; break;
-      case 25: $txt="OPS"; break;
-      case 26: $txt="VORP"; break;
-
-      ## Pitcher Stats
-      case 27: $txt="G"; break;
-      case 28: $txt="GS"; break;
-      case 29: $txt="W"; break;
-      case 30: $txt="L"; break;
-      case 31: $txt="Win%"; break;
-      case 32: if($forSQL) $txt="s"; else $txt="SV"; break;
-      case 33: $txt="HLD"; break;
-      case 34: $txt="IP"; break;
-      case 35: $txt="BF"; break;
-      case 36: $txt="HRA"; break;
-      case 37: $txt="BB"; break;
-      case 38: $txt="K"; break;
-      case 39: $txt="WP"; break;
-      case 40: $txt="ERA"; break;
-      case 41: $txt="BABIP"; break;
-      case 42: $txt="WHIP"; break;
-      case 43: $txt="K/BB"; break;
-      case 44: $txt="RA/9IP"; break;
-      case 45: $txt="HR/9IP"; break;
-      case 46: $txt="H/9IP"; break;
-      case 47: $txt="BB/9IP"; break;
-      case 48: $txt="K/9IP"; break;
-      case 49: $txt="VORP"; break;
-      case 50: $txt="RA"; break;
-      case 51: $txt="GF"; break;
-      case 52: $txt="QS"; break;
-      case 53: $txt="QS%"; break;
-      case 54: $txt="CG"; break;
-      case 55: $txt="CG%"; break;
-      case 56: $txt="SHO"; break;
-      case 57: $txt="GB%"; break;
-
-	  case 58: $txt="CS"; break;
-
-	  case 59: $txt="HA"; break;
-	  case 60: $txt="ER"; break;
-	  case 61: $txt="BS"; break;
-	  case 62: $txt="IPF"; break;
-      default: $txt=$catID; break;
-    }
-   return $txt;
  }
 
 /**
@@ -885,28 +470,6 @@ function ordinal_suffix($value, $sup = 0) {
     }
     return $value . $suffix;
 }
-
-/**
- *	GET HAND.
- *	Converts a hand index ID to a string.
- *
- *	@param	$handID		int 		Hand Index
- *	@return				String		String value
- *
- *	@author	Frank Esselink
- * 	@since	1.0
- */
-function get_hand($handID)
- {
-  switch ($handID)
-   {
-     case 3: $hand="S"; break;
-     case 2: $hand="L"; break;
-     case 1: $hand="R"; break;
-     default: $hand="U"; break;
-   }
-  return $hand;
- }
 
 /**
  *	CENTIMETERS TO FEET/INCHES.

@@ -33,6 +33,46 @@
 //---------------------------------------------------------------
 
 /**
+ *	POSITION LIST.
+ *	This function returns an array that defines the positions for offense, 
+ *	defense and speciality.
+ *
+ *	@return		Array	Stat Categories offensedefense and specilty types
+ */
+if(!function_exists('position_list')) 
+{
+	function position_list() 
+	{
+		$positions = 
+		array(
+			"PH"	=>array('lang'=>"PH", 'type' => 'offense'),
+			"C"		=>array('lang'=>"C", 'type' => 'offense'),
+			"1B"	=>array('lang'=>"1B", 'type' => 'offense'),
+			"2B"	=>array('lang'=>"2B", 'type' => 'offense'),
+			"3B"	=>array('lang'=>"3B", 'type' => 'offense'),
+			"SS"	=>array('lang'=>"SS", 'type' => 'offense'),
+			"LF"	=>array('lang'=>"LF", 'type' => 'offense'),
+			"CF"	=>array('lang'=>"CF", 'type' => 'offense'),
+			"RF"	=>array('lang'=>"RF", 'type' => 'offense'),
+			"DH"	=>array('lang'=>"DH", 'type' => 'offense'),
+			"OF"	=>array('lang'=>"OF", 'type' => 'offense'),
+			"IF"	=>array('lang'=>"IF", 'type' => 'offense'),
+			"MI"	=>array('lang'=>"MI", 'type' => 'offense'),
+			"CI"	=>array('lang'=>"CI", 'type' => 'offense'),
+			"U"		=>array('lang'=>"U", 'type' => 'offense'),
+			"P"		=>array('lang'=>"P",'type' => 'specialty'),
+			"SP"	=>array('lang'=>"SP",'type' => 'specialty'),
+			"RP"	=>array('lang'=>"RP",'type' => 'specialty'),
+			"CL"	=>array('lang'=>"CL",'type' => 'specialty'),
+			"SU"	=>array('lang'=>"SU",'type' => 'specialty'),
+			"MU"	=>array('lang'=>"MU",'type' => 'specialty'),
+		);
+		return $positions;
+	}
+}
+//---------------------------------------------------------------
+
+/**
  *	STAT LIST.
  *	This function returns an array that defines the stat categories broekn down by the 
  * category type (offensedefense and speciality).
@@ -44,7 +84,21 @@ if(!function_exists('stat_list'))
 	function stat_list() 
 	{
 		$stats = array(
-            'offense'=>
+            'general'=>
+				array(
+					"FN"	=>array('lang' => "FN"),
+					"LN"	=>array('lang' => "LN"),
+					"PN"	=>array('lang' => "PN"),
+					"TN"	=>array('lang' => "TN"),
+					"AGE"	=>array('lang' => "AGE"),
+					"POS"	=>array('lang' => "POS"),
+					"ROLE"	=>array('lang' => "ROLE"),
+					"TH"	=>array('lang' => "TH"),
+					"BA"	=>array('lang' => "BA"),
+					"FPTS"	=>array('lang' => "FPTS"),
+					"PR15"	=>array('lang' => "PR15"),
+				),
+			'offense'=>
                 array(
                     "GS"  => array('lang' => "GS"),
                     "PA"  => array('lang' => "PA"),
@@ -186,7 +240,7 @@ if(!function_exists('stat_list'))
  */
 if(!function_exists('stats_class')) 
 {
-	function stats_class($stat_type = TYPE_OFFENSE, $stats_class = CLASS_STANDARD)
+	function stats_class($stat_type = TYPE_OFFENSE, $stats_class = CLASS_STANDARD, $extended = array())
 	{
 		$fieldList = array();
 		if ($stat_type == TYPE_OFFENSE) {
@@ -250,7 +304,43 @@ if(!function_exists('stats_class'))
 					break;
 			} // END switch
 		} // END if
-		return $fieldList;
+		
+		$fields = array();
+		if (isset($extended['GROUP_DEFAULT']))
+		{
+			$genArr = array('PN','TN','POS');
+			foreach($genArr as $field) {
+				array_push($fields,$field);
+			}
+		}
+		if (isset($extended['GROUP_GENERAL'])) 
+		{
+			$genArr = array('AGE','TH','BA');
+			foreach($genArr as $field) {
+				array_push($fields,$field);
+			}
+		}
+		if (isset($extended['GROUP_TRANSACTION']))
+		{
+			array_push($fields,'ADD');
+		}
+		if (isset($extended['GROUP_DRAFT'])) 
+		{
+			array_push($fields,'DRAFT');
+		}
+		foreach($fieldList as $field) {
+			array_push($fields,$field);
+		}
+		if (isset($extended['GROUP_FANTASY_POINTS']))
+		{
+			array_push($fields,'FPTS');
+		}
+		if (isset($extended['GROUP_FANTASY_RATINGS']))
+		{
+			array_push($fields,'PR15');
+		}
+		return $fields;
+		
 	} // END function
 } // END if
 

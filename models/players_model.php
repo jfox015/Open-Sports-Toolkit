@@ -959,7 +959,7 @@ class Players_model extends Base_ootp_model {
 
 	//---------------------------------------------------------------
 	
-	public function get_current_player_stats($player_id = false, $stats_type = Stats::TYPE_OFFENSE, $stats_class = CLASS_STANDARD, $params = array())
+	public function get_current_player_stats($player_id = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $params = array())
 	{
 		if ($player_id === false)
 		{
@@ -977,16 +977,18 @@ class Players_model extends Base_ootp_model {
         $query = $this->db->query($sql);
         if ($query->num_rows() > 0)
         {
-            $stats = $query->result();
+            $stats = $query->result_array();
         }
         $query->free_result();
+		
+		$stats = Stats::format_stats_for_display($stats, $stats_class);
+		
 		return $stats;
 	}
 	
-
 	//---------------------------------------------------------------
 	
-	public function get_current_players_stats($player_ids = false, $stats_type = Stats::TYPE_OFFENSE, $stats_class = CLASS_STANDARD, $params = array())
+	public function get_current_players_stats($player_ids = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $params = array())
 	{
 		if ($player_ids === false)
 		{
@@ -1000,9 +1002,21 @@ class Players_model extends Base_ootp_model {
 		}
 		
 		$query = Stats::get_players_stats($player_ids, $stats_type, $stats_class, STATS_SEASON, $params);
-	
-		return $query;
+
+        $query = $this->db->query($sql);
+        if ($query->num_rows() > 0)
+        {
+            $stats = $query->result_array();
+        }
+        $query->free_result();
+		
+		$stats = Stats::format_stats_for_display($stats, $stats_class);
+		
+		return $stats;
 	}	
+
+	//---------------------------------------------------------------
+	
 	
 	public function get_current_stats($position = 1, $league_id = false, $league_year = false, $team_id = false) {
        

@@ -86,6 +86,15 @@ class Stats
 	protected static $stat_list		= array();
 	
 	/**
+	 * Tyhe sport and data source specific position listing.
+	 *
+	 * @access protected
+	 *
+	 * @var array
+	 */
+	protected static $position_list		= array();
+	
+	/**
 	 * Mapping of source data sources for the stat scope type (career, season, game).
 	 *
 	 * @access protected
@@ -134,6 +143,7 @@ class Stats
 			self::load_sport_helper();
 			self::$ci->lang->load('open_sports_toolkit/stats_'.self::$sport);
 			self::$stat_list = stat_list();
+			self::$position_list = position_list();
 
         }
 		if ($source !== false)
@@ -141,7 +151,9 @@ class Stats
             self::$source = $source;
 			self::load_source_helper();
 
-			self::$stat_list = array_merge(self::$stat_list,field_map());
+			$map =field_map();
+			self::$stat_list = array_merge(self::$stat_list,$map['stats']);
+			self::$position_list = array_merge(self::$position_list,$map['positions']);
         }
 	} //end init()
 	
@@ -163,7 +175,7 @@ class Stats
      * @param array $params		        Array of arguments in (key => value) format
      * @return array|bool		        Array of stats
      */
-	public static function get_league_stats($league_id = false, $stats_type = TYPE_OFFENSE, $stats_class = CLASS_STANDARD, $stat_scope = STATS_CAREER, $params = array())
+	public static function get_league_stats($league_id = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $stat_scope = STATS_CAREER, $params = array())
 	{
 		if ($league_id === false)
 		{
@@ -176,6 +188,7 @@ class Stats
 		$identifier = identifier_map();
         $where[$identifier['league']] = $league_id;
 
+        $params['identifier'] = $identifier['league'];
         $params['where'] = $where;
 
         $stats = self::_get_stats_query($stats_type, $stats_class, $stat_scope, $params);
@@ -196,7 +209,7 @@ class Stats
      * @param array $params		        Array of arguments in (key => value) format
      * @return array|bool		        Array of stats
      */
-    public static function get_team_stats($team_id = false, $stats_type = TYPE_OFFENSE, $stats_class = CLASS_STANDARD, $stat_scope = STATS_CAREER, $params = array())
+    public static function get_team_stats($team_id = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $stat_scope = STATS_CAREER, $params = array())
 	{
 		if ($team_id === false)
 		{
@@ -208,6 +221,7 @@ class Stats
 		$identifier = identifier_map();
         $where[$identifier['team']] = $team_id;
 
+        $params['identifier'] = $identifier['team'];
         $params['where'] = $where;
 
         $stats = self::_get_stats_query($stats_type, $stats_class, $stat_scope, $params);
@@ -228,7 +242,7 @@ class Stats
      * @param array $params		        Array of arguments in (key => value) format
      * @return array|bool		        Array of stats
      */
-    public static function get_player_stats($player_id = false, $stats_type = TYPE_OFFENSE, $stats_class = CLASS_STANDARD, $stat_scope = STATS_CAREER, $params = array())
+    public static function get_player_stats($player_id = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $stat_scope = STATS_CAREER, $params = array())
     {
         if ($player_id === false)
         {
@@ -249,7 +263,7 @@ class Stats
 		$identifier = identifier_map();
         $where[$identifier['player']] = $player_id;
 
-        $params['identifier'] = $identifier;
+        $params['identifier'] = $identifier['player'];
         $params['where'] = $where;
 
         $stats = self::_get_stats_query($stats_type, $stats_class, $stat_scope, $params);
@@ -270,7 +284,7 @@ class Stats
      * @param array 	$params		        Array of arguments in (key => value) format
      * @return 	array|bool		        	Array of stats
      */
-    public static function get_players_stats($player_ids = array(), $stats_type = TYPE_OFFENSE, $stats_class = CLASS_STANDARD, $stat_scope = STATS_CAREER, $params = array())
+    public static function get_players_stats($player_ids = array(), $stats_type = TYPE_OFFENSE, $stats_class = array(), $stat_scope = STATS_CAREER, $params = array())
 	{
 		// Error handling
 		if (!isset($player_ids) || !is_array($player_ids) || count($player_ids) == 0)
@@ -301,7 +315,7 @@ class Stats
             }
         }
         $where_not_in[$identifier['player']] = $exclude_list_str;
-		$params['identifier'] = $identifier;
+		$params['identifier'] = $identifier['player'];
 		$params['where_in'] = $where_in;
 		$params['where_not_in'] = $where_not_in;
 
@@ -315,9 +329,10 @@ class Stats
      * Get Stats List.
      * Returns the internal Stats_list object.
      *
+     * @static
      * @return array            stats_list Array
      */
-    public function get_stats_list()
+    public static function get_stats_list()
     {
         return self::$stat_list;
     }
@@ -328,6 +343,7 @@ class Stats
      * Get Sport.
      * Returns the internal Sport var value.
      *
+     * @static
      * @return array            stats_list Array
      */
     public function get_sport()
@@ -335,10 +351,310 @@ class Stats
         return self::$sport;
     }
 	
+
+	//--------------------------------------------------------------------
+	
+	/**
+     * Get Stat Category.
+     * Returns the acronym for a stat category.
+     *
+     * @static
+     * @param 	int 		$cat	Stat Category ID
+	 * @return 	string|int          Stat Category Name
+     */
+    public static function get_stat_cat($cat)
+    {
+        $cat_str = '';
+		if (count(self::$stat_list) > 0)
+		{
+			foreach(self::$stat_list as $type => $categories)
+			{
+				foreach(self::$categories as $category => $details)
+				{
+					if (isset($details['id']) && $details['id'] == $cat)
+					{
+						$cat_str = $category;
+						break;
+					}
+				}
+			}
+		}
+		return $cat_str;
+    }
+
+	//--------------------------------------------------------------------
+	
+	/**
+     * Get Stat Category Number.
+     * Returns the ID Number for a stat category.
+     *
+     * @static
+     * @param 	string 		$cat	Stat Category Name
+	 * @return 	string|int          Stat Category ID
+     */
+    public static function get_stat_cat_num($cat)
+    {
+        $cat_str = '';
+		if (count(self::$stat_list) > 0)
+		{
+			foreach(self::$stat_list as $type => $categories)
+			{
+				if (isset(self::$categories[$cat]))
+				{
+					$cat_str = self::$categories[$cat]['id'];
+					break;
+				}
+			}
+		}
+		return $cat_str;
+    }	
+	//--------------------------------------------------------------------
+	
+	/**
+     * Get Position.
+     * Returns the acronym for a position.
+     *
+     * @static
+     * @param 	string|int	$pos	Position ID
+	 * @return 	string          	Position Name
+     */
+    public static function get_pos($pos)
+    {
+        $pos_str = '';
+		if (count(self::$position_list) > 0)
+		{
+			foreach(self::$position_list as $position => $details)
+			{
+				if (isset($details['id']) && $details['id'] == $pos)
+				{
+					$pos_str = $position;
+					break;
+				}
+			}
+		}
+		return $pos_str;
+    }	
+
+	//--------------------------------------------------------------------
+	
+	/**
+     * Get Position Number.
+     * Returns the ID for a position.
+     *
+     * @static
+     * @param 	string 		$pos	Position Name
+	 * @return 	string|int          Position ID
+     */
+    public static function get_pos_num($pos)
+    {
+        $pos = '';
+		if (isset(self::$position_list[$pos]))
+		{
+			$pos = self::$position_list[$pos]['id'];
+		}
+		return $pos;
+    }
+
+	/**
+	 *	FORMAT STATS FOR DISPLAY
+	 *
+	 *	Based on the stat selected, handles converting the raw data output to display ready HTML.
+	 *
+	 * 	@static
+	 *	@author	Frank Esselink
+	 * 	@author	Jeff Fox
+	 *	@since	1.0
+	 */
+	public static function format_stats_for_display($player_stats = array(), $fields = array()) {
+		$count = 10;
+		$newStats = array();
+		foreach($player_stats as $row) {
+			$newRow = array();
+			foreach ($fields as $col) {
+				if (isset($row[$col]) && !empty($row[$col])) {
+					$newRow['id'] = $id = $row['id'];
+					switch ($col) {
+						case 'avg':
+						case 'obp':
+						case 'slg':
+						case 'ops':
+						case 'wOBA':
+						case 'oavg':
+						case 'babip':
+							$val=sprintf("%.3f",$row[$col]);
+							if ($val<1) {$val=strstr($val,".");}
+							$newRow[$col] = $val;
+							break;
+						case 'era':
+						case 'whip':
+						case 'k9':
+						case 'bb9':
+						case 'hr9':
+						case 'rating':
+							$val=sprintf("%.2f",$row[$col]);
+							if (($val<1)&&($col=='whip')) {$val=strstr($val,".");}
+							$newRow[$col] = $val;
+							break;
+						case 'ip':
+						case 'vorp':
+							$val=sprintf("%.1f",$row[$col]);
+							$newRow[$col] = $val;
+							break;
+						case 'walk':
+						case 'wiff':
+							$newRow[$col] = intval($row[$col])."%";
+							break;
+						default:
+							$newRow[$col] = intval($row[$col]);
+							break;
+					} // END switch
+
+					// DEBUGGING
+					if ($count < 5) {
+						if (isset($newRow[$col])) {
+							echo($col." = ".$newRow[$col]."<br />");
+						}
+					}
+				} else {
+					$newRow[$col] = 0;
+				}
+			} // END foreach
+			array_push($newStats, $newRow);
+			$count++;
+		} // END foreach
+		return $newStats;
+	}
 	//--------------------------------------------------------------------
 	// !PRIVATE METHODS
 	//--------------------------------------------------------------------
 
+	protected static function format_extended_fields()
+	{
+		$count = 10;
+		$newStats = array();
+		foreach($player_stats as $row) {
+			$newRow = array();
+			foreach ($fields as $col) {
+				if (isset($row[$col]) && !empty($row[$col])) {
+					$newRow['id'] = $id = $row['id'];
+					switch ($col) {
+						case 'add':
+							if ($showTrans === true) {
+								$newRow[$col] = '<a href="#" rel="itemPick" id="'.$row['id'].'"><img src="'.$config['fantasy_web_root'].'images/icons/add.png" width="16" height="16" alt="Add" title="Add" /></td>';
+							}
+							break;
+						case 'draft':
+							if ($showDraft === true) {
+								if (($pick_team_id == $user_team_id && ($draftStatus >= 2 && $draftStatus < 4)) || (($accessLevel == ACCESS_ADMINISTRATE || $isCommish) && ($draftDate != EMPTY_DATE_TIME_STR && time() > strtotime($draftDate)))) {
+									$newRow[$col] = '<a href="#" rel="draft" id="'.$row['id'].'"><img src="'.$config['fantasy_web_root'].'images/icons/next.png" width="16" height="16" alt="Draft Player" title="Draft Player" /></a>';
+								} else {
+									$newRow[$col] = '- -';
+								}
+							}
+							break;
+						case 'player_name':
+
+							if ($statsOnly === false) {
+								$link = '/players/profile/';
+								if (isset($league_id) && !empty($league_id) && $league_id != -1) {
+									$link .= 'player_id/'.$id.'/league_id/'.$league_id;
+								} else {
+									$link .= $id;
+								}
+								$val = anchor($link,$row['first_name']." ".$row['last_name'],array('target'=>'_blank')).' <span style="font-size:smaller;">'.makeElidgibilityString($row['positions']).'</span>';
+
+								// INJURY STATUS
+								$injStatus = "";
+								if ($row['injury_is_injured'] == 1) {
+									$injStatus = makeInjuryStatusString($row);
+								}
+								if (!empty($injStatus)){
+									if (isset($row['injury_dl_left']) && $row['injury_dl_left'] > 0) {
+										$val .= '&nbsp;<img src="'.$config['fantasy_web_root'].'images/icons/red_cross.gif" width="7" height="7" align="absmiddle" alt="'.$injStatus.'" title="'.$injStatus.'" />&nbsp; ';
+									} else if (isset($row['injury_dtd_injury']) && $row['injury_dtd_injury'] != 0) {
+										$val .= '&nbsp;<acronym style="font-size:smaller;text-decoration:none, outline:none;font-weight:bold; color:#C00;" title="'.$injStatus.'">DTD</acronym>';
+									}
+								}
+								if (isset($row['on_waivers']) && $row['on_waivers'] == 1) {
+									$val .= '&nbsp;<b style="color:#ff6600;">W</b>&nbsp; ';
+								}
+								$newRow[$col] = $val;
+							} else {
+								$newRow[$col] = $row[$col];
+								if (isset($row['on_waivers']) && $row['on_waivers'] == 1) {
+									$newRow['on_waivers'] = 1;
+								}
+								if (isset($row['injury_dl_left']) && $row['injury_dl_left'] > 0) {
+									$newRow['injury_dl_left'] = $row['injury_dl_left'];
+								}
+								if (isset($row['injury_left']) && $row['injury_left'] > 0) {
+									$newRow['injury_left'] = $row['injury_left'];
+								}
+								if (isset($row['injury_id'])) {
+									$newRow['injury_id'] = $row['injury_id'];
+								}
+								if (isset($row['injury_is_injured'])) {
+									$newRow['injury_is_injured'] = $row['injury_is_injured'];
+								}
+								if (isset($row['injury_career_ending'])) {
+									$newRow['injury_career_ending'] = $row['injury_career_ending'];
+								}
+								if (isset($row['injury_dtd_injury'])) {
+									$newRow['injury_dtd_injury'] = $row['injury_dtd_injury'];
+								}
+							}
+							break;
+						case 'teamname':
+							if ($statsOnly === false) {
+								if ($league_id != -1) {
+										if (isset($player_teams[$id])) {
+										$team_obj = $team_list[$player_teams[$id]];
+										$val = anchor('/team/info/'.$player_teams[$id],$team_obj['teamname']." ".$team_obj['teamnick'])."</td>";
+									} else {
+										$val = "Free Agent";
+									}
+								} else {
+									$val = '';
+								}
+								$newRow[$col] = $val;
+							}
+							break;
+						case 'bats':
+						case 'throws':
+							$newRow[$col] = get_hand($row[$col]);
+							break;
+						case 'pos':
+						case 'positions':
+							if (strpos($row[$col],":")) {
+								$newRow[$col] = makeElidgibilityString($row[$col]);
+							} else {
+								$newRow[$col] = self::get_pos($row[$col]);
+							}
+							break;
+						case 'position':
+						case 'role':
+							$newRow[$col] = self::get_pos($row[$col]);
+							break;
+						case 'level_id':
+							$newRow[$col] = get_level($row[$col]);
+							break;
+						} // END switch
+
+					// DEBUGGING
+					if ($count < 5) {
+						if (isset($newRow[$col])) {
+							echo($col." = ".$newRow[$col]."<br />");
+						}
+					}
+				} else {
+					$newRow[$col] = 0;
+				}
+			} // END foreach
+			array_push($newStats, $newRow);
+			$count++;
+		} // END foreach
+		return $newStats;
+	}
 	//--------------------------------------------------------------------
 	
 	/**
@@ -349,7 +665,7 @@ class Stats
 	 * @return	void
 	 * @access	private
 	 */
-    private function load_sport_helper()
+    private static function load_sport_helper()
     {
         self::$ci->load->helper('open_sports_toolkit/drivers/'.self::$sport.'/sport');
     }
@@ -364,7 +680,7 @@ class Stats
 	 * @return	void
 	 * @access	private
 	 */
-    private function load_source_helper()
+    private static function load_source_helper()
     {
         self::$ci->load->helper('open_sports_toolkit/drivers/'.self::$sport.'/'. self::$source.'/source');
     }
@@ -388,14 +704,14 @@ class Stats
      * @param array $params
      * @return  array|string
      */
-	private static function _get_stats_query($stats_type = TYPE_OFFENSE, $stats_class = CLASS_STANDARD, $stat_scope = STATS_CAREER, $params = array())
+	private static function _get_stats_query($stats_type = TYPE_OFFENSE, $stats_class = array(), $stat_scope = STATS_CAREER, $params = array())
 	{
         $scope = STATS_CAREER;
         if (isset($params['scope']) && !empty($params['scope']) && $params['scope'] != STATS_CAREER)
         {
             $scope = $params['scope'];
         }
-        $class_def = stats_class($stats_type, $stats_class);
+        //$class_def = stats_class($stats_type, $stats_class);
         
 		$_table_def = table_map();
         $type = '';
@@ -415,10 +731,15 @@ class Stats
                 $type = "offense";
                 break;
         }
-        $query = self::build_stats_query($type, $class_def, self::$stat_list, $scope);
+        $query = self::build_stats_query($type, $stats_class, self::$stat_list, $scope);
 
-        $query .= " FROM ".$_table_def[$type][$stat_scope];
+		$tbl = $_table_def[$type][$stat_scope];
+        $query .= " FROM ".$tbl;
 
+		// JOIN IN THE PLAYERS TABLE FOR META INFORMATION ACCESS
+		$query .= " RIGHT OUTER JOIN ".$_table_def['players']." ON ".$_table_def['players'].".".$params['identifier']." = ".$tbl.".".$params['identifier'];
+		
+		
         // WHERE CLAUSES
         $id_field = '';
         $where_str = ' WHERE ';
@@ -426,11 +747,40 @@ class Stats
         {
             foreach($params['where'] as $col => $val) {
                 if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
-                $where_str .= $col .' = '.self::$ci->db->escape($val);
+                if ($col == $params['identifier'])
+				{
+					$where_str .= $tbl.".";
+				}
+				$where_str .= $col .' = '.self::$ci->db->escape($val);
             }
         }
+				
+		// POSITION FILTERS FOR OFFENSE AND DEFENSE
+        if ($stats_type == TYPE_SPECIALTY)
+		{
+			if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
+            $where_str .= $_table_def['players'].".".where_clause_speciality();
+		} 
+		else if ($stats_type == TYPE_OFFENSE) 
+		{
+			if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
+            $where_str .= $_table_def['players'].".".where_clause_offense();
+		}
+		
+		// SPLITS
+        if (!isset($params['split']) || empty($params['split']))
+        {
+			$params['split'] = SPLIT_SEASON;
+		}
+		if (isset($params['split']) || !empty($params['split']))
+		{
+            if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
+            $where_str .= get_split($params['split'], $tbl);
+        }
+		
         $query .= $where_str;
 
+        // WHERE IN AND NOT IN CLAUSES
         if (isset($params['where_in']) && $params['where_in'] != "()")
         {
             $query .= ' AND '.$_table_def[$type][$stat_scope].'.'.$params['identifier'].' IN '.$params['where_in'];
@@ -478,22 +828,23 @@ class Stats
 		switch ($group)
 		{
 			case 'GROUP_GENERAL':
-				$fieldList = array('age','throws','bats');
+				$fieldList = array('AGE','TH','BA');
 				break;
 			case 'GROUP_TRANSACTION':
-				$fieldList = array('add');
+				$fieldList = array('ADD');
 				break;
 			case 'GROUP_DRAFT':
-				$fieldList = array('draft');
+				$fieldList = array('DRAFT');
 				break;
 			case 'GROUP_FANTASY_POINTS':
-				$fieldList = array('fpts');
+				$fieldList = array('FPTS');
 				break;
 			case 'GROUP_FANTASY_RATINGS':
-				$fieldList = array('rating');
+				$fieldList = array('PR15');
 				break;
+			case 'GROUP_PLAYERS':
 			default:
-				$fieldList = array('player_name','teamname','position','role');
+				$fieldList = array('PN','TN','POS');
 				break;
 		}
 		return $fieldList;
@@ -545,6 +896,7 @@ define('TYPE_OFFENSE', 0);
 define('TYPE_DEFENSE', 1);
 define('TYPE_SPECIALTY', 2);
 define('TYPE_INJURY', 3);
+define('TYPE_TEAM', 4);
 
 define('STATS_CAREER', 0);
 define('STATS_SEASON', 1);
@@ -557,6 +909,11 @@ define('CLASS_STANDARD', 2);
 define('CLASS_COMPLETE', 3);
 define('CLASS_EXPANDED', 4);
 define('CLASS_EXTENDED', 5);
+
+define('SPLIT_SEASON', 0);
+define('SPLIT_PRESEASOM', 1);
+define('SPLIT_PLAYOFFS', 2);
+define('SPLIT_NONE', 3);
 
 /* End of file stats.php */
 /* Location: ./open_sports_toolkit/libraries/stats.php */
