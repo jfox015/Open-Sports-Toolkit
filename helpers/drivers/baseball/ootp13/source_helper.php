@@ -168,20 +168,21 @@ if(!function_exists('field_map'))
 			"stats" => array(
 			'general'=>
 				array(
-					"FN"	=>array('field' => "first_name"),
-					"LN"	=>array('field' => "last_name"),
-					"TN"	=>array('field' => "teamname", 'formula' => 'team_name + " " + team_nick'),
-					"PN"	=>array('field' => "player_name", 'formula' => 'first_name + " " + last_name'),
-					"AGE"	=>array('field' => "age"),
-					"POS"	=>array('field' => "position", 'formula' => 'if(position=1), role, position'),
-					"ROLE"=>array('field' => "role"),
-					"TH"	=>array('field' => "t"),
-					"BA"	=>array('field' => "b"),
+					"FN"	=>array('field' => "players.first_name"),
+					"LN"	=>array('field' => "players.last_name"),
+					"TN"	=>array('field' => "teamname", 'formula' => 'teams.name + " " + teams.nickname as teamname'),
+					"PN"	=>array('field' => "player_name", 'formula' => 'players.first_name + " " + players.last_name as player_name'),
+					"AGE"	=>array('field' => "players.age"),
+					"POS"	=>array('field' => "position", 'formula' => 'if(players.position=1, players.role, players.position) as position'),
+					"ROLE"=>array('field' => "players.role"),
+					"TH"	=>array('field' => "players.throws"),
+					"BA"	=>array('field' => "players.bats"),
 					"FPTS"=>array('field' => "fpts"),
 					"PR15"=>array('field' => "pr15"),
 				),
 			'offense'=>
 				array(
+					"G" => array('id' => 27, 'field' => 'g'),
 					"GS"  => array('id' => 0, 'field' => 'gs'),
 					"PA"  => array('id' => 1,  'field' => 'pa'),
 					"AB"  => array('id' => 2, 'field' => 'ab'),
@@ -201,13 +202,13 @@ if(!function_exists('field_map'))
 					"SF" => array('id' => 16, 'field' => 'sf'),
 					"XBH" => array('id' => 17, 'formula' => '([OPERATOR](d)+[OPERATOR](t)+[OPERATOR](hr)) as xbh'),
 					"AVG" => array('id' => 18, 'formula' => 'if([OPERATOR](ab)=0,0,[OPERATOR](h)/[OPERATOR](ab)) as avg'),
-					"OBP" => array('id' => 19, 'formula' => 'if([OPERATOR](ab)=0,0,[OPERATOR](h)/[OPERATOR](ab)) as avg,if(([OPERATOR](ab)+[OPERATOR](bb)+[OPERATOR](hp)+[OPERATOR](sf))=0,0,([OPERATOR](h)+[OPERATOR](bb)+[OPERATOR](hp))/([OPERATOR](ab)+[OPERATOR](bb)+[OPERATOR](hp)+[OPERATOR](sf))) as obp'),
+					"OBP" => array('id' => 19, 'formula' => 'if(([OPERATOR](ab)+[OPERATOR](bb)+[OPERATOR](hp)+[OPERATOR](sf))=0,0,([OPERATOR](h)+[OPERATOR](bb)+[OPERATOR](hp))/([OPERATOR](ab)+[OPERATOR](bb)+[OPERATOR](hp)+[OPERATOR](sf))) as obp'),
 					"SLG" => array('id' => 20, 'formula' => 'if([OPERATOR](ab)=0,0,([OPERATOR](h)+[OPERATOR](d)+2*[OPERATOR](t)+3*[OPERATOR](hr))/[OPERATOR](ab)) as slg'),
 					"RC" => array('id' => 21, 'field' => 'rc'),
 					"RC/27" => array('id' => 22, 'field' => 'rc/27'),
 					"ISO" => array('id' => 23, 'formula' => 'if([OPERATOR](ab)=0,0,([OPERATOR](tb)-[OPERATOR](h))/[OPERATOR](ab)) as iso'),
 					"WOBA" => array('id' => 24, 'formula' => 'if(([OPERATOR](ab)+[OPERATOR](bb)+[OPERATOR](hp)+[OPERATOR](sf))=0,0,([OPERATOR](h)+[OPERATOR](bb)+[OPERATOR](hp))/([OPERATOR](ab)+[OPERATOR](bb)+[OPERATOR](hp)+[OPERATOR](sf)))+if([OPERATOR](ab)=0,0,([OPERATOR](h)+[OPERATOR](d)+2*[OPERATOR](t)+3*[OPERATOR](hr))/[OPERATOR](ab)) as ops,if([OPERATOR](pa)=0,0,(0.72*[OPERATOR](bb)+0.75*[OPERATOR](hp)+0.9*([OPERATOR](h)-[OPERATOR](d)-[OPERATOR](t)-[OPERATOR](hr))+0.92*0+1.24*[OPERATOR](d)+1.56*[OPERATOR](t)+1.95*[OPERATOR](hr))/[OPERATOR](pa)) as wOBA'),
-					"TAVG" => array('id' => 24, 'formula' => 'if([OPERATOR](ab)=0,0, (([OPERATOR](h)+[OPERATOR](d)+([OPERATOR](t)*2)+([OPERATOR](hr)*3))+[OPERATOR](bb)+[OPERATOR](hbp)+[OPERATOR](sb)-[OPERATOR](cs)/([OPERATOR](ab)+[OPERATOR](gidp))))'),
+					"TAVG" => array('id' => 24, 'formula' => 'if([OPERATOR](ab)=0,0, (([OPERATOR](h)+[OPERATOR](d)+([OPERATOR](t)*2)+([OPERATOR](hr)*3))+[OPERATOR](bb)+[OPERATOR](hbp)+[OPERATOR](sb)-[OPERATOR](cs)/([OPERATOR](ab)+[OPERATOR](gidp)))) as tavg'),
 					"OPS" => array('id' => 25, 'formula' => 'if(([OPERATOR](ab)+[OPERATOR](bb)+[OPERATOR](hp)+[OPERATOR](sf))=0,0,([OPERATOR](h)+[OPERATOR](bb)+[OPERATOR](hp))/([OPERATOR](ab)+[OPERATOR](bb)+[OPERATOR](hp)+[OPERATOR](sf)))+if([OPERATOR](ab)=0,0,([OPERATOR](h)+[OPERATOR](d)+2*[OPERATOR](t)+3*[OPERATOR](hr))/[OPERATOR](ab)) as ops'),
 					"VORP" => array('id' => 26, 'field' => 'vorp'),
 					"GIDP" => array('id' => 80, 'field' => 'gidp'),
@@ -284,17 +285,17 @@ if(!function_exists('field_map'))
 				),
 				"injury"=>
 				array(
-					"I" => array('id' => 91, 'field' => 'injury_is_injured'),
-					"DTD" => array('id' => 92, 'field' => 'injury_dtd_injury'),
-					"CE" => array('id' => 93, 'field' => 'injury_career_ending'),
-					"DL" => array('id' => 94, 'field' => 'injury_dl_left'),
-					"DAYS" => array('id' => 95, 'field' => 'injury_left'),
-					"ID" => array('id' => 96, 'field' => 'injury_id')
+					"INJ" => array('id' => 91, 'field' => 'players.injury_is_injured'),
+					"DTD" => array('id' => 92, 'field' => 'players.injury_dtd_injury'),
+					"CE" => array('id' => 93, 'field' => 'players.injury_career_ending'),
+					"DL" => array('id' => 94, 'field' => 'players.injury_dl_left'),
+					"DAYS" => array('id' => 95, 'field' => 'players.injury_left'),
+					"ID" => array('id' => 96, 'field' => 'players.injury_id')
 				),
 				"team"=>
 				array(
-					"TEAM_NAME" => array('id' => 103, 'field' => 'team_name'),
-					"TEAM_NICK" => array('id' => 104, 'field' => 'team__nick'),
+					"TEAM_NAME" => array('id' => 103, 'field' => 'name'),
+					"TEAM_NICK" => array('id' => 104, 'field' => 'nickname'),
 					"W" => array('id' => 97, 'field' => 'w'),
 					"L" => array('id' => 98, 'field' => 'l'),
 					"PCT" => array('id' => 99, 'field' => 'pct'),

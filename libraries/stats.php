@@ -141,7 +141,8 @@ class Stats
         {
             self::$sport = $sport;
 			self::load_sport_helper();
-			self::$ci->lang->load('open_sports_toolkit/stats_'.self::$sport);
+			self::$ci->lang->load('open_sports_toolkit/'.self::$sport.'_acyn');
+			self::$ci->lang->load('open_sports_toolkit/'.self::$sport.'_full');
 			self::$stat_list = stat_list();
 			self::$position_list = position_list();
 
@@ -189,7 +190,14 @@ class Stats
         $where[$identifier['league']] = $league_id;
 
         $params['identifier'] = $identifier['league'];
-        $params['where'] = $where;
+        if (isset($params['where']))
+		{
+			$params['where'] = $params['where'] + $where;
+		}
+		else 
+		{
+			$params['where'] = $where;
+		}
 
         $stats = self::_get_stats_query($stats_type, $stats_class, $stat_scope, $params);
         return $stats;
@@ -222,7 +230,14 @@ class Stats
         $where[$identifier['team']] = $team_id;
 
         $params['identifier'] = $identifier['team'];
-        $params['where'] = $where;
+        if (isset($params['where']))
+		{
+			$params['where'] = $params['where'] + $where;
+		}
+		else 
+		{
+			$params['where'] = $where;
+		}
 
         $stats = self::_get_stats_query($stats_type, $stats_class, $stat_scope, $params);
         return $stats;
@@ -264,7 +279,15 @@ class Stats
         $where[$identifier['player']] = $player_id;
 
         $params['identifier'] = $identifier['player'];
-        $params['where'] = $where;
+        if (isset($params['where']))
+		{
+			$params['where'] = $params['where'] + $where;
+		}
+		else 
+		{
+			$params['where'] = $where;
+		}
+
 
         $stats = self::_get_stats_query($stats_type, $stats_class, $stat_scope, $params);
         return $stats;
@@ -471,9 +494,29 @@ class Stats
 		foreach($player_stats as $row) {
 			$newRow = array();
 			foreach ($fields as $col) {
+				$col = strtolower($col);
 				if (isset($row[$col]) && !empty($row[$col])) {
-					$newRow['id'] = $id = $row['id'];
+					//$newRow['id'] = $id = $row['id'];
 					switch ($col) {
+						case 'ba':
+						case 'th':
+							$newRow[$col] = get_hand($row[$col]);
+							break;
+						case 'pos':
+						case 'positions':
+							if (strpos($row[$col],":")) {
+								$newRow[$col] = makeElidgibilityString($row[$col]);
+							} else {
+								$newRow[$col] = self::get_pos($row[$col]);
+							}
+							break;
+						case 'position':
+						case 'role':
+							$newRow[$col] = self::get_pos($row[$col]);
+							break;
+						case 'level_id':
+							$newRow[$col] = get_level($row[$col]);
+							break;
 						case 'avg':
 						case 'obp':
 						case 'slg':
@@ -496,6 +539,8 @@ class Stats
 							$newRow[$col] = $val;
 							break;
 						case 'ip':
+						case 'ipi':
+						case 'ipl':
 						case 'vorp':
 							$val=sprintf("%.1f",$row[$col]);
 							$newRow[$col] = $val;
@@ -528,7 +573,7 @@ class Stats
 	// !PRIVATE METHODS
 	//--------------------------------------------------------------------
 
-	protected static function format_extended_fields()
+	protected static function format_extended_fields($player_stats = array(), $fields = array())
 	{
 		$count = 10;
 		$newStats = array();
@@ -537,9 +582,11 @@ class Stats
 			foreach ($fields as $col) {
 				if (isset($row[$col]) && !empty($row[$col])) {
 					$newRow['id'] = $id = $row['id'];
-					switch ($col) {
+					switch ($col) 
+					{
 						case 'add':
-							if ($showTrans === true) {
+							if ($showTrans === true) 
+							{
 								$newRow[$col] = '<a href="#" rel="itemPick" id="'.$row['id'].'"><img src="'.$config['fantasy_web_root'].'images/icons/add.png" width="16" height="16" alt="Add" title="Add" /></td>';
 							}
 							break;
@@ -554,7 +601,8 @@ class Stats
 							break;
 						case 'player_name':
 
-							if ($statsOnly === false) {
+							if ($statsOnly === false) 
+							{
 								$link = '/players/profile/';
 								if (isset($league_id) && !empty($league_id) && $league_id != -1) {
 									$link .= 'player_id/'.$id.'/league_id/'.$league_id;
@@ -619,27 +667,8 @@ class Stats
 								$newRow[$col] = $val;
 							}
 							break;
-						case 'bats':
-						case 'throws':
-							$newRow[$col] = get_hand($row[$col]);
-							break;
-						case 'pos':
-						case 'positions':
-							if (strpos($row[$col],":")) {
-								$newRow[$col] = makeElidgibilityString($row[$col]);
-							} else {
-								$newRow[$col] = self::get_pos($row[$col]);
-							}
-							break;
-						case 'position':
-						case 'role':
-							$newRow[$col] = self::get_pos($row[$col]);
-							break;
-						case 'level_id':
-							$newRow[$col] = get_level($row[$col]);
-							break;
-						} // END switch
-
+						
+					}
 					// DEBUGGING
 					if ($count < 5) {
 						if (isset($newRow[$col])) {
@@ -737,7 +766,9 @@ class Stats
         $query .= " FROM ".$tbl;
 
 		// JOIN IN THE PLAYERS TABLE FOR META INFORMATION ACCESS
-		$query .= " RIGHT OUTER JOIN ".$_table_def['players']." ON ".$_table_def['players'].".".$params['identifier']." = ".$tbl.".".$params['identifier'];
+		$identifier = identifier_map();
+		$query .= " RIGHT OUTER JOIN ".$_table_def['players']." ON ".$_table_def['players'].".".$identifier['player']." = ".$tbl.".".$identifier['player'];
+		$query .= " RIGHT OUTER JOIN ".$_table_def['team']." ON ".$_table_def['team'].".".$identifier['team']." = ".$tbl.".".$identifier['team'];
 		
 		
         // WHERE CLAUSES
@@ -791,9 +822,9 @@ class Stats
         }
 
         // GROUPING FOR SUM AND AVG
-        if (!empty($id_field))
+        if (!empty($identifier['player']))
         {
-            $query .= " GROUP BY ".$_table_def[$type][$stat_scope].'.'.$params['identifier'];
+            $query .= " GROUP BY ".$_table_def[$type][$stat_scope].'.'.$identifier['player'];
         }
 
         // LIMITS AND OFFSET
@@ -874,15 +905,35 @@ class Stats
 		if ($scope === STATS_SEASON_AVG) { $sqlOperator = 'AVG'; }
 
 		foreach ($categories as $cat) {
-			if ($sql != '') { $sql .= ','; } // END if
-			if (isset($stat_list[$stat_type][$cat]['formula']) && !empty($stat_list[$stat_type][$cat]['formula']))
+			// HANDLE GENERAL FIELDS
+			if (isset($stat_list['general'][$cat]))
 			{
-				$sql .= str_replace('[OPERATOR]',$sqlOperator,$stat_list[$stat_type][$cat]['formula']);
-			} else if (isset($stat_list[$stat_type][$cat]['field']) && !empty($stat_list[$stat_type][$cat]['field'])) {
-				$sql .= $sqlOperator.'('.$stat_list[$stat_type][$cat]['field'].') = '.$stat_list[$stat_type][$cat]['field'].'';
-			} else {
-				// Let the stat pass through
-			} // END if
+				if (!empty($sql)) { $sql .= ','; } // END if
+				if (isset($stat_list['general'][$cat]['formula']) && !empty($stat_list['general'][$cat]['formula']))
+				{
+					$sql .= $stat_list['general'][$cat]['formula'];
+				} 
+				else if (isset($stat_list['general'][$cat]['field']) && !empty($stat_list['general'][$cat]['field'])) 
+				{
+					$sql .= $stat_list['general'][$cat]['field'];
+				}
+				else 
+				{
+					// Let the stat pass through
+				} // END if
+			}
+			if (isset($stat_list[$stat_type][$cat]))
+			{
+				if (!empty($sql)) { $sql .= ','; } // END if
+				if (isset($stat_list[$stat_type][$cat]['formula']) && !empty($stat_list[$stat_type][$cat]['formula']))
+				{
+					$sql .= str_replace('[OPERATOR]',$sqlOperator,$stat_list[$stat_type][$cat]['formula']);
+				} 
+				else if (isset($stat_list[$stat_type][$cat]['field']) && !empty($stat_list[$stat_type][$cat]['field'])) 
+				{
+					$sql .= $sqlOperator.'('.$stat_list[$stat_type][$cat]['field'].') as '.$stat_list[$stat_type][$cat]['field'];
+				}
+			}
 		} // END foreach
 		return "SELECT ".$sql;
 	}

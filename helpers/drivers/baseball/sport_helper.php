@@ -100,6 +100,7 @@ if(!function_exists('stat_list'))
 				),
 			'offense'=>
                 array(
+                    "G" => array('lang' => "G"),
                     "GS"  => array('lang' => "GS"),
                     "PA"  => array('lang' => "PA"),
                     "AB"  => array('lang' => "AB"),
@@ -202,7 +203,7 @@ if(!function_exists('stat_list'))
                 ),
             "injury"=>
                 array(
-                    "I" => array('lang' => 'INJURY'),
+                    "INJ" => array('lang' => 'INJURY'),
                     "DTD" => array('lang' => 'DTD_INJURY'),
                     "CE" => array('lang' => 'CE'),
                     "DL" => array('lang' => 'DL'),
@@ -306,36 +307,36 @@ if(!function_exists('stats_class'))
 		} // END if
 		
 		$fields = array();
-		if (isset($extended['GROUP_DEFAULT']))
+		if (in_array('DEFAULT',$extended))
 		{
 			$genArr = array('PN','TN','POS');
 			foreach($genArr as $field) {
 				array_push($fields,$field);
 			}
 		}
-		if (isset($extended['GROUP_GENERAL'])) 
+		if (in_array('GENERAL',$extended))
 		{
 			$genArr = array('AGE','TH','BA');
 			foreach($genArr as $field) {
 				array_push($fields,$field);
 			}
 		}
-		if (isset($extended['GROUP_TRANSACTION']))
+		if (in_array('TRANSACTIONS',$extended))
 		{
 			array_push($fields,'ADD');
 		}
-		if (isset($extended['GROUP_DRAFT'])) 
+		if (in_array('DRAFT',$extended))
 		{
 			array_push($fields,'DRAFT');
 		}
 		foreach($fieldList as $field) {
 			array_push($fields,$field);
 		}
-		if (isset($extended['GROUP_FANTASY_POINTS']))
+		if (in_array('FANTASY_POINTS',$extended))
 		{
 			array_push($fields,'FPTS');
 		}
-		if (isset($extended['GROUP_FANTASY_RATINGS']))
+		if (in_array('FANTASY_RATINGS',$extended))
 		{
 			array_push($fields,'PR15');
 		}

@@ -959,7 +959,7 @@ class Players_model extends Base_ootp_model {
 
 	//---------------------------------------------------------------
 	
-	public function get_current_player_stats($player_id = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $params = array())
+	public function get_player_stats($player_id = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $stats_scope = STATS_SEASON, $params = array())
 	{
 		if ($player_id === false)
 		{
@@ -972,7 +972,7 @@ class Players_model extends Base_ootp_model {
 			Stats::init('baseball','ootp13');
 		}
 		$stats = array();
-		$sql = Stats::get_player_stats($player_id, $stats_type, $stats_class, STATS_SEASON, $params);
+		$sql = Stats::get_player_stats($player_id, $stats_type, $stats_class, $stats_scope, $params);
 
         $query = $this->db->query($sql);
         if ($query->num_rows() > 0)
@@ -988,7 +988,7 @@ class Players_model extends Base_ootp_model {
 	
 	//---------------------------------------------------------------
 	
-	public function get_current_players_stats($player_ids = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $params = array())
+	public function get_players_stats($player_ids = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $stats_scope = STATS_SEASON, $params = array())
 	{
 		if ($player_ids === false)
 		{
@@ -1001,7 +1001,7 @@ class Players_model extends Base_ootp_model {
 			Stats::init('baseball','ootp13');
 		}
 		
-		$query = Stats::get_players_stats($player_ids, $stats_type, $stats_class, STATS_SEASON, $params);
+		$query = Stats::get_players_stats($player_ids, $stats_type, $stats_class, $stats_scope, $params);
 
         $query = $this->db->query($sql);
         if ($query->num_rows() > 0)
@@ -1068,3 +1068,5 @@ class Players_model extends Base_ootp_model {
         return $players_list;
     }
 }  
+/* End of players_model.php */
+/* Location: ./open_sports_toolkit/models/players_model.php */

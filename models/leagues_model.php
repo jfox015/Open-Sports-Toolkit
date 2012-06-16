@@ -32,7 +32,8 @@
 	THE SOFTWARE.
 */
 require_once(dirname(dirname(__FILE__)).'/models/base_ootp_model.php');
-class Leagues_model extends Base_ootp_model {
+class Leagues_model extends Base_ootp_model 
+{
 
 	protected $table		= 'leagues';
 	protected $key			= 'league_id';
@@ -180,8 +181,47 @@ class Leagues_model extends Base_ootp_model {
 		}
 		return $state;
 	}
-	/*---------------------------------------
-	/	PRIVATE/PROTECTED FUNCTIONS
-	/--------------------------------------*/
 
+	/*---------------------------------------------------------
+	/	!STATS
+	/--------------------------------------------------------*/
+
+	//---------------------------------------------------------------
+	
+	public function get_league_stats($league_id = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $stats_scope = STATS_SEASON, $params = array())
+	{
+		if ($league_id === false)
+		{
+			$this->error = "A league id value was not received.";
+			return false;
+		}
+		
+		if (Stats::get_sport() === false)
+		{
+			Stats::init('baseball','ootp13');
+		}
+		$stats = array();
+		$sql = Stats::get_team_stats($league_id, $stats_type, $stats_class, $stats_scope, $params);
+
+		if (isset($params['get_sql']) && $params['get_sql'] === true)
+		{
+			return $sql;
+		}
+		else 
+		{
+			$query = $this->db->query($sql);
+			if ($query->num_rows() > 0)
+			{
+				$stats = $query->result_array();
+			}
+			$query->free_result();
+			
+			$stats = Stats::format_stats_for_display($stats, $stats_class);
+			
+			return $stats;
+		}
+	}
+	
 }
+/* End of leagues_model.php */
+/* Location: ./open_sports_toolkit/models/leagues_model.php */
