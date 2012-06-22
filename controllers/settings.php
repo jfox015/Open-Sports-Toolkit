@@ -8,7 +8,7 @@ class Settings extends Admin_Controller {
 	{
 		parent::__construct();
 
-		$this->auth->restrict('SportsToolkit.Settings.View');
+		$this->auth->restrict('Open_Sports_Toolkit.Settings.View');
 
 		$this->lang->load('sportstoolkit');
 	}
@@ -19,7 +19,7 @@ class Settings extends Admin_Controller {
 	{
 		if ($this->input->post('submit'))
 		{
-            $this->auth->restrict('SportsToolkit.Settings.Manage');
+            $this->auth->restrict('Open_Sports_Toolkit.Settings.Manage');
             if ($this->save_settings())
 			{
 				Template::set_message('Your settings were successfully saved.', 'success');
@@ -30,7 +30,7 @@ class Settings extends Admin_Controller {
 			}
 		}
 		// Read our current settings
-		$settings = $this->settings_model->select('name,value')->find_all_by('module', 'sportstoolkit');
+		$settings = $this->settings_model->select('name,value')->find_all_by('module', 'stk');
 		Template::set('settings', $settings);
 		Template::set('toolbar_title', lang('nw_setting_title'));
 		Template::set_view('settings/index');
@@ -43,10 +43,10 @@ class Settings extends Admin_Controller {
 
 	private function save_settings()
 	{
-		$this->form_validation->set_rules('source_baseball', lang('st_source_baseball'),
-		$this->form_validation->set_rules('source_football', lang('st_source_football'),
-		$this->form_validation->set_rules('source_basketball', lang('st_source_basketball'),
-		$this->form_validation->set_rules('source_hockey', lang('st_source_hockey'),
+		$this->form_validation->set_rules('source_baseball', lang('st_source_baseball'));
+		$this->form_validation->set_rules('source_football', lang('st_source_football'));
+		$this->form_validation->set_rules('source_basketball', lang('st_source_basketball'));
+		$this->form_validation->set_rules('source_hockey', lang('st_source_hockey'));
 
 		if ($this->form_validation->run() === false)
 		{
@@ -54,10 +54,10 @@ class Settings extends Admin_Controller {
 		}
 
 		$data = array(
-			array('name' => 'sportstoolkit.source_baseball', 'value' => $this->input->post('source_baseball')),
-			array('name' => 'sportstoolkit.source_football', 'value' => $this->input->post('source_football')),
-			array('name' => 'sportstoolkit.source_basketball', 'value' => $this->input->post('source_basketball')),
-			array('name' => 'sportstoolkit.source_hockey', 'value' => $this->input->post('source_hockey'))
+			array('name' => 'stk.source_baseball', 'value' => $this->input->post('source_baseball')),
+			array('name' => 'stk.source_football', 'value' => $this->input->post('source_football')),
+			array('name' => 'stk.source_basketball', 'value' => $this->input->post('source_basketball')),
+			array('name' => 'stk.source_hockey', 'value' => $this->input->post('source_hockey'))
 		);
 
 		// Log the activity

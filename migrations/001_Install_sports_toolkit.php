@@ -3,9 +3,9 @@
 class Migration_Install_sports_toolkit extends Migration {
 
     private $permission_array = array(
-        'SportsToolkit.Settings.View' => 'View Sports Toolkit Settings Screens.',
-        'SportsToolkit.Settings.Manage' => 'Manage Sports Toolkit Settings.',
-        'SportsToolkit.Settings.Delete' => 'Delete Sports Toolkit Settings.',
+        'Open_Sports_Toolkit.Settings.View' => 'View Sports Toolkit Settings Screens.',
+        'Open_Sports_Toolkit.Settings.Manage' => 'Manage Sports Toolkit Settings.',
+        'Open_Sports_Toolkit.Settings.Delete' => 'Delete Sports Toolkit Settings.',
     );
 
     public function up()
@@ -21,8 +21,10 @@ class Migration_Install_sports_toolkit extends Migration {
 		
         $default_settings = "
 			INSERT INTO `{$prefix}settings` (`name`, `module`, `value`) VALUES
-			 ('', 'sportsToolkit', ''),
-			 
+			 ('stk.source_baseball', 'stk', ''),
+			 ('stk.source_basketball', 'stk', ''),
+			 ('stk.source_hockey', 'stk', 'ootp13'),
+			 ('stk.source_football', 'stk', '');
 		";
         $this->db->query($default_settings);
 	}
@@ -33,7 +35,7 @@ class Migration_Install_sports_toolkit extends Migration {
 	{
         $prefix = $this->db->dbprefix;
 
-        $this->db->query("DELETE FROM {$prefix}settings WHERE (module = 'sportsToolkit')");
+        $this->db->query("DELETE FROM {$prefix}settings WHERE (module = 'stk')");
 
         foreach ($this->permission_array as $name => $description)
         {
