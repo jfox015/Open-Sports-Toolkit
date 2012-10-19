@@ -46,7 +46,7 @@ if(!function_exists('position_list'))
 		$positions = 
 		array(
 			"PH"	=>array('lang'=>"PH", 'type' => 'offense'),
-			"C"		=>array('lang'=>"C", 'type' => 'offense'),
+			"C"		=>array('lang'=>"C",  'type' => 'offense'),
 			"1B"	=>array('lang'=>"1B", 'type' => 'offense'),
 			"2B"	=>array('lang'=>"2B", 'type' => 'offense'),
 			"3B"	=>array('lang'=>"3B", 'type' => 'offense'),
@@ -59,13 +59,13 @@ if(!function_exists('position_list'))
 			"IF"	=>array('lang'=>"IF", 'type' => 'offense'),
 			"MI"	=>array('lang'=>"MI", 'type' => 'offense'),
 			"CI"	=>array('lang'=>"CI", 'type' => 'offense'),
-			"U"		=>array('lang'=>"U", 'type' => 'offense'),
-			"P"		=>array('lang'=>"P",'type' => 'specialty'),
-			"SP"	=>array('lang'=>"SP",'type' => 'specialty'),
-			"RP"	=>array('lang'=>"RP",'type' => 'specialty'),
-			"CL"	=>array('lang'=>"CL",'type' => 'specialty'),
-			"SU"	=>array('lang'=>"SU",'type' => 'specialty'),
-			"MU"	=>array('lang'=>"MU",'type' => 'specialty'),
+			"U"		=>array('lang'=>"U",  'type' => 'offense'),
+			"P"		=>array('lang'=>"P",  'type' => 'specialty'),
+			"SP"	=>array('lang'=>"SP", 'type' => 'specialty'),
+			"RP"	=>array('lang'=>"RP", 'type' => 'specialty'),
+			"CL"	=>array('lang'=>"CL", 'type' => 'specialty'),
+			"SU"	=>array('lang'=>"SU", 'type' => 'specialty'),
+			"MU"	=>array('lang'=>"MU", 'type' => 'specialty'),
 		);
 		return $positions;
 	}

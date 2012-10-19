@@ -149,6 +149,23 @@ class Leagues_model extends Base_ootp_model
 		}
 	}
 	/**
+	 *	GET SUBLEAGUES INFO.
+		Returns an array of sub league IDs and names.
+	 *	@return	Array $subleagues
+	 */
+	public function get_subleague_info($league_id = 100) {
+		$subleagues = array();
+        if (!$this->use_prefix) $this->db->dbprefix = '';
+        $this->db->select('sub_league_id,name')
+				 ->where('league_id',$league_id)
+				 ->order_by('sub_league_id');
+		$query = $this->db->get('sub_leagues');
+		$subleagues = $query->result_array();
+		$query->free_result();
+        if (!$this->use_prefix) $this->db->dbprefix = $this->dbprefix;
+        return $subleagues;
+	}
+	/**
 	 *	Returns a string with the state of the league.
 	 *	@return	String
 	 */
