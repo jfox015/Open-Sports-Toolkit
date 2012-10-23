@@ -573,7 +573,7 @@ class Stats
 	// !PRIVATE METHODS
 	//--------------------------------------------------------------------
 
-	protected static function format_extended_fields($player_stats = array(), $fields = array())
+	protected static function format_extended_fields($player_stats = array(), $fields = array(), $league_id = 100)
 	{
 		$count = 10;
 		$newStats = array();
@@ -585,15 +585,15 @@ class Stats
 					switch ($col) 
 					{
 						case 'add':
-							if ($showTrans === true) 
+							if ($fields['showTrans'] === true)
 							{
-								$newRow[$col] = '<a href="#" rel="itemPick" id="'.$row['id'].'"><img src="'.$config['fantasy_web_root'].'images/icons/add.png" width="16" height="16" alt="Add" title="Add" /></td>';
+								$newRow[$col] = '<a href="#" rel="itemPick" id="'.$row['id'].'"><img src="'.$fields['web_root'].'images/icons/add.png" width="16" height="16" alt="Add" title="Add" /></td>';
 							}
 							break;
 						case 'draft':
-							if ($showDraft === true) {
-								if (($pick_team_id == $user_team_id && ($draftStatus >= 2 && $draftStatus < 4)) || (($accessLevel == ACCESS_ADMINISTRATE || $isCommish) && ($draftDate != EMPTY_DATE_TIME_STR && time() > strtotime($draftDate)))) {
-									$newRow[$col] = '<a href="#" rel="draft" id="'.$row['id'].'"><img src="'.$config['fantasy_web_root'].'images/icons/next.png" width="16" height="16" alt="Draft Player" title="Draft Player" /></a>';
+							if ($fields['showDraft'] === true) {
+								if (($fields['pick_team_id'] == $fields['user_team_id'] && ($fields['draftStatus'] >= 2 && $fields['draftStatus'] < 4)) || (($fields['accessLevel'] == ACCESS_ADMINISTRATE || $fields['isCommish']) && ($fields['draftDate'] != EMPTY_DATE_TIME_STR && time() > strtotime($fields['draftDate'])))) {
+									$newRow[$col] = '<a href="#" rel="draft" id="'.$row['id'].'"><img src="'.$fields['web_root'].'images/icons/next.png" width="16" height="16" alt="Draft Player" title="Draft Player" /></a>';
 								} else {
 									$newRow[$col] = '- -';
 								}
@@ -601,7 +601,7 @@ class Stats
 							break;
 						case 'player_name':
 
-							if ($statsOnly === false) 
+							if ($fields['statsOnly'] === false)
 							{
 								$link = '/players/profile/';
 								if (isset($league_id) && !empty($league_id) && $league_id != -1) {
@@ -618,7 +618,7 @@ class Stats
 								}
 								if (!empty($injStatus)){
 									if (isset($row['injury_dl_left']) && $row['injury_dl_left'] > 0) {
-										$val .= '&nbsp;<img src="'.$config['fantasy_web_root'].'images/icons/red_cross.gif" width="7" height="7" align="absmiddle" alt="'.$injStatus.'" title="'.$injStatus.'" />&nbsp; ';
+										$val .= '&nbsp;<img src="'.$fields['web_root'].'images/icons/red_cross.gif" width="7" height="7" align="absmiddle" alt="'.$injStatus.'" title="'.$injStatus.'" />&nbsp; ';
 									} else if (isset($row['injury_dtd_injury']) && $row['injury_dtd_injury'] != 0) {
 										$val .= '&nbsp;<acronym style="font-size:smaller;text-decoration:none, outline:none;font-weight:bold; color:#C00;" title="'.$injStatus.'">DTD</acronym>';
 									}
@@ -653,10 +653,10 @@ class Stats
 							}
 							break;
 						case 'teamname':
-							if ($statsOnly === false) {
+							if ($fields['statsOnly'] === false) {
 								if ($league_id != -1) {
 										if (isset($player_teams[$id])) {
-										$team_obj = $team_list[$player_teams[$id]];
+										$team_obj = $fields['team_list'][$player_teams[$id]];
 										$val = anchor('/team/info/'.$player_teams[$id],$team_obj['teamname']." ".$team_obj['teamnick'])."</td>";
 									} else {
 										$val = "Free Agent";
@@ -822,10 +822,20 @@ class Stats
         }
 
         // GROUPING FOR SUM AND AVG
-        if (!empty($identifier['player']))
-        {
-            $query .= " GROUP BY ".$_table_def[$type][$stat_scope].'.'.$identifier['player'];
+        if (!empty($params['total'])) {
+			if (!empty($identifier['team'])) 
+			{
+				$query .= " GROUP BY ".$_table_def[$type][$stat_scope].'.'.$identifier['team'];
+			} 
+			else if (!empty($identifier['league'])) 
+			{
+				$query .= " GROUP BY ".$_table_def[$type][$stat_scope].'.'.$identifier['league'];
+			}
         }
+		else if (!empty($identifier['player']))
+		{
+            $query .= " GROUP BY ".$_table_def[$type][$stat_scope].'.'.$identifier['player'];
+        } 
 
         // LIMITS AND OFFSET
         if (isset($params['limit']) && isset($params['offset']))
@@ -960,6 +970,7 @@ define('CLASS_STANDARD', 2);
 define('CLASS_COMPLETE', 3);
 define('CLASS_EXPANDED', 4);
 define('CLASS_EXTENDED', 5);
+define('CLASS_ULTRA_COMPACT', 6);
 
 define('SPLIT_SEASON', 0);
 define('SPLIT_PRESEASOM', 1);

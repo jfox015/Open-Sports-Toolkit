@@ -343,6 +343,42 @@ class Teams_model extends Base_ootp_model {
 			return $stats;
 		}
 	}
+	//---------------------------------------------------------------
+	
+	public function get_team_totals($team_id = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $stats_scope = STATS_SEASON, $params = array())
+	{
+		if ($team_id === false)
+		{
+			$this->error = "A team id value was not received.";
+			return false;
+		}
+		
+		if (Stats::get_sport() === false)
+		{
+			Stats::init('baseball','ootp13');
+		}
+		$params['total'] = 1;
+		$stats = array();
+		$sql = Stats::get_team_stats($team_id, $stats_type, $stats_class, $stats_scope, $params);
+
+		if (isset($params['get_sql']) && $params['get_sql'] === true)
+		{
+			return $sql;
+		}
+		else 
+		{
+			$query = $this->db->query($sql);
+			if ($query->num_rows() > 0)
+			{
+				$stats = $query->result_array();
+			}
+			$query->free_result();
+			
+			$stats = Stats::format_stats_for_display($stats, $stats_class);
+			
+			return $stats;
+		}
+	}
 }
 /* End of teams_model.php */
 /* Location: ./open_sports_toolkit/models/teams_model.php */

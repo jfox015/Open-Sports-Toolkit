@@ -121,28 +121,28 @@ if(!function_exists('table_map'))
 			array(
                 STATS_CAREER => 'players_career_batting_stats',
                 STATS_SEASON => 'players_career_batting_stats',
-                STATS_GAME => 'players_game_batting',
+                STATS_GAME => 	'players_game_batting',
                 STATS_SEASON_AVG => 'players_career_batting_stats'
 			),
 			'specialty'=>
 			array(
                 STATS_CAREER => 'players_career_pitching_stats',
                 STATS_SEASON => 'players_career_pitching_stats',
-                STATS_GAME => 'players_game_pitching_stats',
+                STATS_GAME => 	'players_game_pitching_stats',
                 STATS_SEASON_AVG => 'players_career_pitching_stats'
 			),
 			'defense'=>
 			array(
                 STATS_CAREER => 'players_career_fielding_stats',
                 STATS_SEASON => 'players_career_fielding_stats',
-                STATS_GAME => 'players_game_fielding',
+                STATS_GAME => 	'players_game_fielding',
                 STATS_SEASON_AVG => 'players_career_fielding_stats'
 			),
 			'injury'=>
 			array(
                 STATS_CAREER => 'players',
                 STATS_SEASON => 'players',
-                STATS_GAME => 'players',
+                STATS_GAME => 	'players',
                 STATS_SEASON_AVG => 'players'
 			),
 			'team'=>'teams',

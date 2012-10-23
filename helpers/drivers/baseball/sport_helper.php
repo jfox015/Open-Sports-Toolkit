@@ -247,6 +247,9 @@ if(!function_exists('stats_class'))
 		if ($stat_type == TYPE_OFFENSE) {
 			// BATTERS
 			switch ($stats_class) {
+				case CLASS_ULTRA_COMPACT:
+					$fieldList = array('AVG','R','HR');
+					break;
 				case CLASS_COMPACT:
 					$fieldList = array('AVG','R','HR','RBI','OPS');
 					break;
@@ -269,6 +272,9 @@ if(!function_exists('stats_class'))
 			} // END switch
 		} else if ($stat_type == TYPE_SPECIALTY){
 			switch ($stats_class) {
+				case CLASS_ULTRA_COMPACT:
+					$fieldList = array('W','L','ERA');
+					break;
 				case CLASS_COMPACT:
 					$fieldList = array('W','L','ERA','BB','SO');
 					break;
@@ -291,6 +297,9 @@ if(!function_exists('stats_class'))
 			} // END switch
 		} else if ($stat_type == TYPE_DEFENSE){
 			switch ($stats_class) {
+				case CLASS_ULTRA_COMPACT:
+					$fieldList = array("FP","PO","E");
+					break;
 				case CLASS_COMPACT:
 					$fieldList = array("TC","A","PO","E","FP");
 					break;

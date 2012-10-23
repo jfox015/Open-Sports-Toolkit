@@ -226,7 +226,33 @@ function get_pitch_rating($pitch,$ir,$gb,$mvmnt,$velo)
     }
    return $rat;
  }
-
+/**
+ *	GET ASSET PATHS.
+ *	A function to create correct paths to OOTP assets like logos and playerpictures. The structure 
+ *	changed in OOTP 13 so this function helps create backwards compatibility with odler versions.
+ *
+ *	@param	Array	$settings	Settings Array Object
+ *	@return	Array				Appended Settings object
+ *
+ */
+if (!function_exists('get_asset_path')) {
+	function get_asset_path($settings) {
+		// SET UP CUSTOM ASSET PATHS
+		$league_logo_path = $team_logo_path = $players_img_path = $player_profile_img_path = $settings['ootp.asset_url'].'images/';
+		if (intval($settings['ootp.game_version']) >= 13) {
+			$league_logo_path .= 'league_logos/';
+			$team_logo_path .= 'team_logos/';
+			$players_img_path .= 'person_pictures/';
+			$player_profile_img_path .= 'profile_pictures/';
+		}
+		$settings['ootp.team_logo_path'] = $team_logo_path;
+		$settings['ootp.league_logo_path'] = $league_logo_path;
+		$settings['ootp.players_img_path'] = $players_img_path;
+		$settings['ootp.player_profile_img_path'] = $player_profile_img_path;
+		
+		return $settings;
+	}
+}
 /**
  *	GET LEAGUE LEVEL.
  *	Returns a text string name for the level passed.

@@ -87,11 +87,11 @@ $lang['acyn_FP']		= 'FP';
 $lang['acyn_RF']		= 'RF';
 //INJURUES
 $lang['acyn_INJ']		= '';
-$lang['acyn_DTD']	= '';
+$lang['acyn_DTD']	    = '';
 $lang['acyn_CE']		= '';
 $lang['acyn_DL']		= 'DL';
-$lang['acyn_DAYS']	'';
-$lang['acyn_ID']		'';
+$lang['acyn_DAYS']	    = '';
+$lang['acyn_ID']		= '';
 //TEAMS/STANDINGS
 $lang['acyn_GB']		= 'GB';
 $lang['acyn_HOME']	= 'HR';
