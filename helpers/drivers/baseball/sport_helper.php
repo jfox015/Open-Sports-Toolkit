@@ -316,16 +316,17 @@ if(!function_exists('stats_class'))
 		} // END if
 		
 		$fields = array();
-		if (in_array('DEFAULT',$extended))
+		if (in_array('NAME',$extended))
 		{
-			$genArr = array('PN','TN','POS');
-			foreach($genArr as $field) {
-				array_push($fields,$field);
-			}
+			array_push($fields,'PN');
+		}
+		if (in_array('TEAM',$extended))
+		{
+			array_push($fields,'TN');
 		}
 		if (in_array('GENERAL',$extended))
 		{
-			$genArr = array('AGE','TH','BA');
+			$genArr = array('POS','AGE','TH','BA');
 			foreach($genArr as $field) {
 				array_push($fields,$field);
 			}

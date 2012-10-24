@@ -254,6 +254,40 @@ if (!function_exists('get_asset_path')) {
 	}
 }
 /**
+ *	FORMAT TIME.
+ *	A function to create correct time display based on a passed value. OOTP 13 seperates games by date and 24 based 
+ *	so, this function resolves thiose issues.
+ *
+ *	@param	Array	$settings	Settings Array Object
+ *	@return	Array				Appended Settings object
+ *
+ */
+if (!function_exists('format_time')) {
+	function format_time($inTime = false, $settings = false) {
+		$time = 0;
+		// SET UP CUSTOM ASSET PATHS
+		if (intval($settings['ootp.game_version']) >= 13) {
+			
+		}
+		else 
+		{
+			$timestr = strval($inTime);
+			$hour = intval(substr($timestr, 0, 2));
+			$minutes = substr($timestr, 2, 2);
+			if ($hour > 12) {
+				$meridian = "pm";
+				$hour = $hour - 12;
+			} else {
+				$meridian = "am";
+			}
+			$time = $hour. ":".$minutes." ".$meridian;
+		}
+		return $time;
+	}
+}
+
+
+/**
  *	GET LEAGUE LEVEL.
  *	Returns a text string name for the level passed.
  *

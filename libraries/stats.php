@@ -477,7 +477,37 @@ class Stats
 		}
 		return $pos;
     }
-
+	
+	//--------------------------------------------------------------------
+	
+	public function get_stats_fields($stat_type = '', $fields = array()) {
+		$stat_fields = array();
+		$stat_list = self::$stat_list;
+		foreach($fields as $field) {
+			$val = '';
+			$cat = '';
+			if (isset($stat_list['general'][$field]['field']))
+			{
+				$cat = $stat_list['general'][$field]['field'];
+			} 
+			else if (isset($stat_list[$stat_type][$field]['field'])) 
+			{
+				$cat = $stat_list[$stat_type][$field]['field'];
+			} 
+			else 
+			{
+				$cat = $field;
+			}
+			if (strstr($cat, ".") !== false) {
+				$tmpCat = explode(".",$cat);
+				$val = $tmpCat[1];
+			} else {
+				$val = $cat;
+			}
+			array_push($stat_fields, $val);
+		}
+		return $stat_fields;
+	}
 	/**
 	 *	FORMAT STATS FOR DISPLAY
 	 *
@@ -495,73 +525,80 @@ class Stats
 			$newRow = array();
 			foreach ($fields as $col) {
 				$col = strtolower($col);
-				if (isset($row[$col]) && !empty($row[$col])) {
-					//$newRow['id'] = $id = $row['id'];
-					switch ($col) {
-						case 'ba':
-						case 'th':
-							$newRow[$col] = get_hand($row[$col]);
-							break;
-						case 'pos':
-						case 'positions':
-							if (strpos($row[$col],":")) {
-								$newRow[$col] = makeElidgibilityString($row[$col]);
-							} else {
-								$newRow[$col] = self::get_pos($row[$col]);
-							}
-							break;
-						case 'position':
-						case 'role':
+				//echo($col." = ".(isset($row[$col]) ? $row[$col] : 0)."<br />");
+				//$newRow['id'] = $id = $row['id'];
+				switch ($col) {
+					case 'bats':
+					case 'throws':
+						$newRow[$col] = get_hand($row[$col]);
+						break;
+					case 'pos':
+					case 'positions':
+						if (strpos($row[$col],":")) {
+							$newRow[$col] = makeElidgibilityString($row[$col]);
+						} else {
 							$newRow[$col] = self::get_pos($row[$col]);
-							break;
-						case 'level_id':
-							$newRow[$col] = get_level($row[$col]);
-							break;
-						case 'avg':
-						case 'obp':
-						case 'slg':
-						case 'ops':
-						case 'wOBA':
-						case 'oavg':
-						case 'babip':
-							$val=sprintf("%.3f",$row[$col]);
-							if ($val<1) {$val=strstr($val,".");}
-							$newRow[$col] = $val;
-							break;
-						case 'era':
-						case 'whip':
-						case 'k9':
-						case 'bb9':
-						case 'hr9':
-						case 'rating':
-							$val=sprintf("%.2f",$row[$col]);
-							if (($val<1)&&($col=='whip')) {$val=strstr($val,".");}
-							$newRow[$col] = $val;
-							break;
-						case 'ip':
-						case 'ipi':
-						case 'ipl':
-						case 'vorp':
-							$val=sprintf("%.1f",$row[$col]);
-							$newRow[$col] = $val;
-							break;
-						case 'walk':
-						case 'wiff':
-							$newRow[$col] = intval($row[$col])."%";
-							break;
-						default:
-							$newRow[$col] = intval($row[$col]);
-							break;
-					} // END switch
-
-					// DEBUGGING
-					if ($count < 5) {
-						if (isset($newRow[$col])) {
-							echo($col." = ".$newRow[$col]."<br />");
 						}
+						break;
+					case 'position':
+					case 'role':
+						$newRow[$col] = self::get_pos($row[$col]);
+						break;
+					case 'level_id':
+						$newRow[$col] = get_level($row[$col]);
+						break;
+					case 'avg':
+					case 'obp':
+					case 'slg':
+					case 'ops':
+					case 'wOBA':
+					case 'oavg':
+					case 'babip':
+						$val=sprintf("%.3f",$row[$col]);
+						if ($val<1) {$val=strstr($val,".");}
+						$newRow[$col] = $val;
+						break;
+					case 'era':
+					case 'whip':
+					case 'k9':
+					case 'bb9':
+					case 'hr9':
+					case 'rating':
+						$val=sprintf("%.2f",$row[$col]);
+						if (($val<1)&&($col=='whip')) {$val=strstr($val,".");}
+						$newRow[$col] = $val;
+						break;
+					case 'ip':
+					case 'ipi':
+					case 'ipl':
+					case 'vorp':
+						$val=sprintf("%.1f",$row[$col]);
+						$newRow[$col] = $val;
+						break;
+					case 'walk':
+					case 'wiff':
+						$newRow[$col] = intval($row[$col])."%";
+						break;
+					case 'add':
+					case 'draft':
+					case 'player_name':
+					case 'teamname':
+						$newRow[$col] = self::format_extended_fields($col, $row);
+						break;
+					default:
+						if (!isset($row[$col]) && empty($row[$col])) {
+							$newRow[$col] = 0;
+						} else {
+							$newRow[$col] = intval($row[$col]);
+						}
+						break;
+				} // END switch
+
+				// DEBUGGING
+				if ($count < 5) {
+					if (isset($newRow[$col])) {
+						echo($col." = ".$newRow[$col]."<br />");
 					}
-				} else {
-					$newRow[$col] = 0;
 				}
 			} // END foreach
 			array_push($newStats, $newRow);
@@ -569,121 +606,67 @@ class Stats
 		} // END foreach
 		return $newStats;
 	}
+	
+	//--------------------------------------------------------------------
+	
+	public static function format_extended_fields($field = false, $row = false, $settings = false, $league_id = 100, $debug = false)
+	{
+		$newRow = array();
+		switch ($field) 
+		{
+			case 'add':
+				if (isset($fields['showTrans']) && $fields['showTrans'] === true)
+				{
+					$newRow[$field] = '<a href="#" rel="itemPick" id="'.$row['id'].'"><img src="'.$settings['web_root'].'images/icons/add.png" width="16" height="16" alt="Add" title="Add" /></td>';
+				}
+				break;
+			case 'draft':
+				if (isset($fields['showDraft']) && $fields['showDraft'] === true) {
+					if (($fields['pick_team_id'] == $fields['user_team_id'] && ($fields['draftStatus'] >= 2 && $fields['draftStatus'] < 4)) || (($fields['accessLevel'] == ACCESS_ADMINISTRATE || $fields['isCommish']) && ($fields['draftDate'] != EMPTY_DATE_TIME_STR && time() > strtotime($fields['draftDate'])))) {
+						$newRow[$field] = '<a href="#" rel="draft" id="'.$row['id'].'"><img src="'.$settings['web_root'].'images/icons/next.png" width="16" height="16" alt="Draft Player" title="Draft Player" /></a>';
+					} else {
+						$newRow[$field] = '- -';
+					}
+				}
+				break;
+			case 'player_name':
+
+				$name = $row['first_name']." ".$row['last_name'];
+				if (isset($row['player_id'])) 
+				{
+					$val = anchor('/players/profile/' . $row['player_id'],$name,array('target'=>'_blank'));
+				}
+				else 
+				{
+					$val = $name;
+				}
+				$newRow[$field] = $val;
+				break;
+			case 'teamname':
+				
+				$name = $row['teamname']." ".$row['teamnick'];
+				if (isset($row['team_id'])) 
+				{
+					$val = anchor('/teams/' . $row['team_id'],$name,array('target'=>'_blank'));
+				}
+				else 
+				{
+					$val = $name;
+				}
+				$newRow[$field] = $val;
+				break;
+		}
+		// DEBUGGING
+		if ($debug) {
+			echo($field." = ".$newRow[$field]."<br />");
+		}
+		return $newRow[$field];
+	}
+		
 	//--------------------------------------------------------------------
 	// !PRIVATE METHODS
 	//--------------------------------------------------------------------
-
-	protected static function format_extended_fields($player_stats = array(), $fields = array(), $league_id = 100)
-	{
-		$count = 10;
-		$newStats = array();
-		foreach($player_stats as $row) {
-			$newRow = array();
-			foreach ($fields as $col) {
-				if (isset($row[$col]) && !empty($row[$col])) {
-					$newRow['id'] = $id = $row['id'];
-					switch ($col) 
-					{
-						case 'add':
-							if ($fields['showTrans'] === true)
-							{
-								$newRow[$col] = '<a href="#" rel="itemPick" id="'.$row['id'].'"><img src="'.$fields['web_root'].'images/icons/add.png" width="16" height="16" alt="Add" title="Add" /></td>';
-							}
-							break;
-						case 'draft':
-							if ($fields['showDraft'] === true) {
-								if (($fields['pick_team_id'] == $fields['user_team_id'] && ($fields['draftStatus'] >= 2 && $fields['draftStatus'] < 4)) || (($fields['accessLevel'] == ACCESS_ADMINISTRATE || $fields['isCommish']) && ($fields['draftDate'] != EMPTY_DATE_TIME_STR && time() > strtotime($fields['draftDate'])))) {
-									$newRow[$col] = '<a href="#" rel="draft" id="'.$row['id'].'"><img src="'.$fields['web_root'].'images/icons/next.png" width="16" height="16" alt="Draft Player" title="Draft Player" /></a>';
-								} else {
-									$newRow[$col] = '- -';
-								}
-							}
-							break;
-						case 'player_name':
-
-							if ($fields['statsOnly'] === false)
-							{
-								$link = '/players/profile/';
-								if (isset($league_id) && !empty($league_id) && $league_id != -1) {
-									$link .= 'player_id/'.$id.'/league_id/'.$league_id;
-								} else {
-									$link .= $id;
-								}
-								$val = anchor($link,$row['first_name']." ".$row['last_name'],array('target'=>'_blank')).' <span style="font-size:smaller;">'.makeElidgibilityString($row['positions']).'</span>';
-
-								// INJURY STATUS
-								$injStatus = "";
-								if ($row['injury_is_injured'] == 1) {
-									$injStatus = makeInjuryStatusString($row);
-								}
-								if (!empty($injStatus)){
-									if (isset($row['injury_dl_left']) && $row['injury_dl_left'] > 0) {
-										$val .= '&nbsp;<img src="'.$fields['web_root'].'images/icons/red_cross.gif" width="7" height="7" align="absmiddle" alt="'.$injStatus.'" title="'.$injStatus.'" />&nbsp; ';
-									} else if (isset($row['injury_dtd_injury']) && $row['injury_dtd_injury'] != 0) {
-										$val .= '&nbsp;<acronym style="font-size:smaller;text-decoration:none, outline:none;font-weight:bold; color:#C00;" title="'.$injStatus.'">DTD</acronym>';
-									}
-								}
-								if (isset($row['on_waivers']) && $row['on_waivers'] == 1) {
-									$val .= '&nbsp;<b style="color:#ff6600;">W</b>&nbsp; ';
-								}
-								$newRow[$col] = $val;
-							} else {
-								$newRow[$col] = $row[$col];
-								if (isset($row['on_waivers']) && $row['on_waivers'] == 1) {
-									$newRow['on_waivers'] = 1;
-								}
-								if (isset($row['injury_dl_left']) && $row['injury_dl_left'] > 0) {
-									$newRow['injury_dl_left'] = $row['injury_dl_left'];
-								}
-								if (isset($row['injury_left']) && $row['injury_left'] > 0) {
-									$newRow['injury_left'] = $row['injury_left'];
-								}
-								if (isset($row['injury_id'])) {
-									$newRow['injury_id'] = $row['injury_id'];
-								}
-								if (isset($row['injury_is_injured'])) {
-									$newRow['injury_is_injured'] = $row['injury_is_injured'];
-								}
-								if (isset($row['injury_career_ending'])) {
-									$newRow['injury_career_ending'] = $row['injury_career_ending'];
-								}
-								if (isset($row['injury_dtd_injury'])) {
-									$newRow['injury_dtd_injury'] = $row['injury_dtd_injury'];
-								}
-							}
-							break;
-						case 'teamname':
-							if ($fields['statsOnly'] === false) {
-								if ($league_id != -1) {
-										if (isset($player_teams[$id])) {
-										$team_obj = $fields['team_list'][$player_teams[$id]];
-										$val = anchor('/team/info/'.$player_teams[$id],$team_obj['teamname']." ".$team_obj['teamnick'])."</td>";
-									} else {
-										$val = "Free Agent";
-									}
-								} else {
-									$val = '';
-								}
-								$newRow[$col] = $val;
-							}
-							break;
-						
-					}
-					// DEBUGGING
-					if ($count < 5) {
-						if (isset($newRow[$col])) {
-							echo($col." = ".$newRow[$col]."<br />");
-						}
-					}
-				} else {
-					$newRow[$col] = 0;
-				}
-			} // END foreach
-			array_push($newStats, $newRow);
-			$count++;
-		} // END foreach
-		return $newStats;
-	}
+	
 	//--------------------------------------------------------------------
 	
 	/**
@@ -822,7 +805,7 @@ class Stats
         }
 
         // GROUPING FOR SUM AND AVG
-        if (!empty($params['total'])) {
+        if (isset($params['total']) && $params['total'] == 1) {
 			if (!empty($identifier['team'])) 
 			{
 				$query .= " GROUP BY ".$_table_def[$type][$stat_scope].'.'.$identifier['team'];
@@ -896,7 +879,7 @@ class Stats
 	/**
 	 *	Build Stats Query.
 	 *	Accepts the player type ans stats class (and custom field defs) and builds a SQL query.
-	 *	@param		$stat_type	int			1 = Batter, All Else = Pitcher
+	 *	@param		$stat_type		int			1 = Batter, All Else = Pitcher
 	 *	@param		$stats			Array		An array of stats fields to include in the query
 	 *	@param		$rules			Array		An array of rules for fantasy points calculation
 	 *	@param		$operator		int			FALSE = SUM, any other value = AVG

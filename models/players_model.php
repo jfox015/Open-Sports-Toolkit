@@ -972,24 +972,33 @@ class Players_model extends Base_ootp_model {
 			Stats::init('baseball','ootp13');
 		}
 		$stats = array();
+		$fields = array();
 		$sql = Stats::get_player_stats($player_id, $stats_type, $stats_class, $stats_scope, $params);
 
-        $query = $this->db->query($sql);
-        if ($query->num_rows() > 0)
-        {
-            $stats = $query->result_array();
-        }
-        $query->free_result();
-		
-		$stats = Stats::format_stats_for_display($stats, $stats_class);
-		
-		return $stats;
+		if ($debug === true)
+		{
+			return $sql;
+		}
+		else 
+		{
+			$query = $this->db->query($sql);
+			if ($query->num_rows() > 0)
+			{
+				$stats = $query->result_array();
+				$fields = $query->list_fields();
+			}
+			$query->free_result();
+			
+			$stats = Stats::format_stats_for_display($stats, Stats::get_stats_fields($stats_type, $stats_class));
+			
+			return $stats;
+		}
 	}
 	
 	//---------------------------------------------------------------
 	
 	public function get_players_stats($player_ids = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $stats_scope = STATS_SEASON, $params = array())
-	{
+	{	
 		if ($player_ids === false)
 		{
 			$this->error = "An array of player id values was not received.";
@@ -1000,19 +1009,28 @@ class Players_model extends Base_ootp_model {
 		{
 			Stats::init('baseball','ootp13');
 		}
-		
+		$stats = array();
+		$fields = array();
 		$query = Stats::get_players_stats($player_ids, $stats_type, $stats_class, $stats_scope, $params);
 
-        $query = $this->db->query($sql);
-        if ($query->num_rows() > 0)
-        {
-            $stats = $query->result_array();
-        }
-        $query->free_result();
-		
-		$stats = Stats::format_stats_for_display($stats, $stats_class);
-		
-		return $stats;
+		if ($debug === true)
+		{
+			return $sql;
+		}
+		else 
+		{
+			$query = $this->db->query($sql);
+			if ($query->num_rows() > 0)
+			{
+				$stats = $query->result_array();
+				$fields = $query->list_fields();
+			}
+			$query->free_result();
+			
+			$stats = Stats::format_stats_for_display($stats, Stats::get_stats_fields($stats_type, $stats_class));
+			
+			return $stats;
+		}
 	}	
 
 	//---------------------------------------------------------------

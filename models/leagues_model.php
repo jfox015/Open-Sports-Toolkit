@@ -218,9 +218,10 @@ class Leagues_model extends Base_ootp_model
 			Stats::init('baseball','ootp13');
 		}
 		$stats = array();
-		$sql = Stats::get_team_stats($league_id, $stats_type, $stats_class, $stats_scope, $params);
+		$fields = array();
+		$sql = Stats::get_league_stats($league_id, $stats_type, $stats_class, $stats_scope, $params);
 
-		if (isset($params['get_sql']) && $params['get_sql'] === true)
+		if ($debug === true)
 		{
 			return $sql;
 		}
@@ -230,10 +231,11 @@ class Leagues_model extends Base_ootp_model
 			if ($query->num_rows() > 0)
 			{
 				$stats = $query->result_array();
+				$fields = $query->list_fields();
 			}
 			$query->free_result();
 			
-			$stats = Stats::format_stats_for_display($stats, $stats_class);
+			$stats = Stats::format_stats_for_display($stats, Stats::get_stats_fields($stats_type, $stats_class));
 			
 			return $stats;
 		}

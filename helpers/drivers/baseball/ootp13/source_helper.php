@@ -170,8 +170,8 @@ if(!function_exists('field_map'))
 				array(
 					"FN"	=>array('field' => "players.first_name"),
 					"LN"	=>array('field' => "players.last_name"),
-					"TN"	=>array('field' => "teamname", 'formula' => 'teams.name + " " + teams.nickname as teamname'),
-					"PN"	=>array('field' => "player_name", 'formula' => 'players.first_name + " " + players.last_name as player_name'),
+					"TN"	=>array('field' => "teamname", 'formula' => 'teams.name as teamname, teams.nickname as teamnick'),
+					"PN"	=>array('field' => "player_name", 'formula' => 'players.first_name, players.last_name'),
 					"AGE"	=>array('field' => "players.age"),
 					"POS"	=>array('field' => "position", 'formula' => 'if(players.position=1, players.role, players.position) as position'),
 					"ROLE"=>array('field' => "players.role"),
