@@ -11,25 +11,6 @@
  */
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('getInjuryName')) {
-	function getInjuryName($injuryId = false) {
-	  	if ($injuryId === false) {
-	        return false;
-	    }
-	    $ci =& get_instance();
-	  	$injuryName = '';
-		$query = $ci->db->query('SELECT injury_text FROM list_injuries WHERE id = '.$injuryId);
-		if ($query->num_rows() > 0) {
-			$row = $query->row();
-			$injuryName = $row->injury_text;
-		} // END if
-		$query->free_result();
-		
-	    return $injuryName;
-	} // END function
-} // END if
-// ------------------------------------------------------------------------
-
 if ( ! function_exists('getDaysInBetween')) {
 	function getDaysInBetween($start, $end) {
 		// Vars
@@ -173,6 +154,34 @@ if ( ! function_exists('loadTimezones')) {
 	}
 }
 // ------------------------------------------------------------------------
+/**
+ *	@deprecated
+ *	use open sports toolkit S.A.L. to ping for injuries
+ */
+if ( ! function_exists('getInjuryName')) {
+	function getInjuryName($injuryId = false) {
+	  	if ($injuryId === false) {
+	        return false;
+	    }
+	    $ci =& get_instance();
+	  	$injuryName = '';
+		$query = $ci->db->query('SELECT injury_text FROM list_injuries WHERE id = '.$injuryId);
+		if ($query->num_rows() > 0) {
+			$row = $query->row();
+			$injuryName = $row->injury_text;
+		} // END if
+		$query->free_result();
+		
+	    return $injuryName;
+	} // END function
+} // END if
+
+// ------------------------------------------------------------------------
+
+/**
+ *	@deprecated
+ *	@see	version_map()
+ */
 if ( ! function_exists('loadOOTPVersions')) {
 	function loadOOTPVersions($selectBox = true) {
 
@@ -187,7 +196,12 @@ if ( ! function_exists('loadOOTPVersions')) {
 	}
 }
 // ------------------------------------------------------------------------
-if ( ! function_exists('getOOTPGameVersion')) {
+
+/**
+ *	@deprecated
+ *	@see	version_map()
+ */
+ if ( ! function_exists('getOOTPGameVersion')) {
 	function getOOTPGameVersion($version = -1) {
 		
 		$outVer = -1;

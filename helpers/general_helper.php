@@ -10,6 +10,74 @@
  */
 
 /**
+ *	SPORT MAP.
+ *	This function returns an array that maps the specific stats categories to source specific
+ *	field values such as Index IDs and DB/endpoint fields.
+ *
+ *	@return		Array	Data field source values for offense, defense and specilty fields
+ */
+if(!function_exists('sports_map')) 
+{
+	function sports_map() 
+	{
+		$map = array(
+			0 		=> 'baseball',
+			1		=> 'football',
+			2		=> 'backetball',
+			3		=> 'hockey',
+			4		=> 'soccer'
+		);
+		return $map;
+	}
+}
+/**
+ *	SOURCE MAP.
+ *	This function returns an array that maps the specific stats categories to source specific
+ *	field values such as Index IDs and DB/endpoint fields.
+ *
+ *	@return		Array	Data field source values for offense, defense and specilty fields
+ */
+if(!function_exists('source_map')) 
+{
+	function source_map() 
+	{
+		$map = array(
+			0 => array(
+				'ootp'=>"Out of the Park Baseball (OOTP)"
+			),
+			1 => array(
+				'phpffl' => 'PHP Fantasy Football League Manager'
+			)
+		);
+		return $map;
+	}
+}
+/**
+ *	SOURCE VERSION MAP.
+ *	This function returns an array that maps the specific stats categories to source specific
+ *	field values such as Index IDs and DB/endpoint fields.
+ *
+ *	@return		Array	Data field source values for offense, defense and specilty fields
+ */
+if(!function_exists('source_version_map')) 
+{
+	function source_version_map() 
+	{
+		$map = array(
+			"ootp" => array(
+				'13'=>"OOTP 13",
+				'12'=>"OOTP 12",
+				'11'=>"OOTP 11",
+				'10'=>"OOTP 10"
+			),
+			"phpffl" => array(
+				'1' => 'phpFFL 1.23'
+			)
+		);
+		return $map;
+	}
+}
+/**
  *	MAKE INJURY STATUS STRING
  *
  *	Converts standard OOTP injury data (found in the player profile data object and injuries
@@ -238,18 +306,27 @@ function get_pitch_rating($pitch,$ir,$gb,$mvmnt,$velo)
 if (!function_exists('get_asset_path')) {
 	function get_asset_path($settings) {
 		// SET UP CUSTOM ASSET PATHS
-		$league_logo_path = $team_logo_path = $players_img_path = $player_profile_img_path = $settings['ootp.asset_url'].'images/';
-		if (intval($settings['ootp.game_version']) >= 13) {
+		$league_logo_path = $team_logo_path = $players_img_path = $player_profile_img_path = $settings['ootp.asset_path'].'images/';
+		$league_logo_url = $team_logo_url = $players_img_url = $player_profile_img_url = $settings['ootp.asset_url'].'images/';
+		if ($settings['osp.game_source'] == 'ootp' && intval($settings['osp.source_version']) >= 13) {
 			$league_logo_path .= 'league_logos/';
 			$team_logo_path .= 'team_logos/';
 			$players_img_path .= 'person_pictures/';
 			$player_profile_img_path .= 'profile_pictures/';
+            $league_logo_url .= 'league_logos/';
+			$team_logo_url .= 'team_logos/';
+			$players_img_url .= 'person_pictures/';
+			$player_profile_img_url .= 'profile_pictures/';
 		}
+		$settings['ootp.team_logo_url'] = $team_logo_url;
+		$settings['ootp.league_logo_url'] = $league_logo_url;
+		$settings['ootp.players_img_url'] = $players_img_url;
+		$settings['ootp.player_profile_img_url'] = $player_profile_img_url;
 		$settings['ootp.team_logo_path'] = $team_logo_path;
 		$settings['ootp.league_logo_path'] = $league_logo_path;
 		$settings['ootp.players_img_path'] = $players_img_path;
 		$settings['ootp.player_profile_img_path'] = $player_profile_img_path;
-		
+
 		return $settings;
 	}
 }
@@ -265,23 +342,17 @@ if (!function_exists('get_asset_path')) {
 if (!function_exists('format_time')) {
 	function format_time($inTime = false, $settings = false) {
 		$time = 0;
-		// SET UP CUSTOM ASSET PATHS
-		if (intval($settings['ootp.game_version']) >= 13) {
-			
+		$timestr = strval($inTime);
+		$hour = intval(substr($timestr, 0, 2));
+		$minutes = substr($timestr, 2, 2);
+		if ($hour > 12) {
+			$meridian = "pm";
+			$hour = $hour - 12;
+		} else {
+			$meridian = "am";
 		}
-		else 
-		{
-			$timestr = strval($inTime);
-			$hour = intval(substr($timestr, 0, 2));
-			$minutes = substr($timestr, 2, 2);
-			if ($hour > 12) {
-				$meridian = "pm";
-				$hour = $hour - 12;
-			} else {
-				$meridian = "am";
-			}
-			$time = $hour. ":".$minutes." ".$meridian;
-		}
+		$time = $hour. ":".$minutes." ".$meridian;
+		//}
 		return $time;
 	}
 }

@@ -7,7 +7,7 @@
 			<tr>
 				<?php 
 				foreach ($headers as $header) :
-					echo (' <th class="headline">'.lang($header."acyn").'</th> '."\n");
+					echo (' <th class="headline">'.lang("acyn_".$header).'</th> '."\n");
 				endforeach;
 				?>
 			</tr>

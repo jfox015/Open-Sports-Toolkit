@@ -43,22 +43,7 @@ class Stats
 	 * @var string
 	 */
 	private static $driver_library		= 'helpers/stats_drivers/';
-
-	/**
-	 * The names of the sports supported by the class.
-	 *
-	 * @access public
-	 *
-	 * @var array
-	 */
-	public static $sports 	= array(
-										0 		=> 'baseball',
-										1		=> 'football',
-										2		=> 'backetball',
-										3		=> 'hockey',
-										4		=> 'soccer'
-									);
-									
+								
 	/**
 	 * The sport and data source specific stats listing.
 	 *
@@ -480,30 +465,33 @@ class Stats
 	
 	//--------------------------------------------------------------------
 	
-	public function get_stats_fields($stat_type = '', $fields = array()) {
+	public function get_stats_fields($stat_type = '', $fields = array(), $statField = 'field') {
 		$stat_fields = array();
 		$stat_list = self::$stat_list;
 		foreach($fields as $field) {
 			$val = '';
 			$cat = '';
-			if (isset($stat_list['general'][$field]['field']))
+			if (isset($stat_list['general'][$field][$statField]))
 			{
-				$cat = $stat_list['general'][$field]['field'];
+				$cat = $stat_list['general'][$field][$statField];
 			} 
-			else if (isset($stat_list[$stat_type][$field]['field'])) 
+			else if (isset($stat_list[$stat_type][$field][$statField])) 
 			{
-				$cat = $stat_list[$stat_type][$field]['field'];
+				$cat = $stat_list[$stat_type][$field][$statField];
 			} 
 			else 
 			{
 				$cat = $field;
-			}
-			if (strstr($cat, ".") !== false) {
+			} // END if
+			if (strstr($cat, ".") !== false) 
+			{
 				$tmpCat = explode(".",$cat);
 				$val = $tmpCat[1];
-			} else {
+			} 
+			else 
+			{
 				$val = $cat;
-			}
+			} // END if
 			array_push($stat_fields, $val);
 		}
 		return $stat_fields;
@@ -743,7 +731,7 @@ class Stats
                 $type = "offense";
                 break;
         }
-        $query = self::build_stats_query($type, $stats_class, self::$stat_list, $scope);
+        $query = self::build_stats_select($type, $stats_class, self::$stat_list, $scope);
 
 		$tbl = $_table_def[$type][$stat_scope];
         $query .= " FROM ".$tbl;
@@ -886,7 +874,7 @@ class Stats
 	 *	@return						String		SQL Query String
 	 */
 
-	private static function build_stats_query($stat_type = '', $categories = array(), $stat_list = array(), $scope = STATS_CAREER)
+	private static function build_stats_select($stat_type = '', $categories = array(), $stat_list = array(), $scope = STATS_CAREER)
 	{
 		// ERROR HANDLING
 		if ((!is_array($categories) || count($categories) == 0) || (!is_array($stat_list) || count($stat_list) == 0))
