@@ -33,9 +33,11 @@ if(!function_exists('sports_map'))
 /**
  *	SOURCE MAP.
  *	This function returns an array that maps the specific stats categories to source specific
- *	field values such as Index IDs and DB/endpoint fields.
+ *	field values such as Index IDs and DB/endpoint fields. Map index numbers correspond to 
+ *	sport index numbers in sports_map().
  *
  *	@return		Array	Data field source values for offense, defense and specilty fields
+ *	@see				open_sports_toolkit::general_helper->sports_map()
  */
 if(!function_exists('source_map')) 
 {
@@ -306,8 +308,8 @@ function get_pitch_rating($pitch,$ir,$gb,$mvmnt,$velo)
 if (!function_exists('get_asset_path')) {
 	function get_asset_path($settings) {
 		// SET UP CUSTOM ASSET PATHS
-		$league_logo_path = $team_logo_path = $players_img_path = $player_profile_img_path = $settings['ootp.asset_path'].'images/';
-		$league_logo_url = $team_logo_url = $players_img_url = $player_profile_img_url = $settings['ootp.asset_url'].'images/';
+		$league_logo_path = $team_logo_path = $players_img_path = $player_profile_img_path = $settings['osp.asset_path'].'images/';
+		$league_logo_url = $team_logo_url = $players_img_url = $player_profile_img_url = $settings['osp.asset_url'].'images/';
 		if ($settings['osp.game_source'] == 'ootp' && intval($settings['osp.source_version']) >= 13) {
 			$league_logo_path .= 'league_logos/';
 			$team_logo_path .= 'team_logos/';
@@ -318,14 +320,14 @@ if (!function_exists('get_asset_path')) {
 			$players_img_url .= 'person_pictures/';
 			$player_profile_img_url .= 'profile_pictures/';
 		}
-		$settings['ootp.team_logo_url'] = $team_logo_url;
-		$settings['ootp.league_logo_url'] = $league_logo_url;
-		$settings['ootp.players_img_url'] = $players_img_url;
-		$settings['ootp.player_profile_img_url'] = $player_profile_img_url;
-		$settings['ootp.team_logo_path'] = $team_logo_path;
-		$settings['ootp.league_logo_path'] = $league_logo_path;
-		$settings['ootp.players_img_path'] = $players_img_path;
-		$settings['ootp.player_profile_img_path'] = $player_profile_img_path;
+		$settings['osp.team_logo_url'] = $team_logo_url;
+		$settings['osp.league_logo_url'] = $league_logo_url;
+		$settings['osp.players_img_url'] = $players_img_url;
+		$settings['osp.player_profile_img_url'] = $player_profile_img_url;
+		$settings['osp.team_logo_path'] = $team_logo_path;
+		$settings['osp.league_logo_path'] = $league_logo_path;
+		$settings['osp.players_img_path'] = $players_img_path;
+		$settings['osp.player_profile_img_path'] = $player_profile_img_path;
 
 		return $settings;
 	}

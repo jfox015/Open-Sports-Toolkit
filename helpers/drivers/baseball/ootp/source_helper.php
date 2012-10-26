@@ -85,22 +85,22 @@ if(!function_exists('get_split'))
 	function get_split($split_cat = SPLIT_SEASON, $tbl = '') 
 	{
 		$split_sql = '';
-		if (!empty($tbl)) { $split_sql = $tbl.'.'; }
 		switch ($split_cat) 
 		{
 			case SPLIT_SEASON:
-				$split_sql .= 'split_id = 1';
+				$split_sql = 'split_id = 1';
 				break;
 			case SPLIT_PRESEASOM:
-				$split_sql .= 'split_id = 2';
+				$split_sql = 'split_id = 2';
 				break;
 			case SPLIT_PLAYOFFS:
-				$split_sql .= 'split_id = 3';
+				$split_sql = 'split_id = 21';
 				break;
 			case SPLIT_NONE:
 			default:
 				break;
 		}
+		if (!empty($tbl) && !empty($split_sql)) { $split_sql = $tbl.'.'.$split_sql; }
 		return $split_sql;
 	}
 }
@@ -146,7 +146,8 @@ if(!function_exists('table_map'))
                 STATS_SEASON_AVG => 'players'
 			),
 			'team'=>'teams',
-			'players'=>'players'
+			'players'=>'players',
+			'games'=>'games'
 		);
         return $fields;
 	}

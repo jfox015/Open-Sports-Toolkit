@@ -1,15 +1,16 @@
 # Open Sports Toolkit
 
-Formerly know as the _OOTP Web Toolkit_, this module is a collection of standard helpers, data models, classes, views and language files for sports mod developers to use as a starting point to build dynamic sports based, data driven  web sites and tools.
+Formerly know as the _OOTP Web Toolkit_, the Open Sports Toolkit (OST) is a collection of standard helpers, data models, classes, views and language files for sports mod developers to use as a starting point to build dynamic sports based, data driven  web sites and tools.
 
 ## Features
 
-- Abstract sports statistics generation and display system. You specify the sport and source and the system gets the stats.
-- Standard stats library API for adding additional sports and data sources.
+- Abstract sports statistics generation and display API. You specify the sport and source and OST gets the stats.
+- Stats Abstraction Library API for adding additional sports and data sources.
 - Standardized data models for working with statstic and meta based data sources
-- Helper functions library that serves as specific drivers for selected data sources
+- Helper functions library that serves as specific drivers for sports data sources
 - Standard langauge files and translations
-- General Twitter Bootsrap ready display views
+- Basic Stats Table View
+- Twitter Bootsrap integration
 
 ## Keep Current on the Mod
 

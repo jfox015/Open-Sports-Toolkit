@@ -109,7 +109,8 @@ class Stats
 	//--------------------------------------------------------------------
 
     /**
-     * Load the assets config file, and inserts the base
+     * Init().
+	 * Load the assets config file, and inserts the base
      * css and js into our array for later use. This ensures
      * that these files will be processed first, in the order
      * the user is expecting, prior to and later-added files.
@@ -124,7 +125,11 @@ class Stats
 	{
         if ($sport !== false)
         {
-            self::$sport = $sport;
+			if (!function_exists('sports_map')) {
+				self::$ci->load->helper('open_sports_toolkit/general');
+			}
+			$sports = sports_map();
+			self::$sport = $sports[$sport];
 			self::load_sport_helper();
 			self::$ci->lang->load('open_sports_toolkit/'.self::$sport.'_acyn');
 			self::$ci->lang->load('open_sports_toolkit/'.self::$sport.'_full');
@@ -161,7 +166,7 @@ class Stats
      * @param array $params		        Array of arguments in (key => value) format
      * @return array|bool		        Array of stats
      */
-	public static function get_league_stats($league_id = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $stat_scope = STATS_CAREER, $params = array())
+	public static function get_league_stats($league_id = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $stat_scope = STATS_CAREER, $range = RANGE_SEASON, $params = array())
 	{
 		if ($league_id === false)
 		{
@@ -184,7 +189,7 @@ class Stats
 			$params['where'] = $where;
 		}
 
-        $stats = self::_get_stats_query($stats_type, $stats_class, $stat_scope, $params);
+        $stats = self::_get_stats_query($stats_type, $stats_class, $stat_scope, $range, $params);
         return $stats;
 	}
 
@@ -202,7 +207,7 @@ class Stats
      * @param array $params		        Array of arguments in (key => value) format
      * @return array|bool		        Array of stats
      */
-    public static function get_team_stats($team_id = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $stat_scope = STATS_CAREER, $params = array())
+    public static function get_team_stats($team_id = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $stat_scope = STATS_CAREER, $range = RANGE_SEASON, $params = array())
 	{
 		if ($team_id === false)
 		{
@@ -224,7 +229,7 @@ class Stats
 			$params['where'] = $where;
 		}
 
-        $stats = self::_get_stats_query($stats_type, $stats_class, $stat_scope, $params);
+        $stats = self::_get_stats_query($stats_type, $stats_class, $stat_scope, $range, $params);
         return $stats;
 	}
 
@@ -242,7 +247,7 @@ class Stats
      * @param array $params		        Array of arguments in (key => value) format
      * @return array|bool		        Array of stats
      */
-    public static function get_player_stats($player_id = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $stat_scope = STATS_CAREER, $params = array())
+    public static function get_player_stats($player_id = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $stat_scope = STATS_CAREER, $range = RANGE_SEASON, $params = array())
     {
         if ($player_id === false)
         {
@@ -274,7 +279,7 @@ class Stats
 		}
 
 
-        $stats = self::_get_stats_query($stats_type, $stats_class, $stat_scope, $params);
+        $stats = self::_get_stats_query($stats_type, $stats_class, $stat_scope, $range, $params);
         return $stats;
     }
 
@@ -292,7 +297,7 @@ class Stats
      * @param array 	$params		        Array of arguments in (key => value) format
      * @return 	array|bool		        	Array of stats
      */
-    public static function get_players_stats($player_ids = array(), $stats_type = TYPE_OFFENSE, $stats_class = array(), $stat_scope = STATS_CAREER, $params = array())
+    public static function get_players_stats($player_ids = array(), $stats_type = TYPE_OFFENSE, $stats_class = array(), $stat_scope = STATS_CAREER, $range = RANGE_SEASON, $params = array())
 	{
 		// Error handling
 		if (!isset($player_ids) || !is_array($player_ids) || count($player_ids) == 0)
@@ -327,7 +332,7 @@ class Stats
 		$params['where_in'] = $where_in;
 		$params['where_not_in'] = $where_not_in;
 
-		$stats = self::_get_stats_query($stats_type, $stats_class, $stat_scope, $params);
+		$stats = self::_get_stats_query($stats_type, $stats_class, $stat_scope, $range, $params);
 		return $stats;
 	}
 
@@ -465,7 +470,17 @@ class Stats
 	
 	//--------------------------------------------------------------------
 	
-	public function get_stats_fields($stat_type = '', $fields = array(), $statField = 'field') {
+	/**
+     * Get Stats Fields.
+     * Returns the value of a meta field value for the stat type and categories passed.
+     *
+     * @static
+     * @param 	string 		$stat_type		Stats category type (TYPE_OFFENSE.TYPE_DEFENSE.TYPE_SPECIALTY.TYPE_INJURY,TYPE_TEAM)
+     * @param 	Array 		$fields			Array of Stat categories (usually derived from sport_helper::tats_class())
+     * @param 	string 		$statField		field, formula or lang
+	 * @return 	Array         				List of stats field meta values
+     */
+    public function get_stats_fields($stat_type = '', $fields = array(), $statField = 'field') {
 		$stat_fields = array();
 		$stat_list = self::$stat_list;
 		foreach($fields as $field) {
@@ -597,7 +612,22 @@ class Stats
 	
 	//--------------------------------------------------------------------
 	
-	public static function format_extended_fields($field = false, $row = false, $settings = false, $league_id = 100, $debug = false)
+	/**
+     * Format Extended Fields.
+     * Formats specialty stats fields for display. These fields have some extra formatting beyond numbers so they are segmented off.
+	 * This can also help extendability for future modules.
+     *
+     * @static
+     * @param 	string 		$field			Field name
+     * @param 	Array 		$row			Array of row information
+     * @param 	Array 		$settings		OSP Settings object
+     * @param 	Int 		$league_id		(Optional) League ID, defaults to 100
+     * @param 	Boolean 	$debug			TRUE to enable debug messaging, FALSE to disable
+	 * @return 	String         				Modified single field of stats values
+	 *
+	 * @since 	0.3
+     */
+    public static function format_extended_fields($field = false, $row = false, $settings = false, $league_id = 100, $debug = false)
 	{
 		$newRow = array();
 		switch ($field) 
@@ -688,7 +718,7 @@ class Stats
 	//--------------------------------------------------------------------
 	
 	/**
-	 *	Get Stats Class.
+	 *	Get Stats Query.
 	 *	Accepts the player type ans stats class (and custom field defs) and builds a SQL query.
 	 *	@param		$stat_type	int			1 = Batter, All Else = Pitcher
 	 *	@param		$stats_class	int			The class of stats to use
@@ -698,19 +728,24 @@ class Stats
      * Get Stats Class.
      * Accepts the player type ans stats class (and custom field defs) and builds a SQL query.
      * @static
-     * @param int $stats_type           Stats Type (offense, defense, specialty, injury)
-     * @param int $stats_class          Stats Class definition
-     * @param int $stat_scope           Scope of stats to return
-     * @param array $params
+	 * @access	private
+     * @param 	int $stats_type           Stats Type (offense, defense, specialty, injury)
+     * @param 	int $stats_class          Stats Class definition
+     * @param 	int $stat_scope           Scope of stats to return
+     * @param 	array $params
      * @return  array|string
      */
-	private static function _get_stats_query($stats_type = TYPE_OFFENSE, $stats_class = array(), $stat_scope = STATS_CAREER, $params = array())
+	private static function _get_stats_query($stats_type = TYPE_OFFENSE, $stats_class = array(), $stat_scope = STATS_CAREER, $range = RANGE_SEASON, $params = array())
 	{
         $scope = STATS_CAREER;
         if (isset($params['scope']) && !empty($params['scope']) && $params['scope'] != STATS_CAREER)
         {
             $scope = $params['scope'];
         }
+		// Fail safe to prevent SQL errors when using game list for range
+		if ($range == RANGE_GAME_ID_LIST && $scope != STATS_GAME) {
+			$scope = STATS_GAME;
+		}
         //$class_def = stats_class($stats_type, $stats_class);
         
 		$_table_def = table_map();
@@ -739,9 +774,13 @@ class Stats
 		// JOIN IN THE PLAYERS TABLE FOR META INFORMATION ACCESS
 		$identifier = identifier_map();
 		$query .= " RIGHT OUTER JOIN ".$_table_def['players']." ON ".$_table_def['players'].".".$identifier['player']." = ".$tbl.".".$identifier['player'];
-		$query .= " RIGHT OUTER JOIN ".$_table_def['team']." ON ".$_table_def['team'].".".$identifier['team']." = ".$tbl.".".$identifier['team'];
 		
-		
+		if (!empty($identifier['team']) && !isset($params['total'])) {
+			$query .= " RIGHT OUTER JOIN ".$_table_def['team']." ON ".$_table_def['team'].".".$identifier['team']." = ".$tbl.".".$identifier['team'];
+		}
+		if ($range == RANGE_GAME_ID_LIST && $scope == STATS_GAME) {
+			$query .= " LEFT JOIN ".$_table_def['games']." ON ".$_table_def['games'].".".$identifier['game']." = ".$tbl.".".$identifier['game'];
+		}
         // WHERE CLAUSES
         $id_field = '';
         $where_str = ' WHERE ';
@@ -769,6 +808,42 @@ class Stats
             $where_str .= $_table_def['players'].".".where_clause_offense();
 		}
 		
+		// DATA RANGE
+		switch ($range) {
+			case RANGE_SEASON:
+				if (isset($params['season']) && !empty($params['season'])) {
+					if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
+					$where_str .= $_table_def[$type][$stat_scope].".year = ".$params['season'];
+				}
+				break;
+			case RANGE_GAME_ID_LIST:
+				if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
+            $where_str .= self::id_array_to_where($params['id_list'], $_table_def[$type][$stat_scope], $identifier['game']);
+				break;
+			case RANGE_DATE_LIST:
+				if (isset($params['season']) && !empty($params['season']) && isset($params['offset']) && !empty($params['offset'])) {
+					if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
+					$where_str .= "DATEDIFF('".$params['season']."',games.date)<=0";
+					$where_str .= "DATEDIFF('".$params['season']."',games.date)>-".$params['offset'];
+				}
+				break;
+			case RANGE_TEAM_LIST:
+				if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
+				$where_str .= self::id_array_to_where($params['id_list'], $_table_def[$type][$stat_scope], $identifier['team']);
+				break;
+			case RANGE_PLAYER_LIST:
+				if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
+				$where_str .= self::id_array_to_where($params['id_list'], $_table_def[$type][$stat_scope], $identifier['player']);
+				break;
+			case RANGE_LEAGUE_LIST:
+				if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
+				$where_str .= self::id_array_to_where($params['id_list'], $_table_def[$type][$stat_scope], $identifier['league']);
+				break;
+			case RANGE_CAREER:
+			default:
+				break;
+		} // END switch
+		
 		// SPLITS
         if (!isset($params['split']) || empty($params['split']))
         {
@@ -776,8 +851,11 @@ class Stats
 		}
 		if (isset($params['split']) || !empty($params['split']))
 		{
-            if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
-            $where_str .= get_split($params['split'], $tbl);
+            $split = get_split($params['split'], $tbl);
+            if (!empty($split)) {
+				if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
+				$where_str .= $split;
+			}
         }
 		
         $query .= $where_str;
@@ -820,10 +898,24 @@ class Stats
                 $query.="LIMIT ".$params['offset'].", ".$params['limit'];
             }
         }
+		//echo ("query = ".$query."<br /><br />");
         return $query;
 
 	}	
 	
+	private function id_array_to_where($id_list = false, $table = '', $field = '') {
+		
+		$idStr = '';
+		if ($id_list !== false && is_array($id_list) && count($id_list)) 
+		{
+			foreach ($id_list as $id) 
+			{
+				if (!empty($idStr)) { $idStr .= ' OR '; }
+				$idStr .= $table.'.'.$field. ' = '.$id;
+			} // END foreach
+		} // END if
+		return "(".$idStr.")";
+	}
 	//---------------------------------------------------------------
 
     /**
@@ -831,9 +923,10 @@ class Stats
      * Returns a list of extended information fields that accompany stats. These are divided into groups or can be queried
      * together (group = all).
      * @static
-     * @param int $stat_type    Stat Type
-     * @param bool $group       Field Group type
-     * @return array            Field List Array
+	 * @access	private
+     * @param 	int $stat_type    Stat Type
+     * @param 	bool $group       Field Group type
+     * @return 	array            Field List Array
      */
 	private static function get_extended_fields($group = false) 
 	{
@@ -867,7 +960,9 @@ class Stats
 	/**
 	 *	Build Stats Query.
 	 *	Accepts the player type ans stats class (and custom field defs) and builds a SQL query.
-	 *	@param		$stat_type		int			1 = Batter, All Else = Pitcher
+	 *	@static
+	 * 	@access		private
+     * 	@param		$stat_type		int			1 = Batter, All Else = Pitcher
 	 *	@param		$stats			Array		An array of stats fields to include in the query
 	 *	@param		$rules			Array		An array of rules for fantasy points calculation
 	 *	@param		$operator		int			FALSE = SUM, any other value = AVG
@@ -947,6 +1042,14 @@ define('SPLIT_SEASON', 0);
 define('SPLIT_PRESEASOM', 1);
 define('SPLIT_PLAYOFFS', 2);
 define('SPLIT_NONE', 3);
+
+define('RANGE_GAME_ID_LIST', 0);
+define('RANGE_DATE_LIST', 1);
+define('RANGE_LEAGUE_LIST', 2);
+define('RANGE_TEAM_LIST', 3);
+define('RANGE_PLAYER_LIST', 4);
+define('RANGE_SEASON', 5);
+define('RANGE_CAREER', 6);
 
 /* End of file stats.php */
 /* Location: ./open_sports_toolkit/libraries/stats.php */

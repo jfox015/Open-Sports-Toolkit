@@ -310,7 +310,7 @@ class Teams_model extends Base_ootp_model {
 
 	//---------------------------------------------------------------
 	
-	public function get_team_stats($team_id = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $stats_scope = STATS_SEASON, $params = array(), $debug = false)
+	public function get_team_stats($team_id = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $stats_scope = STATS_SEASON, $range = RANGE_SEASON, $params = array(), $debug = false)
 	{
 		if ($team_id === false)
 		{
@@ -324,7 +324,7 @@ class Teams_model extends Base_ootp_model {
 		}
 		$stats = array();
 		$fields = array();
-		$sql = Stats::get_team_stats($team_id, $stats_type, $stats_class, $stats_scope, $params);
+		$sql = Stats::get_team_stats($team_id, $stats_type, $stats_class, $stats_scope, $range, $params);
 
 		if ($debug === true)
 		{

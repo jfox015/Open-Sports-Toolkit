@@ -21,10 +21,10 @@ class Migration_Install_sports_toolkit extends Migration {
 		
         $default_settings = "
 			INSERT INTO `{$prefix}settings` (`name`, `module`, `value`) VALUES
-			 ('stk.source_baseball', 'stk', ''),
-			 ('stk.source_basketball', 'stk', ''),
-			 ('stk.source_hockey', 'stk', 'ootp13'),
-			 ('stk.source_football', 'stk', '');
+			 ('osp.source_baseball', 'osp', ''),
+			 ('osp.source_basketball', 'osp', ''),
+			 ('osp.source_hockey', 'osp', ''),
+			 ('osp.source_football', 'osp', '');
 		";
         $this->db->query($default_settings);
 	}
@@ -35,7 +35,7 @@ class Migration_Install_sports_toolkit extends Migration {
 	{
         $prefix = $this->db->dbprefix;
 
-        $this->db->query("DELETE FROM {$prefix}settings WHERE (module = 'stk')");
+        $this->db->query("DELETE FROM {$prefix}settings WHERE (module = 'osp')");
 
         foreach ($this->permission_array as $name => $description)
         {

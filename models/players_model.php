@@ -959,7 +959,7 @@ class Players_model extends Base_ootp_model {
 
 	//---------------------------------------------------------------
 	
-	public function get_player_stats($player_id = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $stats_scope = STATS_SEASON, $params = array())
+	public function get_player_stats($player_id = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $stats_scope = STATS_SEASON, $range = RANGE_SEASON, $params = array())
 	{
 		if ($player_id === false)
 		{
@@ -973,7 +973,7 @@ class Players_model extends Base_ootp_model {
 		}
 		$stats = array();
 		$fields = array();
-		$sql = Stats::get_player_stats($player_id, $stats_type, $stats_class, $stats_scope, $params);
+		$sql = Stats::get_player_stats($player_id, $stats_type, $stats_class, $stats_scope, $range, $params);
 
 		if ($debug === true)
 		{
@@ -997,7 +997,7 @@ class Players_model extends Base_ootp_model {
 	
 	//---------------------------------------------------------------
 	
-	public function get_players_stats($player_ids = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $stats_scope = STATS_SEASON, $params = array())
+	public function get_players_stats($player_ids = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $stats_scope = STATS_SEASON, $range = RANGE_SEASON, $params = array())
 	{	
 		if ($player_ids === false)
 		{
@@ -1011,7 +1011,7 @@ class Players_model extends Base_ootp_model {
 		}
 		$stats = array();
 		$fields = array();
-		$query = Stats::get_players_stats($player_ids, $stats_type, $stats_class, $stats_scope, $params);
+		$query = Stats::get_players_stats($player_ids, $stats_type, $stats_class, $stats_scope, $range, $params);
 
 		if ($debug === true)
 		{
