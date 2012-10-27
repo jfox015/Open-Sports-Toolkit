@@ -89,10 +89,14 @@ if(!function_exists('stat_list'))
 					"FN"	=>array('lang' => "FN"),
 					"LN"	=>array('lang' => "LN"),
 					"PN"	=>array('lang' => "PN"),
+					"PID"	=>array('lang' => "PID"),
 					"TN"	=>array('lang' => "TN"),
+					"TNACR"	=>array('lang' => "TNACR"),
+					"TID"	=>array('lang' => "TID"),
 					"AGE"	=>array('lang' => "AGE"),
 					"POS"	=>array('lang' => "POS"),
 					"ROLE"	=>array('lang' => "ROLE"),
+					"LVL"	=>array('lang' => "LVL"),
 					"TH"	=>array('lang' => "TH"),
 					"BA"	=>array('lang' => "BA"),
 					"FPTS"	=>array('lang' => "FPTS"),
@@ -132,7 +136,8 @@ if(!function_exists('stat_list'))
                     "GIDP" => array('lang' => "GIDP"),
                     "RISP" => array('lang' => "RISP") ,
                     "WIFF" => array('lang' => "WIFF"),
-                    "WALK" => array('lang' => "WALK")
+                    "WALK" => array('lang' => "WALK"),
+                    "TRO" => array('lang' => "TRO")
                 ),
 			'specialty' =>
                 array(
@@ -177,7 +182,9 @@ if(!function_exists('stat_list'))
                     "IRA" => array('lang' => "IRA"),
                     "BK" => array('lang' => "BK"),
                     "HB" => array('lang' => "HB"),
-                    "OBA" => array('lang' => "OBA", 'formula' => 'if([OPERATOR](ab)=0,0,[OPERATOR](ha)/[OPERATOR](ab)) as oavg'),
+                    "OBA" => array('lang' => "OBA"),
+                    "TRP" => array('lang' => "TRP"),
+                    "ERC" => array('lang' => "ERC"),
                 ),
 			"defense"=>
                 array(
@@ -318,11 +325,28 @@ if(!function_exists('stats_class'))
 		$fields = array();
 		if (in_array('NAME',$extended))
 		{
-			array_push($fields,'PN');
+			$genArr = array('PN','PID');
+			foreach($genArr as $field) {
+				array_push($fields,$field);
+			}
 		}
-		if (in_array('TEAM',$extended))
+        if (in_array('TID',$extended))
+        {
+            array_push($fields,'TID');
+        }
+        if (in_array('TEAM',$extended))
 		{
-			array_push($fields,'TN');
+			$genArr = array('TN','TID');
+			foreach($genArr as $field) {
+				array_push($fields,$field);
+			}
+		}
+		if (in_array('TEAM_ACY',$extended))
+		{
+			$genArr = array('TNACR','TID');
+			foreach($genArr as $field) {
+				array_push($fields,$field);
+			}
 		}
 		if (in_array('GENERAL',$extended))
 		{
@@ -350,11 +374,213 @@ if(!function_exists('stats_class'))
 		{
 			array_push($fields,'PR15');
 		}
+		if (in_array('TOP_PLAYERS',$extended))
+		{
+			array_push($fields,(($stat_type == TYPE_OFFENSE) ? 'TRO' : 'TRP'));
+		}
+		
 		return $fields;
 		
 	} // END function
 } // END if
 
+//---------------------------------------------------------------
+
+if(!function_exists('format_stats')) 
+{
+	function format_stats($stat_type = TYPE_OFFENSE, $stats = false, $categories = false, $stat_list = false, $position_list = false, $debug = false)
+	{
+		// ERROR HANDLING
+		if ($stats === false || $categories === false || $stat_list === false)
+		{	
+			return false;
+		}
+		$max_count = 10;
+		$newStats = array();
+        foreach($stats as $row) {
+			$newRow = array();
+            $count = 0;
+
+            foreach ($categories as $field) {
+				if (isset($stat_list['general'][$field]['field']) && !empty($stat_list['general'][$field]['field']))
+				{
+					$col = $stat_list['general'][$field]['field'];
+				}
+				else if (isset($stat_list[$stat_type][$field]['field']) && !empty($stat_list[$stat_type][$field]['field']))
+				{
+					$col = $stat_list[$stat_type][$field]['field'];
+				}
+                if (strstr($col, ".") !== false)
+                {
+                    $tmpCat = explode(".",$col);
+                    $col = $tmpCat[1];
+                }
+                switch ($field) {
+					case 'BA':
+					case 'TH':
+						$newRow[$col] = get_hand($row[$col]);
+						break;
+					case 'pos':
+					case 'positions':
+						if (strpos($row[$col],":")) {
+							$newRow[$col] = makeElidgibilityString($row[$col]);
+						} else {
+							$newRow[$col] = get_pos($row[$col],$position_list);
+						}
+						break;
+					case 'POS':
+					case 'ROLE':
+						$newRow[$col] = get_pos($row[$col], $position_list);
+						break;
+					case 'LVL':
+						$newRow[$col] = get_level($row[$col]);
+						break;
+					case 'AVG':
+					case 'OBP':
+					case 'SLG':
+					case 'OPS':
+					case 'WOBA':
+					case 'OAVG':
+					case 'BABIP':
+						$val=sprintf("%.3f",$row[$col]);
+						if ($val<1) {$val=strstr($val,".");}
+						$newRow[$col] = $val;
+						break;
+					case 'ERA':
+					case 'WHIP':
+					case 'SO_IP':
+					case 'BB_IP':
+					case 'HR_IP':
+					case 'PR15':
+						$val=sprintf("%.2f",$row[$col]);
+						if (($val<1)&&($col=='whip')) {$val=strstr($val,"0.");}
+						$newRow[$col] = $val;
+						break;
+					case 'IP':
+					case 'IPI':
+					case 'IPL':
+					case 'VORP':
+						$val=sprintf("%.1f",$row[$col]);
+						$newRow[$col] = $val;
+						break;
+					case 'WALK':
+					case 'WIFF':
+						$newRow[$col] = intval($row[$col])."%";
+						break;
+					case 'ADD':
+					case 'DRAFT':
+					case 'PN':
+					case 'TN':
+					case 'TNACR':
+						$newRow[$col] = format_extended_fields($field, $col, $row);
+						break;
+					default:
+						if (!isset($row[$col]) && empty($row[$col])) {
+							$newRow[$col] = 0;
+						} else {
+							$newRow[$col] = intval($row[$col]);
+						}
+						break;
+				} // END switch
+
+				// DEBUGGING
+				if ($debug && $count < $max_count) {
+					if (isset($newRow[$col])) {
+						echo($col." = ".$newRow[$col]."<br />");
+					}
+				}
+			} // END foreach
+			array_push($newStats, $newRow);
+			$count++;
+		} // END foreach
+		return $newStats;
+	}
+}
+
+//--------------------------------------------------------------------
+
+/**
+ * Format Extended Fields.
+ * Formats specialty stats fields for display. These fields have some extra formatting beyond numbers so they are segmented off.
+ * This can also help extendability for future modules.
+ *
+ * @static
+ * @param 	string 		$field			Field name
+ * @param 	Array 		$row			Array of row information
+ * @param 	Array 		$settings		OSP Settings object
+ * @param 	Int 		$league_id		(Optional) League ID, defaults to 100
+ * @param 	Boolean 	$debug			TRUE to enable debug messaging, FALSE to disable
+ * @return 	String         				Modified single field of stats values
+ *
+ * @since 	0.3
+ */
+if(!function_exists('format_extended_fields')) 
+{
+    function format_extended_fields($field = false, $col = false, $row = false, $settings = false, $league_id = 100, $debug = false)
+	{
+		$newVal = array();
+		switch ($field) 
+		{
+			case 'ADD':
+				if (isset($fields['showTrans']) && $fields['showTrans'] === true)
+				{
+					$newVal = '<a href="#" rel="itemPick" id="'.$row['id'].'"><img src="'.$fields['img_path'].'add.png" width="16" height="16" alt="Add" title="Add" /></td>';
+				}
+				break;
+			case 'DRAFT':
+				if (isset($fields['showDraft']) && $fields['showDraft'] === true) {
+					$newVal = '<a href="#" rel="draft" id="'.$row['id'].'"><img src="'.$fields['img_path'].'next.png" width="16" height="16" alt="Draft Player" title="Draft Player" /></a>';
+				} else {
+					$newVal = '- -';
+				}
+				break;
+			case 'PN':
+
+				$name = $row['first_name']." ".$row['last_name'];
+				if (isset($row['player_id'])) 
+				{
+					$val = anchor('/players/profile/' . $row['player_id'],$name,array('target'=>'_blank'));
+				}
+				else 
+				{
+					$val = $name;
+				}
+				$newVal = $val;
+				break;
+			case 'TN':
+				
+				$name = $row['teamname']." ".$row['teamnick'];
+				if (isset($row['team_id'])) 
+				{
+					$val = anchor('/teams/' . $row['team_id'],$name,array('target'=>'_blank'));
+				}
+				else 
+				{
+					$val = $name;
+				}
+				$newVal = $val;
+				break;
+			case 'TNACR':
+				
+				$name = $row['abbr'];
+				if (isset($row['team_id'])) 
+				{
+					$val = anchor('/teams/' . $row['team_id'],$name,array('target'=>'_blank'));
+				}
+				else 
+				{
+					$val = $name;
+				}
+				$newVal = $val;
+				break;
+		}
+		// DEBUGGING
+		if ($debug) {
+			echo($col." = ".$newVal."<br />");
+		}
+		return $newVal;
+	}
+}
 
 /* End of file sport_helper.php */
 /* Location: ./open_sports_toolkit/helpers/drivers/baseball/sport_helper.php */

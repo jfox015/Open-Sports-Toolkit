@@ -44,10 +44,10 @@ if(!function_exists('source_map'))
 	function source_map() 
 	{
 		$map = array(
-			0 => array(
+            'baseball' => array(
 				'ootp'=>"Out of the Park Baseball (OOTP)"
 			),
-			1 => array(
+            'football' => array(
 				'phpffl' => 'PHP Fantasy Football League Manager'
 			)
 		);
@@ -295,7 +295,63 @@ function get_pitch_rating($pitch,$ir,$gb,$mvmnt,$velo)
         break;
     }
    return $rat;
- }
+ }	
+ //--------------------------------------------------------------------
+	
+/**
+ * Get Position.
+ * Returns the acronym for a position.
+ *
+ * @static
+ * @param 	string|int	$pos	Position ID
+ * @return 	string          	Position Name
+ */
+ if (!function_exists('get_pos'))
+ {
+    function get_pos($pos, $position_list = false)
+    {
+        $pos_str = '';
+		if ($position_list === false || count($position_list) == 0)
+		{
+			return false;
+		}
+        foreach($position_list as $position => $details)
+        {
+            if (isset($details['id']) && $details['id'] == $pos)
+            {
+                $pos_str = $position;
+                break;
+            }
+        }
+		return $pos_str;
+    }
+}
+//--------------------------------------------------------------------
+
+/**
+ * Get Position Number.
+ * Returns the ID for a position.
+ *
+ * @static
+ * @param 	string 		$pos	Position Name
+ * @return 	string|int          Position ID
+ */
+if (!function_exists('get_pos_num'))
+{
+    function get_pos_num($pos_str, $position_list = false)
+    {
+        $pos = '';
+        if ($position_list === false || count($position_list) == 0)
+        {
+            return false;
+        }
+		if (isset($position_list[$pos_str]))
+		{
+			$pos = $position_list[$pos_str]['id'];
+		}
+		return $pos;
+    }
+}
 /**
  *	GET ASSET PATHS.
  *	A function to create correct paths to OOTP assets like logos and playerpictures. The structure 

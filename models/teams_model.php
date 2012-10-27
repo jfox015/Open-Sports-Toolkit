@@ -53,24 +53,40 @@ class Teams_model extends Base_ootp_model {
 	 *	@return				Array of DB Result Objects
 	 *
 	 */
-	public function get_teams($league_id = false) {
+	public function get_teams($league_id = false, $include_results = false) {
 
 		$teams = array();
         if (!$this->use_prefix) $this->db->dbprefix = '';
-        if ($this->db->table_exists($this->table)) {
+        if ($this->db->table_exists($this->table))
+        {
+            $select = 'teams.team_id,abbr,name,nickname,sub_league_id,logo_file,text_color_id,background_color_id';
+            if ($include_results)
+            {
+                   $select .= ',w,l,pos';
+            }
 
-            $this->db->select('team_id,abbr,name,nickname,logo_file')
-                ->where('allstar_team',0)
-                ->order_by('name,nickname','asc');
+            $this->db->select($select);
+            if ($include_results)
+            {
+                $this->db->join('team_record', 'team_record.team_id = teams.team_id', 'left');
+            }
+            $this->db->where('allstar_team',0);
             if ($league_id !== false)
             {
                 $this->db->where('league_id',$league_id);
             }
+            $this->db->order_by('name,nickname','asc');
+
             $query = $this->db->get($this->table);
             if ($query->num_rows() > 0) {
                 $teams = $query->result();
             }
-
+            $query->free_result();
+        }
+        else
+        {
+            $this->error = "Table ".$this->table." does not exist.";
+            return false;
         }
         if (!$this->use_prefix) $this->db->dbprefix = $this->dbprefix;
         return $teams;
@@ -86,16 +102,25 @@ class Teams_model extends Base_ootp_model {
 	 *	@return				Array of team values
 	 *
 	 */
-	public function get_teams_array($league_id = false) {
+	public function get_teams_array($league_id = false, $include_results = false) {
 
 		$teams = array();
-		$teams_result = $this->get_teams($league_id);
+		$teams_result = $this->get_teams($league_id, $include_results);
 		if (isset($teams_result) && is_array($teams_result) && sizeof($teams_result) > 0) {
 			foreach($teams_result as $row) {
-				$teams = $teams + array($row->team_id=>array('team_id'=>$row->team_id,'abbr'=>$row->abbr,'name'=>$row->name,
-									    'nickname'=>$row->nickname,'logo_file'=>$row->logo_file));
+                $team = array('team_id' => $row->team_id, 'abbr' => $row->abbr,
+                    'name' => $row->name, 'nickname' => $row->nickname,'city' => $row->name,
+                    'sub_league_id' => $row->sub_league_id,'logo_file' => $row->logo_file,
+                    'text_color_id' => $row->text_color_id, 'background_color_id' => $row->background_color_id);
+                if ($include_results)
+                {
+                    $team = $team + array('w' => $row->w, 'l' => $row->l, 'pos' => $row->pos);
+                }
+
+                $teams = $teams + array($row->team_id => $team);
 			}
 		}
+        //echo($this->db->last_query()."<br />");
 		return $teams;
 	}
 	
@@ -302,48 +327,6 @@ class Teams_model extends Base_ootp_model {
             $this->db->where('league_id',$league_id)->where('team_id',$team_id)->delete('teams_owners');
         }
 		return true;
-	}
-
-	/*---------------------------------------------------------
-	/	!STATS
-	/--------------------------------------------------------*/
-
-	//---------------------------------------------------------------
-	
-	public function get_team_stats($team_id = false, $stats_type = TYPE_OFFENSE, $stats_class = array(), $stats_scope = STATS_SEASON, $range = RANGE_SEASON, $params = array(), $debug = false)
-	{
-		if ($team_id === false)
-		{
-			$this->error = "A team id value was not received.";
-			return false;
-		}
-		
-		if (Stats::get_sport() === false)
-		{
-			Stats::init('baseball','ootp13');
-		}
-		$stats = array();
-		$fields = array();
-		$sql = Stats::get_team_stats($team_id, $stats_type, $stats_class, $stats_scope, $range, $params);
-
-		if ($debug === true)
-		{
-			return $sql;
-		}
-		else 
-		{
-			$query = $this->db->query($sql);
-			if ($query->num_rows() > 0)
-			{
-				$stats = $query->result_array();
-				$fields = $query->list_fields();
-			}
-			$query->free_result();
-			
-			$stats = Stats::format_stats_for_display($stats, Stats::get_stats_fields($stats_type, $stats_class));
-			
-			return $stats;
-		}
 	}
 }
 /* End of teams_model.php */
