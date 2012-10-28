@@ -18,51 +18,48 @@
 			<thead>
 			<tr>
 				<?php
-                $exceptions = array('PN','TN','PID','TID');
-				foreach ($stats_class as $field) :
-					if ($field != 'PID' && $field != 'TID') {
-                        $class = ' stat';
-                        if (in_array($field, $exceptions)) { $class = ''; }
-                        if (isset($stats_list['general'][$field]['lang']))
-                        {
-                            $label = lang("acyn_".$stats_list['general'][$field]['lang']);
+                if (isset($records['headers']) && is_array($records['headers']) && count($records['headers'])) :
+                    $exceptions = array('PN','TN','PID','TID');
+                    foreach ($records['headers'] as $field => $label) :
+                        if ($field != 'PID' && $field != 'TID') {
+                            $class = 'stat';
+                            if (in_array($field, $exceptions)) { $class = ''; }
+                            echo (' <th class="headline'.$class.'">'.$label.'</th> '."\n");
                         }
-                        else if (isset($stats_list[$player_type][$field]['lang']))
-                        {
-                            $label = lang("acyn_".$stats_list[$player_type][$field]['lang']);
-                        }
-					    echo (' <th class="headline'.$class.'">'.$label.'</th> '."\n");
-                    }
-				endforeach;
+                    endforeach;
+                endif;
 				?>
 			</tr>
 			</thead>
 			<tbody>
-			<?php 
-			foreach ($records as $player) : ?>
-			<?php $player = (array)$player;?>
-			<tr>
-				<?php
-                $exceptions = array('player_name','team_name','player_id','team_id');
-                foreach($player as $field => $value) :
-					if ($field != 'id' && $field != 'role') :
-						$class = 'stat';
-                        if (in_array($field, $exceptions)) { $class = ''; }
-						if ($field != 'player_id' && $field !=  'team_id') {
-                            echo('<td class="'.$class.'">'.$value.'</td>');
-                        }
-					endif;
-				endforeach; ?>
-			</tr>
-			<?php endforeach; ?>
+			<?php
+            if (isset($records['stats']) && is_array($records['stats']) && count($records['stats'])) :
+                foreach ($records['stats'] as $player) : ?>
+                <?php $player = (array)$player;?>
+                <tr>
+                    <?php
+                    $exceptions = array('player_name','team_name','player_id','team_id');
+                    foreach($player as $field => $value) :
+                        if ($field != 'id' && $field != 'role') :
+                            $class = 'stat';
+                            if (in_array($field, $exceptions)) { $class = ''; }
+                            if ($field != 'player_id' && $field !=  'team_id') {
+                                echo('<td class="'.$class.'">'.$value.'</td>');
+                            }
+                        endif;
+                    endforeach; ?>
+                </tr>
+                <?php endforeach;
+            endif;
+            ?>
 			</tbody>
 			
-			<?php if (isset($totals) && is_array($totals) && count($totals)) :  ?>
+			<?php if (isset($records['totals']) && is_array($records['totals']) && count($records['totals'])) :  ?>
 			<tfoot>
 			<tr>
 				<?php
                 $exceptions = array('player_name','team_name','player_id','team_id');
-                foreach($totals[0] as $field => $value) :
+                foreach($records['totals'][0] as $field => $value) :
 					if ($field != 'id' && $field != 'role') :
 						$class = 'stat';
                         if (in_array($field, $exceptions)) { $class = ''; }

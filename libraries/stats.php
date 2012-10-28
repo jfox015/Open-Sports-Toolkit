@@ -169,7 +169,7 @@ class Stats
 	 *
 	 * <ul>
 	 *	<li>select_data - (Array) 	key => value array of dynamic select replacements</li>
-	 *	<li>total 		- (Boolean)	TRUE for the stats engine to query for an aggregate total of the type passedrather than individual results</li>
+	 *	<li>totals 		- (Boolean)	TRUE for the stats engine to query for an aggregate total of the type passedrather than individual results</li>
 	 *	<li>where 		- (Array)	key => value array of custom where clause definitions</li>
 	 *	<li>where_in 	- (String)	A comma delimited string of values to apply to a WHERE IN clause</li>
 	 *	<li>year 		- (int)		Year value for season and season range queries</li>
@@ -206,8 +206,10 @@ class Stats
 		} // END if
 		
 		$stats = array();
+		$headers = array();
+        $totals = array();
 		$where = array();
-		
+
 		if ($id !== false) 
 		{
 			if (is_string($id))
@@ -247,6 +249,8 @@ class Stats
 				$fields = $query->list_fields();
 			} // END if
 			$query->free_result();
+
+            $headers = self::make_headers($stats_type, $stats_class, self::$stat_list);
 			
 			if (!function_exists('format_stats'))
 			{
@@ -257,8 +261,19 @@ class Stats
 			{
 				$stats = format_stats($stats_type, $stats_data, $stats_class, self::$stat_list, self::$position_list, $debug);
 			} // END if
+
+            if (isset($params['totals'])) {
+                $params['totals_row'] = true;
+                $sql = self::_get_stats_query($type, $stats_type, $stats_class, $stat_scope, $range, $params, $debug);
+                $query = self::$ci->db->query($sql);
+                if ($query->num_rows() > 0)
+                {
+                    $totals = $query->result_array();
+                } // END if
+                $query->free_result();
+            }
 		} // END if
-		return $stats;
+		return array('stats'=>$stats, 'headers'=>$headers, 'totals' =>$totals);
 	}
 
 	//--------------------------------------------------------------------
@@ -405,6 +420,40 @@ class Stats
 	 * @return	void
 	 * @access	private
 	 */
+    protected  static function make_headers($stats_type = false, $stats_class = false)
+    {
+        $stats_list = self::$stat_list;
+        $headers = array();
+        foreach($stats_class as $field)
+        {
+            $exceptions = array('PID','TID');
+            foreach ($stats_class as $field) :
+                if (!in_array($field, $exceptions)) {
+                    if (isset($stats_list['general'][$field]['lang']))
+                    {
+                        $label = lang("acyn_".$stats_list['general'][$field]['lang']);
+                    }
+                    else if (isset($stats_list[$stats_type][$field]['lang']))
+                    {
+                        $label = lang("acyn_".$stats_list[$stats_type][$field]['lang']);
+                    }
+                    $headers = $headers + array($field => $label);
+                }
+            endforeach;
+        }
+        return $headers;
+    }
+
+	//--------------------------------------------------------------------
+
+	/**
+	 *
+	 * Load Sport Helper.
+	 * Loads the specific driver for the selected sport.
+	 *
+	 * @return	void
+	 * @access	private
+	 */
     private static function load_sport_helper()
     {
         self::$ci->load->helper('open_sports_toolkit/drivers/'.self::$sport.'/sport');
@@ -480,7 +529,7 @@ class Stats
 		$identifier = identifier_map();
 		$query .= " RIGHT OUTER JOIN ".$_table_def['players']." ON ".$_table_def['players'].".".$identifier['player']." = ".$tbl.".".$identifier['player'];
 		
-		if ($query_type != 'player' && !empty($params['identifier']) && !isset($params['total'])) {
+		if ($query_type != 'player' && !empty($params['identifier']) && !isset($params['totals_row'])) {
 			$query .= " RIGHT OUTER JOIN ".$_table_def[$query_type]." ON ".$_table_def[$query_type].".".$params['identifier']." = ".$tbl.".".$params['identifier'];
 		}
         /*------------------------------------
@@ -589,7 +638,7 @@ class Stats
         /*------------------------------------
 		/	GROUPING FOR SUM AND AVG
 		/-----------------------------------*/
-        if (isset($params['total']) && $params['total'] == 1) {
+        if (isset($params['totals_row']) && $params['totals_row'] == 1) {
 			if (!empty($identifier['team'])) 
 			{
 				$query .= " GROUP BY ".$_table_def[$stats_type][$stat_scope].'.'.$identifier['team'];
