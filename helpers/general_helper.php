@@ -44,10 +44,10 @@ if(!function_exists('source_map'))
 	function source_map() 
 	{
 		$map = array(
-            'baseball' => array(
+			0 => array(
 				'ootp'=>"Out of the Park Baseball (OOTP)"
 			),
-            'football' => array(
+			1 => array(
 				'phpffl' => 'PHP Fantasy Football League Manager'
 			)
 		);

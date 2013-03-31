@@ -1,6 +1,6 @@
 # Open Sports Toolkit
 
-Formerly know as the _OOTP Web Toolkit_, the Open Sports Toolkit (OST) is a collection of standard helpers, data models, classes, views and language files for sports mod developers to use as a starting point to build dynamic sports based, data driven  web sites and tools.
+Formerly know as the _OOTP Web Toolkit_, the Open Sports Toolkit (OST) is a collection of helpers, data models, classes, views and language files for sports mod developers to use as a starting point to build dynamic sports based, data driven  web sites and tools.
 
 ## Features
 

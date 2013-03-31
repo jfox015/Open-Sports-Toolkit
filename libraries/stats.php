@@ -134,7 +134,11 @@ class Stats
 	{
         if ($sport !== false)
         {
-			self::$sport = $sport;
+			if (!function_exists('sports_map')) {
+				self::$ci->load->helper('open_sports_toolkit/general');
+			}
+			$sports = sports_map();
+			self::$sport = $sports[$sport];
 			self::load_sport_helper();
 			self::$ci->lang->load('open_sports_toolkit/'.self::$sport.'_acyn');
 			self::$ci->lang->load('open_sports_toolkit/'.self::$sport.'_full');

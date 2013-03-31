@@ -101,51 +101,58 @@ class Players_model extends Base_ootp_model {
 	 *	@param	$player_id	int		Player ID
 	 *	@return				Array	Array of player detail values
 	 */
-	public function get_player_details($player_id = false) {
+	public function get_player_details($player_id = false, $settings = false) {
 
         if ($player_id === false) { return; }
         $details = array();
         $this->db->dbprefix = '';
         $this->db->select('players.player_id,first_name,last_name,players.nick_name as playerNickname,teams.team_id, teams.name AS team_name, teams.nickName as teamNickname, position,role, date_of_birth,weight,height,bats,throws,draft_year,draft_round,draft_pick,draft_team_id,retired,
 						  injury_is_injured, injury_dtd_injury, injury_career_ending, injury_dl_left, injury_left, injury_id, logo_file, players.city_of_birth_id, age');
-        //$this->db->join('players','players.player_id = fantasy_players.player_id','left');
         $this->db->join('teams','teams.team_id = players.team_id','right outer');
         $this->db->where('players.player_id',$player_id);
         $query = $this->db->get($this->table);
 
         if ($query->num_rows() > 0) {
             $details = $query->row_array();
-        }
-        $query->free_result();
-        /*if (sizeof($details) > 0) {
-              $birthCity = '';
-              $birthRegion = '';
-              $birthNation = '';
 
-              if (isset($details['city_of_birth_id']) && $details['city_of_birth_id'] != 0) {
-                  $this->db->select('cities.name as birthCity, cities.region as birthRegion, nations.short_name as birthNation');
-                  $this->db->join('nations','nations.nation_id = cities.nation_id','right outer');
-                  $this->db->where('cities.city_id',$details['city_of_birth_id']);
-                  $cQuery = $this->db->get('cities');
-                  if ($cQuery->num_rows() > 0) {
-                      $cRow = $cQuery->row();
-                      $birthCity = $cRow->birthCity;
-                      $birthRegion = $cRow->birthRegion;
-                      $birthNation = $cRow->birthNation;
-                  }
-                  $cQuery->free_result();
-              } else {
-                  $birthCity = 'Unknown';
-                  $birthNation = 'N/A';
-              }
-              $details = $details + array('birthCity'=>$birthCity,'birthRegion'=>$birthRegion,'birthNation'=>$birthNation);
-              $query->free_result();
-          } else {
+            $birthCity = '';
+			$birthRegion = '';
+			$birthNation = '';
+			if ($settings !== false && $settings['osp.game_sport'] == 0 && $settings['osp.game_source'] == 'ootp')
+			{
+				if(isset($details['city_of_birth_id']) && $details['city_of_birth_id'] != 0)
+				{
+					$ver = intval($settings['osp.source_version']);
+					$select = 'cities.name as birthCity, nations.short_name as birthNation';
+					if ($ver < 12) {
+						$select .= ',cities.region as birthRegion';
+					} else {
+						$select .= ',states.name as birthRegion';
+					}
+					$this->db->select($select);
+					$this->db->join('nations','nations.nation_id = cities.nation_id','right outer');
+					if ($ver >= 12) {
+						$this->db->join('states','states.state_id = cities.state_id','right outer');
+					}
+					$this->db->where('cities.city_id',$details['city_of_birth_id']);
+					$cQuery = $this->db->get('cities');
+					if ($cQuery->num_rows() > 0) {
+						$cRow = $cQuery->row();
+						$birthCity = $cRow->birthCity;
+						$birthRegion = $cRow->birthRegion;
+						$birthNation = $cRow->birthNation;
+					}
+					$cQuery->free_result();
+				}
+				$details = $details + array('birthCity'=>$birthCity,'birthRegion'=>$birthRegion,'birthNation'=>$birthNation);
+			}
+		} else {
               $details['id'] = $details['player_id'] = -1;
               $details['first_name'] = "Not";
               $details['last_name'] = "Found";
-          }*/
-        //print($this->db->last_query()."<br />");
+		}
+		$query->free_result();
+		// print($this->db->last_query()."<br />");
         if (!$this->use_prefix) $this->db->dbprefix = $this->dbprefix;
         return $details;
     }
@@ -161,13 +168,13 @@ class Players_model extends Base_ootp_model {
 	 *	@param	$players	Array	Array of Player IDs
 	 *	@return				Array	Array of player detail value arrays
 	 */
-	public function get_players_details($players = array()) {
+	public function get_players_details($players = array(), $settings = false) {
 
         if (sizeof($players) == 0) { return; }
         $playersInfo = array();
 
         foreach($players as $row) {
-            $playersInfo = $playersInfo + array($row['player_id'] => $this->getPlayerDetails($row['player_id']));
+            $playersInfo = $playersInfo + array($row['player_id'] => $this->getPlayerDetails($row['player_id'], $settings));
         }
         //echo($this->db->last_query()."<br />");
         return $playersInfo;
