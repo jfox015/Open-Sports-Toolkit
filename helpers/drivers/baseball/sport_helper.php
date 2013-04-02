@@ -178,8 +178,8 @@ if(!function_exists('stat_list'))
                     "SVO" => array('lang' => "SVO"),
                     "ER" => array('lang' => "ER"),
                     "IPF" => array('lang' => "IPIF"),
-                    "IR" => array('lang' => "IR"),
-                    "IRA" => array('lang' => "IRA"),
+                    //"IR" => array('lang' => "IR"),
+                    //"IRA" => array('lang' => "IRA"),
                     "BK" => array('lang' => "BK"),
                     "HB" => array('lang' => "HB"),
                     "OBA" => array('lang' => "OBA"),
@@ -295,7 +295,7 @@ if(!function_exists('stats_class'))
 					$fieldList = array('W','L','SV','ERA','G','GS','IP','CG','SHO','HA','RA','ER','BB','SO','HRA','BB_9','K_9','HR_9','WHIP','BIFP','ERAPLUS');
 					break;
 				case CLASS_EXTENDED:
-					$fieldList = array('IR','IRA','SO','BS','QS','QS%','CG%','SHO%','GF');
+					$fieldList = array('SO','BS','QS','QS%','CG%','SHO%','GF');
 					break;
 				case CLASS_STANDARD:
 				default:
@@ -329,8 +329,7 @@ if(!function_exists('stats_class'))
 			foreach($genArr as $field) {
 				array_push($fields,$field);
 			}
-		}
-        if (in_array('TID',$extended))
+		}if (in_array('TID',$extended))
         {
             array_push($fields,'TID');
         }
@@ -348,9 +347,13 @@ if(!function_exists('stats_class'))
 				array_push($fields,$field);
 			}
 		}
-		if (in_array('GENERAL',$extended))
+        if (in_array('POS',$extended))
+        {
+            array_push($fields,'POS');
+        }
+        if (in_array('GENERAL',$extended))
 		{
-			$genArr = array('POS','AGE','TH','BA');
+			$genArr = array('AGE','TH','BA');
 			foreach($genArr as $field) {
 				array_push($fields,$field);
 			}

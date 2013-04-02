@@ -507,9 +507,13 @@ class Stats
 		if ($range == RANGE_GAME_ID_LIST && $stat_scope != STATS_GAME) {
 			$stat_scope = STATS_GAME;
 		}
-		
+		$no_operator = false;
+		if ($range == RANGE_CAREER && $stat_scope == STATS_CAREER) {
+			$no_operator = true;
+		}
+
 		$_table_def = table_map();
-        $query = self::build_stats_select($stats_type, $stats_class, self::$stat_list, $stat_scope);
+        $query = self::build_stats_select($stats_type, $stats_class, self::$stat_list, $stat_scope, $no_operator);
 		 
 		/*------------------------------------
 		/	DYNAMIC SELECT DATA
@@ -768,14 +772,16 @@ class Stats
 	 *	Accepts the player type ans stats class (and custom field defs) and builds a SQL query.
 	 *	@static
 	 * 	@access		private
-     * 	@param		$stat_type		int			1 = Batter, All Else = Pitcher
-	 *	@param		$stats			Array		An array of stats fields to include in the query
-	 *	@param		$rules			Array		An array of rules for fantasy points calculation
-	 *	@param		$operator		int			FALSE = SUM, any other value = AVG
-	 *	@return						String		SQL Query String
+     * 	@param		$stat_type			int			1 = Batter, All Else = Pitcher
+	 *	@param		$categories			Array		An array of stats fields to include in the query
+	 *	@param		$stat_list			Array		The full table of stats available
+	 *	@param		$scope				int			Stat scope (season, career, range, etc.)
+	 *	@param		$no_operator		Boolean		TRUE to use no operator, FALSE to use one
+	 *	@return							String		SQL Query String
 	 */
 
-	private static function build_stats_select($stat_type = '', $categories = array(), $stat_list = array(), $scope = STATS_CAREER)
+	private static function build_stats_select($stat_type = '', $categories = array(), $stat_list = array(), $scope = STATS_CAREER,
+	$no_operator = false)
 	{
 		// ERROR HANDLING
 		if ((!is_array($categories) || count($categories) == 0) || (!is_array($stat_list) || count($stat_list) == 0))
@@ -785,8 +791,11 @@ class Stats
 		$sql = '';
 		$sqlOperator = 'SUM';
 		if ($scope === STATS_SEASON_AVG) { $sqlOperator = 'AVG'; }
+		
+		if ($no_operator === true) { $sqlOperator = ''; }
 
-		foreach ($categories as $cat) {
+		foreach ($categories as $cat) 
+		{
 			// HANDLE GENERAL FIELDS
 			if (isset($stat_list['general'][$cat]))
 			{
@@ -809,7 +818,12 @@ class Stats
 				if (!empty($sql)) { $sql .= ','; } // END if
 				if (isset($stat_list[$stat_type][$cat]['formula']) && !empty($stat_list[$stat_type][$cat]['formula']))
 				{
-					$sql .= str_replace('[OPERATOR]',$sqlOperator,$stat_list[$stat_type][$cat]['formula']);
+					if ($no_operator === true) {
+                        $clean_formula = str_replace('[OPERATOR]','',$stat_list[$stat_type][$cat]['formula']);
+                        $sql .= preg_replace('/[OPERATOR][\s]?\([\w]*\)/', '%1', $clean_formula);
+                    } else {
+                        $sql .= str_replace('[OPERATOR]',$sqlOperator,$stat_list[$stat_type][$cat]['formula']);
+                    }
 				} 
 				else if (isset($stat_list[$stat_type][$cat]['field']) && !empty($stat_list[$stat_type][$cat]['field'])) 
 				{
@@ -835,6 +849,8 @@ define('TYPE_DEFENSE', 'defense');
 define('TYPE_SPECIALTY', 'specialty');
 define('TYPE_INJURY', 'injury');
 define('TYPE_TEAM', 'team');
+define('TYPE_LEAGUE', 'league');
+define('TYPE_PLAYER', 'player');
 
 define('STATS_CAREER', 0);
 define('STATS_SEASON', 1);

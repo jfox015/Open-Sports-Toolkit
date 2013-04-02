@@ -103,6 +103,27 @@ class Leagues_model extends Base_ootp_model
 		}
 	}
 	/**
+	 *	Resolve Stats Season.
+	 *	Returns the latest sensible year to display stats. For example if the current league date is less than the league start date,
+	 *	this function sends back the previous season.
+	 *	@param	$league_id	Defaults to 100
+	 *	@return				Int		year value
+	 */
+	public function resolve_stats_season($league_id = 100) {
+		$currDate = strtotime($this->get_league_date('current',$league_id));
+		$startDate = strtotime($this->get_league_date('start',$league_id));
+		if ($currDate <= $startDate) 
+		{
+			$years = $this->get_all_seasons($league_id);
+            $league_year = (intval($years[0]));
+		}
+		else 
+		{
+			$league_year = date('Y',$currDate);
+		}
+		return $league_year;
+	}
+	/**
 	 *	Get All Season.
 	 *	Returns a list of years as found in the players stats tables.
 	 *	@param	$league_id	int		Defaults to 100
@@ -128,17 +149,17 @@ class Leagues_model extends Base_ootp_model
 	 */
 	public function get_league_date($date_type = false, $league_id = 100) 
 	{
-		$league = $this->find_all_by('league_id',$league_id);
-		if (isset($league) && is_array($league) && count($league)) 
+		$league = $this->find_by('league_id',$league_id);
+		if (isset($league) && is_array($league) && count($league))
 		{
-			$date = '';
+            $date = '';
 			switch($date_type) 
 			{
 				case 'current':
-					$date = $league->current_date;
+					$date = $league[0]['current_date'];
 					break;
 				case 'start':
-					$date = $league->start_date;
+					$date = $league[0]['start_date'];
 					break;
 			}
 			return $date;

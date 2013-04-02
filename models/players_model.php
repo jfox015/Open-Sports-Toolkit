@@ -276,40 +276,43 @@ class Players_model extends Base_ootp_model {
 	 *	GET PLAYERS.
 	 *	Returns an array of players based on the passed arguments.
 	 *	
-	 *	@param	$league_id		int			he League ID
-	 *	@param	$player_active	Boolean		TRUE = active, FALSE = retired
+	 *	@param	$league_id		int			The League ID
+	 *	@param	$search_type	String		Search type (alpha, pos, status, all - default)
+	 *	@param	$search_param	<mixed>		Search parameter value
 	 *	@param	$selectBox		Boolean		TRUE to return players for select box, FALSE for normal return
 	 *	@return					Array		Array of player data values
 	 *
 	 */
-    public function get_players($league_id = false, $player_active = true, $selectBox = false,$searchType= false, $searchParam = false) {
+    public function get_players($league_id = false, $search_type = false, $search_param = false, $selectBox = false) {
         $players = array();
         if (!$this->use_prefix) $this->db->dbprefix = '';
-        $this->db->select('players.player_id, first_name, last_name, players.position, players.role, players.injury_is_injured, players.injury_dtd_injury, players.injury_career_ending, players.injury_dl_left, players.injury_left, players.injury_id, ');
-
-        switch ($searchType) {
+        $this->db->select('players.player_id, first_name, last_name, players.position, players.role, players.injury_is_injured, players.injury_dtd_injury, players.injury_career_ending, players.injury_dl_left, players.injury_left, players.injury_id');
+        switch ($search_type) {
             case 'alpha':
-                $this->db->like('players.last_name', $searchParam, 'after');
+                $this->db->like('players.last_name', $search_param, 'after');
                 break;
             case 'pos':
                 $col = "position";
-                if ($searchParam == 11 || $searchParam == 12 || $searchParam == 13) {
+                if ($search_param == 11 || $search_param == 12 || $search_param == 13) {
                     $col = "role";
                 }
-                if ($searchParam == 20) {
+                if ($search_param == 20) {
                     $this->db->where('(players.position = 7 OR players.position = 8 OR players.position = 9)');
-                } else if ($searchParam == 12 || $searchParam == 13) {
+                } else if ($search_param == 12 || $search_param == 13) {
                     $this->db->where('(players.role = 12 OR players.role = 13)');
                 } else {
-                    $this->db->where('players.'.$col, $searchParam);
+                    $this->db->where('players.'.$col, $search_param);
                 }
                 break;
+			case 'status':
+				if ($search_param === false) $search_param = 1;
+				$this->db->where('players.retired',$search_param);
             case 'all':
             default:
                 break;
         } // END switch
-        $this->db->where('players.retired',0);
-        $this->db->order_by('players.last_name','asc');
+        
+        $this->db->order_by('players.last_name, players.first_name','asc');
         $query = $this->db->get($this->table);
 
         if ($query->num_rows() > 0) {
