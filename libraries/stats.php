@@ -295,6 +295,20 @@ class Stats
     }
 
 	//--------------------------------------------------------------------
+
+	/**
+     * Get Position List.
+     * Returns the internal position_list object.
+     *
+     * @static
+     * @return array            stats_list Array
+     */
+    public static function get_position_list()
+    {
+        return self::$position_list;
+    }
+
+	//--------------------------------------------------------------------
 	
 	/**
      * Get Sport.

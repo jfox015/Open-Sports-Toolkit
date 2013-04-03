@@ -329,7 +329,9 @@ if(!function_exists('stats_class'))
 			foreach($genArr as $field) {
 				array_push($fields,$field);
 			}
-		}if (in_array('TID',$extended))
+		}
+
+        if (in_array('TID',$extended))
         {
             array_push($fields,'TID');
         }

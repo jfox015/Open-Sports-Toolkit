@@ -286,7 +286,11 @@ class Players_model extends Base_ootp_model {
     public function get_players($league_id = false, $search_type = false, $search_param = false, $selectBox = false) {
         $players = array();
         if (!$this->use_prefix) $this->db->dbprefix = '';
-        $this->db->select('players.player_id, first_name, last_name, players.position, players.role, players.injury_is_injured, players.injury_dtd_injury, players.injury_career_ending, players.injury_dl_left, players.injury_left, players.injury_id');
+        $this->db->select('players.player_id, first_name, last_name, players.position, players.role, players.injury_is_injured,
+        players.injury_dtd_injury, players.injury_career_ending, players.injury_dl_left, players.injury_left, players.injury_id,
+        if (players.team_id = 0, "-1", teams.team_id) as team_id,
+       if (players.team_id = 0, "", teams.name) as teamname, if (players.team_id = 0, "",teams.nickname) as teamnick', false);
+        $this->db->join('teams', 'teams.team_id = players.team_id', 'right outer');
         switch ($search_type) {
             case 'alpha':
                 $this->db->like('players.last_name', $search_param, 'after');
@@ -311,9 +315,14 @@ class Players_model extends Base_ootp_model {
             default:
                 break;
         } // END switch
-        
+
+        if ($league_id !== false) {
+            $this->db->where('players.league_id',$league_id);
+        }
         $this->db->order_by('players.last_name, players.first_name','asc');
+
         $query = $this->db->get($this->table);
+        //echo($this->db->last_query()."<br />");
 
         if ($query->num_rows() > 0) {
             $fields = $query->list_fields();

@@ -45,7 +45,7 @@ if(!function_exists('position_list'))
 	{
 		$positions = 
 		array(
-			""	=>array('lang'=>"", 'type' => array(''),
+			""	=>array('lang'=>"", 'type' => array(''))
 			
 		);
 		return $positions;
@@ -178,27 +178,27 @@ if(!function_exists('stat_list'))
                 ),
             "injury"=>
                 array(
-                    "INJ" => array('lang' => array('INJURY'),
-                    "DTD" => array('lang' => array('DTD_INJURY'),
-                    "CE" => array('lang' => array('CE'),
-                    "DL" => array('lang' => array('DL'),
-                    "DAYS" => array('lang' => array('DAYS'),
-                    "ID" => array('lang' => array('ID')
+                    "INJ" => array('lang' => 'INJURY'),
+                    "DTD" => array('lang' => 'DTD_INJURY'),
+                    "CE" => array('lang' => 'CE'),
+                    "DL" => array('lang' => 'DL'),
+                    "DAYS" => array('lang' => 'DAYS'),
+                    "ID" => array('lang' => 'ID')
                 ),
 			"team"=>
 				array(
-					"W" => array('lang' => array('W'),
-					"L" => array('lang' => array('L'),
-					"PCT" => array('lang' => array('PCT'),
-					"GB" => array('lang' => array('GB'),
-					"HOME" => array('lang' => array('HOME'),
-					"ROAD" => array('lang' => array('ROAD'),
-					"RS" => array('lang' => array('RS'),
-					"RA" => array('lang' => array('RA'),
-					"DIFF" => array('lang' => array('DIFF'),
-					"STRK" => array('lang' => array('STRK'),
-					"L10" => array('lang' => array('L10'),
-					"POFF" => array('lang' => array('POFF')
+					"W" => array('lang' => 'W'),
+					"L" => array('lang' => 'L'),
+					"PCT" => array('lang' => 'PCT'),
+					"GB" => array('lang' =>'GB'),
+					"HOME" => array('lang' => 'HOME'),
+					"ROAD" => array('lang' => 'ROAD'),
+					"RS" => array('lang' => 'RS'),
+					"RA" => array('lang' => 'RA'),
+					"DIFF" => array('lang' => 'DIFF'),
+					"STRK" => array('lang' => 'STRK'),
+					"L10" => array('lang' => 'L10'),
+					"POFF" => array('lang' => 'POFF')
 				)
 		);
 		return $stats;
