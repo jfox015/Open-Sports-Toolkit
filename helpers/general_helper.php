@@ -6,7 +6,8 @@
  * 	helper functions such as reslving positon names and numbers, building common
  *	stat queries and display lists and more.
  *
- * 	@author 	All functions are written by Frank Esselink unless otherwise noted.
+ * 	@author 	Jeff Fox
+ * 	@author 	Several functions written by Frank Esselink where noted.
  */
 
 /**
@@ -88,41 +89,64 @@ if(!function_exists('source_version_map'))
  *	@param	$row		Array 	Array of player data with injuriy fields
  *	@return				String	Injury String text
  *
- * 	@author	Jeff Fox
- *	@since	1.0.2
+ *	@since	0.3
  */
-function makeInjuryStatusString($row) {
-	$injStatus = '';
-	if (isset($row['injury_dtd_injury']) && $row['injury_dtd_injury'] == 1) {
-		$injStatus .= "Questionable - ";
-	} else if (isset($row['injury_career_ending']) && $row['injury_career_ending'] == 1) {
-		$injStatus .= "Career Ending Injury! ";
-	} else {
-		$injStatus .= "Injured - ";
+ if(!function_exists('make_injury_status_string'))
+{
+	function make_injury_status_string($row) 
+	{
+		$injStatus = '';
+		if (isset($row['injury_dtd_injury']) && $row['injury_dtd_injury'] == 1) {
+			$injStatus .= lang('full_QUES')." - ";
+		} else if (isset($row['injury_career_ending']) && $row['injury_career_ending'] == 1) {
+			$injStatus .= lang('full_CE')."! ";
+		} else {
+			$injStatus .= lang('full_INJR')." - ";
+		}
+		// GET injury name
+		$injury_name = lang('full_UNKN');
+		if (isset($row['injury_id'])) {
+			$injury_name = get_injury_name($row['injury_id']);
+		}
+		$injStatus .= $injury_name;
+		if ((isset($row['injury_dl_left']) && $row['injury_dl_left'] > 0)) {
+			$injStatus .= ", ".lang('acyn_ONDL')." - ".$row['injury_dl_left']." ".lang('acyn_DL');
+		}
+		if (isset($row['injury_left']) && ($row['injury_left'] > 0 || (isset($row['injury_dl_left']) && $row['injury_left'] > $row['injury_dl_left']))) {
+			$injStatus .= ", ".$row['injury_left']." ".lang('acyn_DAYS');
+		}
+		return $injStatus;
 	}
-	// GET injury name
-	$injury_name = "Unknown Injury";
-	if (isset($row['injury_id'])) {
-		$injury_name = getInjuryName($row['injury_id']);
-	}
-	$injStatus .= $injury_name;
-	if ((isset($row['injury_dl_left']) && $row['injury_dl_left'] > 0)) {
-		$injStatus .= ", on DL - ".$row['injury_dl_left']." Days Left";
-	}
-	if (isset($row['injury_left']) && ($row['injury_left'] > 0 || (isset($row['injury_dl_left']) && $row['injury_left'] > $row['injury_dl_left']))) {
-		$injStatus .= ", ".$row['injury_left']." Total Days Left";
-	}
-	return $injStatus;
 }
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('get_injury_name')) {
+    function get_injury_name($injuryId = false) {
+        if ($injuryId === false) {
+            return false;
+        }
+        $ci =& get_instance();
+        $injuryName = '';
+        $ci->db->select('injury_text')
+               ->where('id', $injuryId);
+        $query = $ci->db->get('list_injuries');
+        if ($query->num_rows() > 0) {
+            $row = $query->row();
+            $injuryName = $row->injury_text;
+        } // END if
+        $query->free_result();
+
+        return $injuryName;
+    } // END function
+} // END if
 /**
- *	MAKE ELIDGIBILUITY STRING
+ *	MAKE ELIDGIBILITY STRING
  *
  *	Converts an array of positions into a readable list of position acroymns.
  *
  *	@param	$positions	Array 	List of positions
  *	@return				String	Position list String
  *
- * 	@author	Jeff Fox
  *	@since	1.0
  */
 function makeElidgibilityString($positions) {
@@ -138,80 +162,6 @@ function makeElidgibilityString($positions) {
 	}
 	return $gmPos;
 }
-/**
- *	CALCULATE RATING
- *
- *	@param	$rating		int			Rating Value INT
- *	@param	$ratOrTal	int			Rate or Tally INT
- *	@param	$max		varchar		Max Value
- *	@return				String		Rating Value
- *
- *	@todo	Rewrite this so settings can be in DB, remove session component
- * 	@author	Frank Esselink
- * 	@since	1.0
- */
-function calc_rating($rating,$ratOrTal=0,$max="")
- {
-   if ($rating==0) {return 0;}
-
-   if ((file_exists("./settings/lgSettings.txt"))&&(($_SESSION['ratings']=="")||($_SESSION['talents']=="")||($_SESSION['others']==""))) {
-      $f = fopen("./settings/lgSettings.txt",'r');
-      if ($f)
-       {
-         while (!feof($f))
-          {
-            $text=fgets($f);
-            $split=explode("|",$text);
-            switch ($split[0])
-             {
-	        case 'RATINGS'  : $e=explode("\n",$split[1]);$ratings=$e[0];     break;
-	        case 'TALENTS'  : $e=explode("\n",$split[1]);$talents=$e[0];     break;
-	        case 'OTHERS'   : $e=explode("\n",$split[1]);$others=$e[0];      break;
-	     }
-          }
-	 fclose($f);
-	 $_SESSION['ratings']=$ratings;
-	 $_SESSION['talents']=$talents;
-	 $_SESSION['others']=$others;
-       }
-    }
-   $scale=$_SESSION['ratings'];
-   if ($ratOrTal==1) {$scale=$_SESSION['talents'];}
-   if ($ratOrTal==2) {$scale=$_SESSION['others'];}
-   if ($scale=="") {$scale='Hidden';}
-
-   if ($max!="") {$rating=max($rating,$max);}
-
-   switch ($scale)
-    {
-      case "2-8":
-	$rat=intval(($rating/31) + 2);
-	$rat=min(8,$rat);
-	$rat=max(2,$rat);
-        break;
-      case "20-80":
-        $rat=intval(($rating+10)/15);
-	$rat=min(13,$rat);
-	$rat=max(1,$rat);
-	$rat=5*$rat+15;
-	break;
-      case "Hidden": $rat=0; break;
-      default:
-        switch ($scale)
-	 {
-	   case "1-5":   $maxRat=5;   break;
-           case "1-10":  $maxRat=10;  break;
-           case "1-20":  $maxRat=20;  break;
-	   case "1-100"; $maxRat=100; break;
-	 }
-	$sc=200/$maxRat;
-	$rat=intval(($rating+$sc)/$sc);
-	$rat=min($maxRat,$rat);
-	$rat=max(1,$rat);
-    }
-
-   return $rat;
- }
 
 /**
  *	FORMAT BYTES.
@@ -299,12 +249,16 @@ function get_pitch_rating($pitch,$ir,$gb,$mvmnt,$velo)
  //--------------------------------------------------------------------
 	
 /**
- * Get Position.
- * Returns the acronym for a position.
+ * 	Get Position.
+ * 	Returns the acronym for a position.
  *
- * @static
- * @param 	string|int	$pos	Position ID
- * @return 	string          	Position Name
+ *	NOTE: This function requies that the Stats library be inialtized with 
+ *	the sport and scource values to populate the level_list property.
+ 
+ * 	@static
+ * 	@param 		int			$pos				Position ID
+ * 	@param 		array		$position_list		The sport and source specific position list
+ * 	@return 	string          				Position acronym
  */
  if (!function_exists('get_pos'))
  {
@@ -326,6 +280,79 @@ function get_pitch_rating($pitch,$ir,$gb,$mvmnt,$velo)
 		return $pos_str;
     }
 }
+
+//--------------------------------------------------------------------
+	
+/**
+ * 	Get Award.
+ * 	Returns the acronym for a award for use in displaying the text.
+ *
+ *	NOTE: This function requies that the Stats library be inialtized with 
+ *	the sport and scource values to populate the award_list property.
+ *
+ * 	@static
+ * 	@param 		string		$award			Award ID
+ * 	@param 		array		$award_list		The sport and source specific award list
+ * 	@return 	string          			Award acronym
+ *	@since	0.3
+ */
+ if (!function_exists('get_award'))
+ {
+    function get_award($award, $award_list = false)
+    {
+        $award_str = '';
+		if ($award_list === false || count($award_list) == 0)
+		{
+			return false;
+		}
+        foreach($award_list as $awd => $details)
+        {
+            if (isset($details['id']) && $details['id'] == $award)
+            {
+                $award_str = $awd;
+                break;
+            }
+        }
+		return $award_str;
+    }
+}
+
+//--------------------------------------------------------------------
+	
+/**
+ * 	Get Level.
+ * 	Returns the acronym for a level for use in displaying the text.
+ *
+ *	NOTE: This function requies that the Stats library be inialtized with 
+ *	the sport and scource values to populate the level_list property.
+ *
+ * 	@static
+ * 	@param 		string		$level			Level ID
+ * 	@param 		array		$level_list		The sport and source specific level list
+ * 	@return 	string          			Level acronym
+ *	@since	0.3
+ */
+ if (!function_exists('get_level'))
+ {
+    function get_level($level, $level_list = false)
+    {
+        $level_str = '';
+		if ($level_list === false || count($level_list) == 0)
+		{
+			return false;
+		}
+        foreach($level_list as $lvl => $details)
+        {
+            if (isset($details['id']) && $details['id'] == $level)
+            {
+                $level_str = $lvl;
+                break;
+            }
+        }
+		return $level_str;
+    }
+}
+
 //--------------------------------------------------------------------
 
 /**
@@ -413,177 +440,6 @@ if (!function_exists('format_time')) {
 		//}
 		return $time;
 	}
-}
-
-
-/**
- *	GET LEAGUE LEVEL.
- *	Returns a text string name for the level passed.
- *
- *	@param	$lvl	int		Level index
- *	@return			String	level name
- *
- *	@author	Frank Esselink
- * 	@since	1.0
- */
-function get_level($lvl)
- {
-   switch ($lvl)
-    {
-      case 1: $txt="ML"; break;
-      case 2: $txt="AAA"; break;
-      case 3: $txt="AA"; break;
-      case 4: $txt="A"; break;
-      case 5: $txt="SS"; break;
-      case 6: $txt="R"; break;
-      case 7: $txt="INT"; break;
-      case 8: $txt="WL"; break;
-      case 9: $txt="COL"; break;
-      case 10: $txt="HS"; break;
-      default: $txt=$lvl; break;
-
-    }
-   return $txt;
- }
-
-/**
- *	GET AWARD.
- *	Returns a award string name for the level passed.
- *
- *	@param	$awid	int		Award type ID
- *	@return			String	Award name Value
- *
- *	@author	Frank Esselink
- * 	@since	1.0
- */
-function get_award($awid)
- {
-    switch ($awid)
-     {
-       case 0:
-         $txt="Player of the Week";
-	 break;
-       case 1:
-         $txt="Pitcher of the Month";
-         break;
-       case 2:
-         $txt="Batter of the Month";
-         break;
-       case 3:
-         $txt="Rookie of the Month";
-         break;
-       case 4:
-         $txt="Oustanding Pitcher";
-         break;
-       case 5:
-         $txt="Oustanding Hitter";
-         break;
-       case 6:
-         $txt="Oustanding Rookie";
-         break;
-       case 7:
-         $txt="Gold Glove";
-         break;
-       case 8:
-         $txt=$awid;
-         break;
-       case 9:
-         $txt="All-Star";
-         break;
-       default:
-         $txt=$awid." not found";
-	 break;
-     }
-    return $txt;
- }
-/**
- *	GET VELOCITY.
- *	Converts a velocity index int into a text string.
- *
- *	@param	$velo	int		Velocity Int
- *	@return			String	Velocity String
- *
- *	@author	Frank Esselink
- * 	@since	1.0
- */
-function get_velo($velo)
- {
-  switch ($velo)
-   {
-     case 1:  $txt="<75 Mph";    break;
-     case 2:  $txt="81-83 Mph";  break;
-     case 3:  $txt="82-84 Mph";  break;
-     case 4:  $txt="83-85 Mph";  break;
-     case 5:  $txt="84-86 Mph";  break;
-     case 6:  $txt="85-87 Mph";  break;
-     case 7:  $txt="86-88 Mph";  break;
-     case 8:  $txt="87-89 Mph";  break;
-     case 9:  $txt="89-90 Mph";  break;
-     case 10: $txt="90-92 Mph";  break;
-     case 11: $txt="91-93 Mph";  break;
-     case 12: $txt="92-94 Mph";  break;
-     case 13: $txt="93-95 Mph";  break;
-     case 14: $txt="94-96 Mph";  break;
-     case 15: $txt="95-97 Mph";  break;
-     case 16: $txt="96-98 Mph";  break;
-     case 17: $txt="97-99 Mph";  break;
-     case 18: $txt="98-100 Mph"; break;
-     case 19: $txt="99-101 Mph"; break;
-     case 20: $txt="101+ Mph";   break;
-   }
-  return $txt;
- }
-
-/**
- *	HALL OF FAME POSITION.
- *
- *	@param	$pos		pos Int
- *	@return			int		Positon Value
- *
- *	@author	Frank Esselink
- * 	@since	1.0
- */
-function hof_pos($pos)
-{
-   switch ($pos)
-    {
-      case 2: $val=20;break;
-      case 3: $val=1;break;
-      case 4: $val=14;break;
-      case 5: $val=13;break;
-      case 6: $val=16;break;
-      case 7: $val=3;break;
-      case 8: $val=12;break;
-      case 9: $val=6;break;
-      default: $val=0;break;
-    }
-   return $val;
-}
-
-/**
- *	ALL STAR POSITION.
- *
- *	@param	$pos	int		pos Int
- *	@return			int		Positon Value
- *
- *	@author	Frank Esselink
- * 	@since	1.0
- */
-function ss_pos($pos)
-{
-   switch ($pos)
-    {
-      case 2: $val=20;break;
-      case 3: $val=1;break;
-      case 4: $val=11;break;
-      case 5: $val=7;break;
-      case 6: $val=14;break;
-      case 7: $val=3;break;
-      case 8: $val=5;break;
-      case 9: $val=4;break;
-      default: $val=0;break;
-    }
-   return $val;
 }
  
 /**

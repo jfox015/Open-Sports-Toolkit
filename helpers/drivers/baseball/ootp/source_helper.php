@@ -3,7 +3,7 @@
  *	SOURCE HELPER.
  *	A helper that defines the specific db mappings for the dtata source.
  *
- *	This source driver is scustom tuned for OOTP baseball version 13 and up.
+ *	This source driver is custom tuned for OOTP Baseball version 13 and up.
  *
  * 	@sport 		Baseball
  *	@source		OOTP 13
@@ -180,6 +180,7 @@ if(!function_exists('field_map'))
 					"TN"	=>array('field' => "teamname", 'formula' => 'teams.name as teamname, teams.nickname as teamnick'),
 					"TNACR"	=>array('field' => "team_acr", 'formula' => 'teams.abbr'),
 					"PN"	=>array('field' => "player_name", 'formula' => 'players.first_name, players.last_name'),
+					"PNABBR"=>array('field' => "player_abbr_name", 'formula' => 'CONCAT(SUBSTR(players.first_name,0,1),". ",players.last_name)'),
 					"AGE"	=>array('field' => "players.age"),
 					"POS"	=>array('field' => "position", 'formula' => 'if(players.position=1, players.role, players.position) as position'),
 					"ROLE"	=>array('field' => "players.role"),
@@ -188,6 +189,7 @@ if(!function_exists('field_map'))
 					"BA"	=>array('field' => "players.bats"),
 					"FPTS"	=>array('field' => "fpts"),
 					"PR15"	=>array('field' => "pr15"),
+					"INJURY"	=>array('field' => "injury", 'formula' => 'players.injury_is_injured, players.injury_dtd_injury, players.injury_career_ending, players.injury_dl_left, players.injury_left, players.injury_id'),
 				),
 			'offense'=>
 				array(
@@ -313,12 +315,16 @@ if(!function_exists('field_map'))
 					"GB" => array('id' => 100, 'field' => 'gb'),
 					"HOME" => array('id' => 101, 'field' => 'home'),
 					"ROAD" => array('id' => 102, 'field' => 'road'),
-					"RS" => array('id' => 102, 'field' => 'rs'),
-					"RA" => array('id' => 102, 'field' => 'ra'),
-					"DIFF" => array('id' => 102, 'field' => 'diff'),
-					"STRK" => array('id' => 102, 'field' => 'strk'),
-					"L10" => array('id' => 102, 'field' => 'l10') ,
-					"POFF" => array('id' => 102, 'field' => 'poff')
+					"RS" => array('id' => 105, 'field' => 'rs'),
+					"RA" => array('id' => 106, 'field' => 'ra'),
+					"DIFF" => array('id' => 107, 'field' => 'diff'),
+					"STRK" => array('id' => 108, 'field' => 'strk'),
+					"L10" => array('id' => 109, 'field' => 'l10') ,
+					"POFF" => array('id' => 110, 'field' => 'poff')
+				),
+				"game"=>
+				array(
+					"DATE" => array('id' => 111, 'field' => 'date')
 				)
 			),
 			'positions'=>
@@ -344,11 +350,37 @@ if(!function_exists('field_map'))
 				"CL"	=>array('id'=>13),
 				"SU"	=>array('id'=>26),
 				"MU"	=>array('id'=>27)
+			),
+			'awards' => 
+			array(
+				"POW"	=>array('id'=>0),
+				"POM"	=>array('id'=>1),
+				"BOM"	=>array('id'=>2),
+				"ROM"	=>array('id'=>3),
+				"POY"	=>array('id'=>4),
+				"BOY"	=>array('id'=>5),
+				"ROY"	=>array('id'=>6),
+				"GG"	=>array('id'=>7),
+				"UN"	=>array('id'=>8),
+				"AS"	=>array('id'=>9),
+				"POG"	=>array('id'=>10)
+			),
+			'levels' => 
+			array(
+				"ML"	=>array('id'=>1),
+				"AAA"	=>array('id'=>2),
+				"AA"	=>array('id'=>3),
+				"A_L"	=>array('id'=>4),
+				"SS"	=>array('id'=>5),
+				"R_L"	=>array('id'=>6),
+				"INT"	=>array('id'=>7),
+				"WL"	=>array('id'=>8),
+				"COL"	=>array('id'=>9),
+				"HS"	=>array('id'=>10),
 			)
 		);
 		return $map;
 	}
 }
-
 /* End of file source_helper.php */
-/* Location: ./open_sports_toolkit/helpers/drivers/baseball/ootp13/source_helper.php */
+/* Location: ./open_sports_toolkit/helpers/drivers/baseball/ootp/source_helper.php */

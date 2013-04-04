@@ -189,10 +189,31 @@ if ( ! function_exists('loadOOTPVersions')) {
 					 "11"=>"OOTP 11",
 					 "12"=>"OOTP 12",
 					 "13"=>"OOTP 13"
-					 //,"14"=>OOTP 14" -- Future support
-					 //,"15"=>OOTP 15" -- Future support
-					 //,"16"=>OOTP 16" -- Future support
+					 ,"14"=>"OOTP 14"
+					 //,"15"=>"OOTP 15" -- Future support
+					 //,"16"=>"OOTP 16" -- Future support
+					 //,"17"=>"OOTP 17" -- Future support
 					 );
+	}
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('getVisibleDays')) 
+{
+	function getVisibleDays($league_date = false, $sim_length = 7) 
+	{
+		
+		if ($league_date === false) return;
+		$days = array($league_date);
+		$d = strtotime($league_date);
+		$days_added = 1;
+		while ($days_added < $sim_length)
+		{
+			array_push($days,date('Y-m-d',$d+($days_added*60*60*24)));
+			$days_added++;
+		}
+		return $days;
 	}
 }
 // ------------------------------------------------------------------------

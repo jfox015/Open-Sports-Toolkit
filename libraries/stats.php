@@ -63,7 +63,7 @@ class Stats
 	protected static $source	= false;
 
 	/**
-	 * Tyhe sport and data source specific stats listing.
+	 * The sport and data source specific stats listing.
 	 *
 	 * @access protected
 	 *
@@ -72,13 +72,31 @@ class Stats
 	protected static $stat_list		= array();
 	
 	/**
-	 * Tyhe sport and data source specific position listing.
+	 * The sport and data source specific position listing.
 	 *
 	 * @access protected
 	 *
 	 * @var array
 	 */
 	protected static $position_list		= array();
+	
+	/**
+	 * The sport and data source specific awards listing.
+	 *
+	 * @access protected
+	 *
+	 * @var array
+	 */
+	protected static $award_list		= array();
+	
+	/**
+	 * The sport and data source specific level listing.
+	 *
+	 * @access protected
+	 *
+	 * @var array
+	 */
+	protected static $level_list		= array();
 	
 	/**
 	 * Mapping of source data sources for the stat scope type (career, season, game).
@@ -134,7 +152,8 @@ class Stats
 	{
         if ($sport !== false)
         {
-			if (!function_exists('sports_map')) {
+			if (!function_exists('sports_map')) 
+			{
 				self::$ci->load->helper('open_sports_toolkit/general');
 			}
 			$sports = sports_map();
@@ -144,16 +163,19 @@ class Stats
 			self::$ci->lang->load('open_sports_toolkit/'.self::$sport.'_full');
 			self::$stat_list = stat_list();
 			self::$position_list = position_list();
-
+			self::$award_list = award_list();
+			self::$level_list = level_list();
         }
 		if ($source !== false)
         {
             self::$source = $source;
 			self::load_source_helper();
 
-			$map =field_map();
+			$map = field_map();
 			self::$stat_list = array_merge_recursive(self::$stat_list,$map['stats']);
 			self::$position_list = array_merge_recursive(self::$position_list,$map['positions']);
+			self::$award_list = array_merge_recursive(self::$award_list,$map['awards']);
+			self::$level_list = array_merge_recursive(self::$level_list,$map['levels']);
         }
 	} //end init()
 	
@@ -521,9 +543,11 @@ class Stats
 		if ($range == RANGE_GAME_ID_LIST && $stat_scope != STATS_GAME) {
 			$stat_scope = STATS_GAME;
 		}
+		
+		// For straight data pulls (no sum or avg) turn off the operator
 		$no_operator = false;
-		if ($range == RANGE_CAREER && $stat_scope == STATS_CAREER) {
-			$no_operator = true;
+		if (isset($params['no_operator']) && !empty($params['no_operator'])) {
+			$no_operator = $params['no_operator'];
 		}
 
 		$_table_def = table_map();
@@ -878,6 +902,7 @@ define('CLASS_COMPLETE', 3);
 define('CLASS_EXPANDED', 4);
 define('CLASS_EXTENDED', 5);
 define('CLASS_ULTRA_COMPACT', 6);
+define('CLASS_RECENT', 7);
 
 define('SPLIT_SEASON', 0);
 define('SPLIT_PRESEASOM', 1);

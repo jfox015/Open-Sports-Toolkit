@@ -89,6 +89,7 @@ if(!function_exists('stat_list'))
 					"FN"	=>array('lang' => "FN"),
 					"LN"	=>array('lang' => "LN"),
 					"PN"	=>array('lang' => "PN"),
+					"PNABBR"=>array('lang' => "PNABBR"),
 					"PID"	=>array('lang' => "PID"),
 					"TN"	=>array('lang' => "TN"),
 					"TNACR"	=>array('lang' => "TNACR"),
@@ -101,6 +102,7 @@ if(!function_exists('stat_list'))
 					"BA"	=>array('lang' => "BA"),
 					"FPTS"	=>array('lang' => "FPTS"),
 					"PR15"	=>array('lang' => "PR15"),
+					"INJURY"=>array('lang' => "INJ"),
 				),
 			'offense'=>
                 array(
@@ -231,12 +233,72 @@ if(!function_exists('stat_list'))
 					"STRK" => array('lang' => 'STRK'),
 					"L10" => array('lang' => 'L10'),
 					"POFF" => array('lang' => 'POFF')
+				),
+			"game"=>
+				array(
+					"DATE" => array('lang' => 'DATE')
 				)
 		);
 		return $stats;
 	} // END function
 } // END if
 
+//---------------------------------------------------------------
+
+/**
+ *	AWARD LIST.
+ *	This function returns an array that defines the awards for this sport.
+ *
+ *	@return		Array	Award Categories
+ */
+if(!function_exists('award_list')) 
+{
+	function award_list() 
+	{
+		$awards = 
+		array(
+			"POW"	=>array('lang'=>"POW"),
+			"POM"	=>array('lang'=>"POM"),
+			"BOM"	=>array('lang'=>"BOM"),
+			"ROM"	=>array('lang'=>"ROM"),
+			"POY"	=>array('lang'=>"POY"),
+			"BOY"	=>array('lang'=>"BOY"),
+			"ROY"	=>array('lang'=>"ROY"),
+			"GG"	=>array('lang'=>"GG"),
+			"AS"	=>array('lang'=>"AS"),
+			"POG"	=>array('lang'=>"POG"),
+		);
+		return $awards;
+	}
+}
+//---------------------------------------------------------------
+
+/**
+ *	LEVEL LIST.
+ *	This function returns an array that defines the levels for this sport.
+ *
+ *	@return		Array	Level Categories
+ */
+if(!function_exists('level_list')) 
+{
+	function level_list() 
+	{
+	  $levels =
+		array(
+			"ML"	=>array('lang'=>"ML"),
+			"AAA"	=>array('lang'=>"AAA"),
+			"AA"	=>array('lang'=>"AA"),
+			"A_L"	=>array('lang'=>"A"),
+			"SS"	=>array('lang'=>"SS"),
+			"R_L"	=>array('lang'=>"R"),
+			"INT"	=>array('lang'=>"INT"),
+			"WL"	=>array('lang'=>"WL"),
+			"COL"	=>array('lang'=>"COL"),
+			"HS"	=>array('lang'=>"HS"),
+		);
+		return $levels;
+	}
+}
 //---------------------------------------------------------------
 
 /**
@@ -263,6 +325,9 @@ if(!function_exists('stats_class'))
 				case CLASS_BASIC:
 					$fieldList = array('AVG','R','H','HR','RBI','SB','OBP','OPS');
 					break;
+				case CLASS_RECENT:
+					$fieldList = array('AB','R','H','HR','RBI','BB','SO','SB');
+					break;
 				case CLASS_COMPLETE:
 					$fieldList = array('AVG','G','AB','R','H','2B','3B','HR','RBI','BB','SO','SB','OBP','SLG','OPS');
 					break;
@@ -287,6 +352,9 @@ if(!function_exists('stats_class'))
 					break;
 				case CLASS_BASIC:
 					$fieldList = array('W','L','SV','ERA','IP','BB','SO','WHIP');
+					break;
+				case CLASS_RECENT:
+					$fieldList = array('W','L','SV','IP','HA','ERA','BB','SO');
 					break;
 				case CLASS_COMPLETE:
 					$fieldList = array('W','L','SV','ERA','G','GS','IP','CG','SHO','HA','RA','ER','HRA','BB','SO','WHIP');
@@ -323,14 +391,20 @@ if(!function_exists('stats_class'))
 		} // END if
 		
 		$fields = array();
+		// NOTE 
 		if (in_array('NAME',$extended))
 		{
 			$genArr = array('PN','PID');
 			foreach($genArr as $field) {
 				array_push($fields,$field);
 			}
+		} else if (in_array('NAME_ABBR',$extended))
+		{
+			$genArr = array('PNABBR','PID');
+			foreach($genArr as $field) {
+				array_push($fields,$field);
+			}
 		}
-
         if (in_array('TID',$extended))
         {
             array_push($fields,'TID');
@@ -367,6 +441,10 @@ if(!function_exists('stats_class'))
 		if (in_array('DRAFT',$extended))
 		{
 			array_push($fields,'DRAFT');
+		}
+		if (in_array('INJURY',$extended))
+		{
+			array_push($fields,'INJURY');
 		}
 		foreach($fieldList as $field) {
 			array_push($fields,$field);
@@ -477,6 +555,7 @@ if(!function_exists('format_stats'))
 					case 'PN':
 					case 'TN':
 					case 'TNACR':
+					case 'INJURY':
 						$newRow[$col] = format_extended_fields($field, $col, $row);
 						break;
 					default:
@@ -539,12 +618,38 @@ if(!function_exists('format_extended_fields'))
 					$newVal = '- -';
 				}
 				break;
+			case 'INJURY':
+				// INJURY STATUS
+				$injStatus = "";
+				if ($row['injury_is_injured'] == 1) {
+					$injStatus = make_injury_status_string($row);
+				}
+				if (!empty($injStatus)){
+					if (isset($row['injury_dl_left']) && $row['injury_dl_left'] > 0) 
+					{
+                        $newVal = '&nbsp;<img src="'.img_path().'red_cross.gif" width="7" height="7" align="absmiddle" alt="'.$injStatus.'" title="'.$injStatus.'" />&nbsp; ';
+					}
+					else if (isset($row['injury_dtd_injury']) && $row['injury_dtd_injury'] != 0) 
+					{
+                        $newVal = '&nbsp;<acronym style="font-size:smaller;text-decoration:none, outline:none;font-weight:bold; color:#C00;" title="'.$injStatus.'">DTD</acronym>';
+					}
+				}
+				break;
+			// PLAYER NAME
 			case 'PN':
-
-				$name = $row['first_name']." ".$row['last_name'];
+			case 'PNABBR':
+				
+				if (isset($row['player_abbr_name']) && !empty($row['player_abbr_name'])) 
+				{
+					$name = $row['player_abbr_name'];
+				}
+				else 
+				{
+					$name = $row['first_name']." ".$row['last_name'];
+				}
 				if (isset($row['player_id'])) 
 				{
-					$val = anchor('/players/profile/' . $row['player_id'],$name,array('target'=>'_blank'));
+					$val = anchor('players/profile/' . $row['player_id'],$name,array('target'=>'_blank'));
 				}
 				else 
 				{
@@ -552,25 +657,21 @@ if(!function_exists('format_extended_fields'))
 				}
 				$newVal = $val;
 				break;
+            // TEAM NAME AND ACCRONYM
 			case 'TN':
-				
-				$name = $row['teamname']." ".$row['teamnick'];
-				if (isset($row['team_id'])) 
-				{
-					$val = anchor('/teams/' . $row['team_id'],$name,array('target'=>'_blank'));
-				}
-				else 
-				{
-					$val = $name;
-				}
-				$newVal = $val;
-				break;
 			case 'TNACR':
 				
-				$name = $row['abbr'];
+				if (isset($row['abbr']) && !empty($row['abbr'])) 
+				{
+					$name = $row['abbr'];
+				}
+				else 
+				{
+					$name = $row['teamname']." ".$row['teamnick'];
+				}
 				if (isset($row['team_id'])) 
 				{
-					$val = anchor('/teams/' . $row['team_id'],$name,array('target'=>'_blank'));
+					$val = anchor('teams/' . $row['team_id'],$name,array('target'=>'_blank'));
 				}
 				else 
 				{

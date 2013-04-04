@@ -155,6 +155,9 @@ class Leagues_model extends Base_ootp_model
             $date = '';
 			switch($date_type) 
 			{
+				case 'current_year':
+					$date = date('Y', strtotime($league[0]['current_date']));
+					break;
 				case 'current':
 					$date = $league[0]['current_date'];
 					break;

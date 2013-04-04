@@ -106,8 +106,7 @@ class Players_model extends Base_ootp_model {
         if ($player_id === false) { return; }
         $details = array();
         $this->db->dbprefix = '';
-        $this->db->select('players.player_id,first_name,last_name,players.nick_name as playerNickname,teams.team_id, teams.name AS team_name, teams.nickName as teamNickname, position,role, date_of_birth,weight,height,bats,throws,draft_year,draft_round,draft_pick,draft_team_id,retired,
-						  injury_is_injured, injury_dtd_injury, injury_career_ending, injury_dl_left, injury_left, injury_id, logo_file, players.city_of_birth_id, age');
+        $this->db->select('players.player_id,first_name,last_name,players.nick_name as playerNickname,teams.team_id, teams.name AS team_name, teams.nickName as teamNickname, position,role, date_of_birth,weight,height,bats,throws,draft_year,draft_round,draft_pick,draft_team_id,retired,injury_is_injured, injury_dtd_injury, injury_career_ending, injury_dl_left, injury_left, injury_id, logo_file, players.city_of_birth_id, age');
         $this->db->join('teams','teams.team_id = players.team_id','right outer');
         $this->db->where('players.player_id',$player_id);
         $query = $this->db->get($this->table);
@@ -287,7 +286,7 @@ class Players_model extends Base_ootp_model {
         $players = array();
         if (!$this->use_prefix) $this->db->dbprefix = '';
         $this->db->select('players.player_id, first_name, last_name, players.position, players.role, players.injury_is_injured,
-        players.injury_dtd_injury, players.injury_career_ending, players.injury_dl_left, players.injury_left, players.injury_id,
+        players.injury_dtd_injury, players.injury_career_ending, players.injury_dl_left, players.injury_left, players.injury_id, age,
         if (players.team_id = 0, "-1", teams.team_id) as team_id,
        if (players.team_id = 0, "", teams.name) as teamname, if (players.team_id = 0, "",teams.nickname) as teamnick', false);
         $this->db->join('teams', 'teams.team_id = players.team_id', 'right outer');
@@ -365,7 +364,7 @@ class Players_model extends Base_ootp_model {
      *
      */
    public function get_active_players($league_id = false, $select_box = false) {
-        return $this->get_players($league_id, true, $select_box);
+        return $this->get_players($league_id, 'status', 1, $select_box);
     }
 
 	//---------------------------------------------------------------
@@ -380,7 +379,7 @@ class Players_model extends Base_ootp_model {
      *
      */
     public function get_retired_players($league_id = false, $select_box = false) {
-        return $this->get_players($league_id, false, $select_box);
+        return $this->get_players($league_id, 'status', 0, $select_box);
     }
 
 	//---------------------------------------------------------------
@@ -389,14 +388,14 @@ class Players_model extends Base_ootp_model {
      *	GET PLAYER AWARDS.
      *	Returns all awards won by the players broken out by award type.
      *
-     *	@param	$ootp_league_id		OOTP League ID value
+     *	@param	$league_id			League ID value
      *	@param	$player_id			Player Id, defaults to current player id if empty
      *	@return						Award Array
      *	@since						1.0
      *	@version					1.0.1
      *
      */
-    public function get_player_awards($ootp_league_id, $player_id = false) {
+    public function get_player_awards($league_id, $player_id = false) {
 
         if ($player_id === false) { $player_id = $this->player_id; }
 
@@ -404,7 +403,7 @@ class Players_model extends Base_ootp_model {
         if (!$this->use_prefix) $this->db->dbprefix = '';
         $this->db->select("award_id,year,position");
         $this->db->from('players_awards');
-        $this->db->where('league_id',$ootp_league_id);
+        $this->db->where('league_id',$league_id);
         $this->db->where('player_id',$player_id);
         $this->db->where_in('award_id',array(4,5,6,7,9));
         $this->db->order_by('award_id','award_id,year,position');
@@ -899,15 +898,28 @@ class Players_model extends Base_ootp_model {
 
 	//---------------------------------------------------------------
 	
-	public function getRecentGameStats($ootp_league_id, $last_date, $lgyear, $days = 7, $player_id = false) {
+	/**
+     *	GET RECENT GAME STATS.
+     *	Returns statistics for recent games.
+     *
+     *	@param	$league_id			League ID value
+     *	@param	$player_id			Player Id, defaults to current player id if empty
+     *	@return						Stat Array in key = value format
+     *	@since						1.0
+     *	@version					1.0.2
+     *
+     */
+    public function get_recent_game_stats($league_id = false, $last_date = false, $year = false, $days = 7, $player_id = false) {
 
-        if ($player_id === false) { $player_id = $this->player_id; }
+		if ($player_id === false) 	{ $player_id = $this->player_id; }
+		if ($last_date === false) 	{ $last_date = date('Y-m-d 00:00:00'); }
+		if ($year === false) 		{ $year = date('Y'); }
 
         // GET ALL TEAMS
         if (!$this->use_prefix) $this->db->dbprefix = '';
         $teams = array();
         $this->db->select("team_id, abbr");
-        $this->db->where("league_id",$ootp_league_id);
+        $this->db->where("league_id",$league_id);
         $query = $this->db->get("teams");
         if ($query->num_rows() > 0) {
             foreach($query->result() as $row) {
@@ -918,12 +930,13 @@ class Players_model extends Base_ootp_model {
 
         $stats = array();
         $pos = 0;
-        $team_id = $this->getTeam();
-        // GET PLAYER POSITION
-        $pos = $this->getPlayerPosition();
+
+        // GET PLAYER TEAM & POSITION
+        $team_id = $this->get_player_team($player_id);
+		$pos = $this->get_player_position($player_id);
 
         $select = "games.date,games.home_team,games.away_team,";
-        $this->db->flush_cache();
+        if (!$this->use_prefix) $this->db->dbprefix = '';
         if ($pos == 1) {
             $this->db->select($select.'w,l,s,ip,ha,er,bb,k');
             $table = 'players_game_pitching_stats';
@@ -932,9 +945,9 @@ class Players_model extends Base_ootp_model {
             $table = 'players_game_batting';
         }
         $this->db->from($table);
-        $this->db->join($this->tables['OOTP_GAMES'],$table.".game_id = games.game_id",'left');
+        $this->db->join('games',$table.".game_id = games.game_id",'left');
         $this->db->where($table.'.player_id',$player_id);
-        $this->db->where($table.'.year',$lgyear);
+        $this->db->where($table.'.year',$year);
         $this->db->where($table.'.level_id',1);
         $this->db->where('games.game_type',0);
         $this->db->where("(games.home_team = ".$team_id." OR games.away_team = ".$team_id.")");
@@ -976,6 +989,89 @@ class Players_model extends Base_ootp_model {
 
     }	
 
+	//---------------------------------------------------------------
+	
+	/**
+     *	GET PLAYER SCHEDULES.
+     *	Returns a list of upcoming games for one or more players.
+     *
+     *	@param	$players_list		Player id list
+     *	@param	$start_date			The first day to show games for
+     *	@param	$sim_len			Number of days to display
+     *	@return						Schedule Array in key = value format
+     *
+     */
+    public function get_player_schedules($players_list = false, $start_date = false ,$sim_len = 7) 
+	{
+		if (!function_exists('getVisibleDays')) {
+			$this->load->helper('open_sports_toolkit/datalist');
+		}
+		
+		$daysInPeriod = getVisibleDays($start_date, $sim_len);  
+		$schedules = array();
+		//$schedules = array('players_active'=>array(),'players_reserve'=>array(),'players_injured'=>array());
+		// LOAD PLAYERS
+        if (!$this->use_prefix) $this->db->dbprefix = '';
+        if (is_array($players_list) && sizeof($players_list) > 0) {
+			foreach ($players_list as $arr_id => $players_arr) {
+				//if ($arr_id == 0) { $list = 'players_active'; } else if ($arr_id == 1) { $list = 'players_reserve'; } else { $list = 'players_injured'; }
+				if (is_array($players_arr) && sizeof($players_arr) > 0) {
+					foreach ($players_arr as $id => $data) {
+						$projStarts = array();
+						/**
+						 * TODO  GET PITCHING PROJECTED STARTS
+						 */
+						//if ($data['position'] == 1 && $data['role'] == 11) {
+							// GET START PROJECTIONS
+						//}
+						$this->db->flush_cache();
+						$this->db->select('game_id,home_team,away_team,games.date AS game_date,time AS game_time');
+						$this->db->where("DATEDIFF('".$start_date."',games.date)<=",0);
+						$this->db->where("DATEDIFF('".$start_date."',games.date)>-",$sim_len);
+						$this->db->where('(home_team = '.$data['team_id'].' OR away_team = '.$data['team_id'].')');
+						$this->db->order_by('games.date','asc');
+						$query = $this->db->get('games');
+						$player_schedule = array();
+						$offDay = 0;
+						if ($query->num_rows() > 0) {
+							$dateCount = 0;
+							$prevDate = -1;
+							foreach ($query->result() as $row) {
+								$game_date = strtotime($row->game_date);
+								// HANDLE MULTIPLE GAMES FOR A SINGLE DAY
+								if (($prevDate != -1 && $prevDate == $game_date)) {
+									$dateCount -= 1;
+								}
+								$calendar_date = strtotime($daysInPeriod[$dateCount]);
+								$date_diff = $game_date - $calendar_date;
+								$diffDays = floor($date_diff/(60*60*24));
+								// IF AN OFF DAY IS FOUND, ADD AN EMPTY FIELD
+								if ($diffDays != 0) {
+									$player_schedule = $player_schedule + array(($offDay-=1)=>array('home_team'=>-1,
+															   'away_team'=>-1));
+									$dateCount++;
+								}
+								$player_schedule = $player_schedule + array($row->game_id=>array('home_team'=>$row->home_team,
+															   'away_team'=>$row->away_team,'game_date'=>$row->game_date,
+															   'game_time'=>$row->game_time));
+								// SAVE LAST DATE USED TO CORRETLY HANDLE MUTLTIPLE GAMES ON A SINGLE DAY
+								$prevDate = $game_date;
+								$dateCount++;
+							} // END foreach
+							if (sizeof($player_schedule) < intval($sim_len)) {
+								$player_schedule = $player_schedule + array(($offDay-=1)=>array('home_team'=>-1,
+												   'away_team'=>-1));
+							}
+						} // END if
+						$query->free_result();
+						$schedules = $schedules + array($id=>$player_schedule);
+					} // END foreach
+				} // END if
+			} // END foreach
+		} // END if
+        if (!$this->use_prefix) $this->db->dbprefix = $this->dbprefix;
+        return $schedules;
+	}
 	//---------------------------------------------------------------
 	
 	
