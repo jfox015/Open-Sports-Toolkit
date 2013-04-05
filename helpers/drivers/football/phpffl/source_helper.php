@@ -124,7 +124,7 @@ if(!function_exists('table_map'))
                 STATS_GAME => 'players_game_batting',
                 STATS_SEASON_AVG => 'players_career_batting_stats'
 			),
-			'specialty'=>
+			'speciality'=>
 			array(
                 STATS_CAREER => 'players_career_pitching_stats',
                 STATS_SEASON => 'players_career_pitching_stats',
@@ -170,7 +170,7 @@ if(!function_exists('field_map'))
 				array(
 					"" => array('id' => , 'field' => ''),
 				),
-				"specialty"=>
+				"speciality"=>
 				array(
 					"" => array('id' => , 'field' => ''),
 				

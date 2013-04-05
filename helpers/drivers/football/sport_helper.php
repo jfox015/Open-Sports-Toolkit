@@ -112,7 +112,7 @@ if(!function_exists('stat_list'))
 					'TD_O' => array('lang' => 'TD_O'),
 					'YDS_O' => array('lang' => 'YDS_O')
                 ),
-			'specialty' =>
+			'speciality' =>
                 array(
                     '1-19' => array('lang' => '1-19'),
 					'20-29' => array('lang' => '20-29'),

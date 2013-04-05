@@ -90,6 +90,9 @@ if(!function_exists('get_split'))
 		$split_sql = '';
 		switch ($split_cat) 
 		{
+			case SPLIT_DEFENSE:
+				$split_sql = 'split_id = 0';
+				break;
 			case SPLIT_SEASON:
 				$split_sql = 'split_id = 1';
 				break;
@@ -127,7 +130,7 @@ if(!function_exists('table_map'))
                 STATS_GAME => 	'players_game_batting',
                 STATS_SEASON_AVG => 'players_career_batting_stats'
 			),
-			'specialty'=>
+			'speciality'=>
 			array(
                 STATS_CAREER => 'players_career_pitching_stats',
                 STATS_SEASON => 'players_career_pitching_stats',
@@ -178,10 +181,10 @@ if(!function_exists('field_map'))
 					"PID"	=>array('field' => "player_id", 'formula' => 'players.player_id'),
 					"TID"	=>array('field' => "team_id", 'formula' => 'players.team_id'),
 					"TN"	=>array('field' => "teamname", 'formula' => 'teams.name as teamname, teams.nickname as teamnick'),
-					"TNACR"	=>array('field' => "team_acr", 'formula' => 'teams.abbr'),
+					"TNACR"	=>array('field' => "team_acr", 'formula' => 'teams.abbr as team_acr'),
 					"PN"	=>array('field' => "player_name", 'formula' => 'players.first_name, players.last_name'),
-					"PNABBR"=>array('field' => "player_abbr_name", 'formula' => 'CONCAT(SUBSTR(players.first_name,0,1),". ",players.last_name)'),
-					"AGE"	=>array('field' => "players.age"),
+                    "PNABBR"=>array('field' => "player_abbr_name", 'formula' => 'CONCAT(SUBSTRING(players.first_name,1,1),". ",players.last_name) as player_abbr_name'),
+                    "AGE"	=>array('field' => "players.age"),
 					"POS"	=>array('field' => "position", 'formula' => 'if(players.position=1, players.role, players.position) as position'),
 					"ROLE"	=>array('field' => "players.role"),
 					"LVL"	=>array('field' => "players.level_id"),
@@ -228,7 +231,7 @@ if(!function_exists('field_map'))
 					"WALK" => array('id' => 83, 'field' => 'walk', 'formula' => 'if (([OPERATOR](bb)/([OPERATOR](ab)+[OPERATOR](bb)))*100=0,0,[OPERATOR](bb)/([OPERATOR](ab)+[OPERATOR](bb))*100) as walk'),
 					"TRO" => array('id' => 103, 'field' => 'tro', 'formula' => 'if(SUM(pa)<(2*[GAME_COUNT]),-99,(0.47*(sum(h)-sum(d)-sum(t)-sum(hr)) + .78*sum(d) + 1.09*sum(t) + 1.4*sum(hr) + .33*(sum(bb)-sum(hp)) + .3*sum(sb) + .5*(-.52*sum(cs) - .26*(sum(ab)-sum(h)-sum(gdp)) - .72*sum(gdp)))) as tro')
 				),
-				"specialty"=>
+				"speciality"=>
 				array(
 					"G" => array('id' => 27, 'field' => 'g'),
 					"GS" => array('id' => 28, 'field' => 'gs'),

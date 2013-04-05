@@ -210,7 +210,7 @@ class Stats
      * @static
      * @param 	String 		$type					Stat type (league, team, player, game)
      * @param 	int 		$id						ID param
-     * @param 	int 		$stats_type           	Stats Type (offense, defense, specialty, injury, team)
+     * @param 	int 		$stats_type           	Stats Type (offense, defense, speciality, injury, team)
      * @param 	Array 		$stats_class          	Stats Class definition
      * @param 	int 		$stat_scope          	Scope of stats to return (career, season, game, season avg)
      * @param 	int 		$range           		Range for data values
@@ -299,6 +299,7 @@ class Stats
                 $query->free_result();
             }
 		} // END if
+        //echo(self::$ci->db->last_query()."<br />");
 		return array('stats'=>$stats, 'headers'=>$headers, 'totals' =>$totals);
 	}
 
@@ -528,7 +529,7 @@ class Stats
      * Accepts the player type ans stats class (and custom field defs) and builds a SQL query.
      * @static
 	 * @access	private
-     * @param 	int 	$stats_type           	Stats Type (offense, defense, specialty, injury)
+     * @param 	int 	$stats_type           	Stats Type (offense, defense, speciality, injury)
      * @param 	int 	$stats_class          	Stats Class definition
      * @param 	int 	$stat_scope           	Scope of stats to return
      * @param 	int 	$range           	 	Range type of stats
@@ -884,7 +885,7 @@ define('ID_GAME','game');
 
 define('TYPE_OFFENSE', 'offense');
 define('TYPE_DEFENSE', 'defense');
-define('TYPE_SPECIALTY', 'specialty');
+define('TYPE_SPECIALTY', 'speciality');
 define('TYPE_INJURY', 'injury');
 define('TYPE_TEAM', 'team');
 define('TYPE_LEAGUE', 'league');
@@ -908,6 +909,7 @@ define('SPLIT_SEASON', 0);
 define('SPLIT_PRESEASOM', 1);
 define('SPLIT_PLAYOFFS', 2);
 define('SPLIT_NONE', 3);
+define('SPLIT_DEFENSE', 4);
 
 define('RANGE_GAME_ID_LIST', 0);
 define('RANGE_DATE_LIST', 1);

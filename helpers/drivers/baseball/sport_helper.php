@@ -60,12 +60,12 @@ if(!function_exists('position_list'))
 			"MI"	=>array('lang'=>"MI", 'type' => 'offense'),
 			"CI"	=>array('lang'=>"CI", 'type' => 'offense'),
 			"U"		=>array('lang'=>"U",  'type' => 'offense'),
-			"P"		=>array('lang'=>"P",  'type' => 'specialty'),
-			"SP"	=>array('lang'=>"SP", 'type' => 'specialty'),
-			"RP"	=>array('lang'=>"RP", 'type' => 'specialty'),
-			"CL"	=>array('lang'=>"CL", 'type' => 'specialty'),
-			"SU"	=>array('lang'=>"SU", 'type' => 'specialty'),
-			"MU"	=>array('lang'=>"MU", 'type' => 'specialty'),
+			"P"		=>array('lang'=>"P",  'type' => 'speciality'),
+			"SP"	=>array('lang'=>"SP", 'type' => 'speciality'),
+			"RP"	=>array('lang'=>"RP", 'type' => 'speciality'),
+			"CL"	=>array('lang'=>"CL", 'type' => 'speciality'),
+			"SU"	=>array('lang'=>"SU", 'type' => 'speciality'),
+			"MU"	=>array('lang'=>"MU", 'type' => 'speciality'),
 		);
 		return $positions;
 	}
@@ -141,7 +141,7 @@ if(!function_exists('stat_list'))
                     "WALK" => array('lang' => "WALK"),
                     "TRO" => array('lang' => "TRO")
                 ),
-			'specialty' =>
+			'speciality' =>
                 array(
                     "G" => array('lang' => "G"),
                     "GS" => array('lang' => "GS"),
@@ -398,7 +398,7 @@ if(!function_exists('stats_class'))
 			foreach($genArr as $field) {
 				array_push($fields,$field);
 			}
-		} else if (in_array('NAME_ABBR',$extended))
+		} else if (in_array('PNABBR',$extended))
 		{
 			$genArr = array('PNABBR','PID');
 			foreach($genArr as $field) {
@@ -553,6 +553,7 @@ if(!function_exists('format_stats'))
 					case 'ADD':
 					case 'DRAFT':
 					case 'PN':
+					case 'PNABBR':
 					case 'TN':
 					case 'TNACR':
 					case 'INJURY':
@@ -585,7 +586,7 @@ if(!function_exists('format_stats'))
 
 /**
  * Format Extended Fields.
- * Formats specialty stats fields for display. These fields have some extra formatting beyond numbers so they are segmented off.
+ * Formats speciality stats fields for display. These fields have some extra formatting beyond numbers so they are segmented off.
  * This can also help extendability for future modules.
  *
  * @static
@@ -639,7 +640,7 @@ if(!function_exists('format_extended_fields'))
 			case 'PN':
 			case 'PNABBR':
 				
-				if (isset($row['player_abbr_name']) && !empty($row['player_abbr_name'])) 
+				if (isset($row['player_abbr_name']) && !empty($row['player_abbr_name']))
 				{
 					$name = $row['player_abbr_name'];
 				}
@@ -661,9 +662,9 @@ if(!function_exists('format_extended_fields'))
 			case 'TN':
 			case 'TNACR':
 				
-				if (isset($row['abbr']) && !empty($row['abbr'])) 
+				if (isset($row['team_acr']) && !empty($row['team_acr']))
 				{
-					$name = $row['abbr'];
+					$name = $row['team_acr'];
 				}
 				else 
 				{
