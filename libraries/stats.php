@@ -331,6 +331,31 @@ class Stats
         return self::$position_list;
     }
 
+    //--------------------------------------------------------------------
+
+    /**
+     * Get Position Array.
+     * Returns an id => value array of positions.
+     *
+     * @static
+     * @return array            stats_list Array
+     */
+    public static function get_position_array($include_group = false)
+    {
+        $arr_out = array();
+        $types = array(TYPE_OFFENSE, TYPE_DEFENSE, TYPE_SPECIALTY);
+        foreach ($types as $type) {
+           $arr_out[$type] = array();
+            foreach (self::$position_list as $pos => $details) {
+                if ($details['type'] == $type) {
+                    if(($details['group'] == true && $include_group) ||$details['group'] == false )  {
+                        $arr_out[$type] = $arr_out[$type] + array($details['id'] => $pos);
+                    }
+                }
+            }
+        }
+        return $arr_out;
+    }
 	//--------------------------------------------------------------------
 	
 	/**
@@ -575,8 +600,9 @@ class Stats
 		/----------------------------------------------------------*/ 
 		$identifier = identifier_map();
 		$query .= " RIGHT OUTER JOIN ".$_table_def['players']." ON ".$_table_def['players'].".".$identifier['player']." = ".$tbl.".".$identifier['player'];
-		
-		if ($query_type != 'player' && !empty($params['identifier']) && !isset($params['totals_row'])) {
+		$query .= " RIGHT OUTER JOIN ".$_table_def['team']." ON ".$_table_def['team'].".".$identifier['team']." = ".$tbl.".".$identifier['team'];
+
+		if (($query_type != 'player' && $query_type != 'team') && !empty($params['identifier']) && !isset($params['totals_row'])) {
 			$query .= " RIGHT OUTER JOIN ".$_table_def[$query_type]." ON ".$_table_def[$query_type].".".$params['identifier']." = ".$tbl.".".$params['identifier'];
 		}
         /*------------------------------------
