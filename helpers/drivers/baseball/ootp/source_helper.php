@@ -380,6 +380,14 @@ if(!function_exists('field_map'))
 				"WL"	=>array('id'=>8),
 				"COL"	=>array('id'=>9),
 				"HS"	=>array('id'=>10),
+			),
+			'splits' =>
+			array(
+                "DEF"	=>array('id'=>0),
+                "REG"	=>array('id'=>1),
+                "ST"	=>array('id'=>2),
+                "PS"	=>array('id'=>21),
+                "OS"	=>array('id'=>100),
 			)
 		);
 		return $map;

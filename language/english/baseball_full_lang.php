@@ -150,3 +150,9 @@ $lang['full_INT']		= 'International';
 $lang['full_WL']		= 'Winter League';
 $lang['full_COL']		= 'College';
 $lang['full_HS']		= 'High School';
+// LEVELS
+$lang['full_REG']		= 'Regular Season';
+$lang['full_ST']		= 'Spring Training';
+$lang['full_PS']		= 'Post Seeson';
+$lang['full_OS']		= 'Off Season';
+$lang['full_DEF']		= 'Defense';

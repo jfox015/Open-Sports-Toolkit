@@ -70,7 +70,16 @@ class Stats
 	 * @var array
 	 */
 	protected static $stat_list		= array();
-	
+
+	/**
+	 * The sport and data source specific splits listing.
+	 *
+	 * @access protected
+	 *
+	 * @var array
+	 */
+	protected static $splits_list	= array();
+
 	/**
 	 * The sport and data source specific position listing.
 	 *
@@ -165,6 +174,7 @@ class Stats
 			self::$position_list = position_list();
 			self::$award_list = award_list();
 			self::$level_list = level_list();
+			self::$splits_list = split_list();
         }
 		if ($source !== false)
         {
@@ -176,6 +186,7 @@ class Stats
 			self::$position_list = array_merge_recursive(self::$position_list,$map['positions']);
 			self::$award_list = array_merge_recursive(self::$award_list,$map['awards']);
 			self::$level_list = array_merge_recursive(self::$level_list,$map['levels']);
+			self::$splits_list = array_merge_recursive(self::$splits_list,$map['splits']);
         }
 	} //end init()
 	
@@ -317,6 +328,39 @@ class Stats
         return self::$stat_list;
     }
 
+	//--------------------------------------------------------------------
+
+	/**
+     * Get Stats List.
+     * Returns the internal splits_list object.
+     *
+     * @static
+     * @return array            splits_list Array
+     */
+    public static function get_splits_list()
+    {
+        return self::$splits_list;
+    }
+
+    //--------------------------------------------------------------------
+
+    /**
+     * Get Position Array.
+     * Returns an id => value array of positions.
+     *
+     * @static
+     * @return array            stats_list Array
+     */
+    public static function get_splits_array($only_invisible = true)
+    {
+        $arr_out = array();
+        foreach (self::$splits_list as $split => $details) {
+            if(($details['visible'] === false && !$only_invisible) ||$details['visible'] == true)  {
+               $arr_out = $arr_out + array($details['id'] => $split);
+            }
+        }
+        return $arr_out;
+    }
 	//--------------------------------------------------------------------
 
 	/**

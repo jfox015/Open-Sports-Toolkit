@@ -302,6 +302,29 @@ if(!function_exists('level_list'))
 //---------------------------------------------------------------
 
 /**
+ *	SPLIT LIST.
+ *	This function returns an array that defines the splits for this sport.
+ *
+ *	@return		Array	Level Categories
+ */
+if(!function_exists('split_list'))
+{
+	function split_list()
+	{
+	  $splits =
+		array(
+            "DEF"	=>array('lang'=>"DEF", 'visible' => false),
+            "REG"	=>array('lang'=>"REG", 'visible' => true),
+			"ST"	=>array('lang'=>"ST", 'visible' => true),
+			"PS"	=>array('lang'=>"PS", 'visible' => true),
+			"OS"	=>array('lang'=>"OS", 'visible' => false),
+		);
+		return $splits;
+	}
+}
+//---------------------------------------------------------------
+
+/**
  *	Get Stats Class.
  *	Accepts the player type ans stats class (and custom field defs) and builds a SQL query.
  *	@param		$stat_type	int				TYPE_OFFENSE, TYPE_DEFENSE or TYPE_SPECIALTY

@@ -152,3 +152,9 @@ $lang['acyn_INT']		= 'INT';
 $lang['acyn_WL']		= 'WL';
 $lang['acyn_COL']		= 'COL';
 $lang['acyn_HS']		= 'HS';
+// LEVELS
+$lang['acyn_REG']		= 'REG';
+$lang['acyn_ST']		= 'ST';
+$lang['acyn_PS']		= 'PS';
+$lang['acyn_OS']		= 'OS';
+$lang['acyn_DEF']		= 'DEF';
