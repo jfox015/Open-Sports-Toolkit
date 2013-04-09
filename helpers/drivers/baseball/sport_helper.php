@@ -322,6 +322,31 @@ if(!function_exists('split_list'))
 		return $splits;
 	}
 }
+
+ //---------------------------------------------------------------
+
+/**
+ *	HAND LIST.
+ *	Converts a hand index ID to a string.
+ *
+ *	@return		Array	Hand List
+ *
+ */
+if(!function_exists('hands_list'))
+{
+	function hands_list()
+	{
+		$hands =
+		array(
+            "SW"	=>array('lang'=>"SW", 'visible' => true),
+            "LH"	=>array('lang'=>"LH", 'visible' => true),
+            "RH"	=>array('lang'=>"RH", 'visible' => true),
+            "UN"	=>array('lang'=>"UN", 'visible' => false),
+		);
+		return $hands;
+    }
+}
+
 //---------------------------------------------------------------
 
 /**
@@ -439,7 +464,7 @@ if(!function_exists('stats_class'))
 				array_push($fields,$field);
 			}
 		}
-		if (in_array('TEAM_ACY',$extended))
+		if (in_array('TNACR',$extended))
 		{
 			$genArr = array('TNACR','TID');
 			foreach($genArr as $field) {
@@ -494,7 +519,8 @@ if(!function_exists('stats_class'))
 
 if(!function_exists('format_stats')) 
 {
-	function format_stats($stat_type = TYPE_OFFENSE, $stats = false, $categories = false, $stat_list = false, $position_list = false, $debug = false)
+	function format_stats($stat_type = TYPE_OFFENSE, $stats = false, $categories = false, $stat_list = false,
+                          $position_list = false, $hands_list = false, $level_list = false, $debug = false)
 	{
 		// ERROR HANDLING
 		if ($stats === false || $categories === false || $stat_list === false)
@@ -524,7 +550,7 @@ if(!function_exists('format_stats'))
                 switch ($field) {
 					case 'BA':
 					case 'TH':
-						$newRow[$col] = get_hand($row[$col]);
+						$newRow[$col] = lang('acyn_'.get_hand($row[$col],$hands_list));
 						break;
 					case 'pos':
 					case 'positions':
@@ -539,7 +565,7 @@ if(!function_exists('format_stats'))
 						$newRow[$col] = get_pos($row[$col], $position_list);
 						break;
 					case 'LVL':
-						$newRow[$col] = get_level($row[$col]);
+						$newRow[$col] = lang('acyn_'.get_level($row[$col],$level_list));
 						break;
 					case 'AVG':
 					case 'OBP':

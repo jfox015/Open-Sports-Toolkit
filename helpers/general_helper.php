@@ -320,6 +320,41 @@ function get_pitch_rating($pitch,$ir,$gb,$mvmnt,$velo)
 //--------------------------------------------------------------------
 	
 /**
+ * 	Get Hand.
+ * 	Returns the acronym for a hand for use in displaying the text.
+ *
+ *	NOTE: This function requies that the Stats library be inialtized with 
+ *	the sport and scource values to populate the level_list property.
+ *
+ * 	@static
+ * 	@param 		string		$hand			Hand ID
+ * 	@param 		array		$hand_str		The sport and source specific hand list
+ * 	@return 	string          			Hand acronym
+ *	@since	0.3
+ */
+ if (!function_exists('get_hand'))
+ {
+    function get_hand($hand, $hands_list = false)
+    {
+        $hand_str = '';
+		if ($hands_list === false || count($hands_list) == 0)
+		{
+			return false;
+		}
+        foreach($hands_list as $hnd => $details)
+        {
+            if (isset($details['id']) && $details['id'] == $hand)
+            {
+                $hand_str = $hnd;
+                break;
+            }
+        }
+		return $hand_str;
+    }
+}
+//--------------------------------------------------------------------
+	
+/**
  * 	Get Level.
  * 	Returns the acronym for a level for use in displaying the text.
  *
@@ -442,28 +477,6 @@ if (!function_exists('format_time')) {
 	}
 }
  
-/**
- *	GET HAND.
- *	Converts a hand index ID to a string.
- *
- *	@param	$handID		int 		Hand Index
- *	@return				String		String value
- *
- *	@author	Frank Esselink
- * 	@since	1.0
- */
-function get_hand($handID)
-{
-  switch ($handID)
-   {
-     case 3: $hand="S"; break;
-     case 2: $hand="L"; break;
-     case 1: $hand="R"; break;
-     default: $hand="U"; break;
-   }
-  return $hand;
-}
-
 /**
  *	DATE DIFFERENCE.
  *

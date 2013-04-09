@@ -153,6 +153,10 @@ $lang['full_HS']		= 'High School';
 // LEVELS
 $lang['full_REG']		= 'Regular Season';
 $lang['full_ST']		= 'Spring Training';
-$lang['full_PS']		= 'Post Seeson';
+$lang['full_PS']		= 'Post Season';
 $lang['full_OS']		= 'Off Season';
 $lang['full_DEF']		= 'Defense';
+// Hands
+$lang['full_RH']		= 'Right';
+$lang['full_LH']		= 'Left';
+$lang['full_SW']		= 'Switch';

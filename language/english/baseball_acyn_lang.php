@@ -158,3 +158,7 @@ $lang['acyn_ST']		= 'ST';
 $lang['acyn_PS']		= 'PS';
 $lang['acyn_OS']		= 'OS';
 $lang['acyn_DEF']		= 'DEF';
+// Hands
+$lang['acyn_RH']		= 'R';
+$lang['acyn_LH']		= 'L';
+$lang['acyn_SW']		= 'S';

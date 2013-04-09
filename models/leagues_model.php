@@ -90,16 +90,24 @@ class Leagues_model extends Base_ootp_model
 	 */
 	public function in_season($league_id = 100) {
 		
-		$league = $this->find_all_by('league_id',$league_id);
-		
-		if (isset($league) && is_array($league) && count($league)) {
-			if ($league->league_state > 1 && $league->league_state < 4) {
-				return true;
-			} else {
-				return false;
-			}
+		if($this->db->table_exists($this->table))
+        {
+            $this->db->select('league_state')
+                     ->where('league_id',$league_id);
+            $query = $this->db->get($this->table);
+            if ($query->num_rows() > 0) {
+                $row = $query->result();
+                if ($row->league_state > 1 && $row->league_state < 4) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }  else {
+                return false;
+            }
+            $query->free_result();
 		} else {
-			return 'Required OOTP database tables have not been loaded.';
+			return 'Required database tables have not been loaded.';
 		}
 	}
 	/**
@@ -177,15 +185,24 @@ class Leagues_model extends Base_ootp_model
 		Returns an array of sub league IDs and names.
 	 *	@return	Array $subleagues
 	 */
-	public function get_subleague_info($league_id = 100) {
+	public function get_subleague_info($league_id = 100, $select_list = false) {
 		$subleagues = array();
         if (!$this->use_prefix) $this->db->dbprefix = '';
-        $this->db->select('sub_league_id,name')
-				 ->where('league_id',$league_id)
+        $this->db->select('sub_league_id,name, abbr')
+				 ->where('league_id',intval($league_id))
 				 ->order_by('sub_league_id');
 		$query = $this->db->get('sub_leagues');
-		$subleagues = $query->result_array();
+        if ($query->num_rows() > 0) {
+            if ($select_list === true) {
+                foreach($query->result_array() as $row) {
+                    $subleagues = $subleagues + array($row['sub_league_id'] => $row['abbr']);
+                }
+            } else {
+                $subleagues = $query->result_array();
+            }
+        }
 		$query->free_result();
+        //echo($this->db->last_query()."<br />");
         if (!$this->use_prefix) $this->db->dbprefix = $this->dbprefix;
         return $subleagues;
 	}

@@ -90,6 +90,15 @@ class Stats
 	protected static $position_list		= array();
 	
 	/**
+	 * The sport and data source specific hands listing.
+	 *
+	 * @access protected
+	 *
+	 * @var array
+	 */
+	protected static $hands_list		= array();
+		
+	/**
 	 * The sport and data source specific awards listing.
 	 *
 	 * @access protected
@@ -175,6 +184,7 @@ class Stats
 			self::$award_list = award_list();
 			self::$level_list = level_list();
 			self::$splits_list = split_list();
+			self::$hands_list = hands_list();
         }
 		if ($source !== false)
         {
@@ -187,6 +197,7 @@ class Stats
 			self::$award_list = array_merge_recursive(self::$award_list,$map['awards']);
 			self::$level_list = array_merge_recursive(self::$level_list,$map['levels']);
 			self::$splits_list = array_merge_recursive(self::$splits_list,$map['splits']);
+			self::$hands_list = array_merge_recursive(self::$hands_list,$map['hands']);
         }
 	} //end init()
 	
@@ -296,7 +307,8 @@ class Stats
 			} 
 			else
 			{
-				$stats = format_stats($stats_type, $stats_data, $stats_class, self::$stat_list, self::$position_list, $debug);
+				$stats = format_stats($stats_type, $stats_data, $stats_class, self::$stat_list, self::$position_list,
+                    self::$hands_list, self::$level_list, $debug);
 			} // END if
 
             if (isset($params['totals'])) {
@@ -310,7 +322,7 @@ class Stats
                 $query->free_result();
             }
 		} // END if
-        //echo(self::$ci->db->last_query()."<br />");
+        echo(self::$ci->db->last_query()."<br />");
 		return array('stats'=>$stats, 'headers'=>$headers, 'totals' =>$totals);
 	}
 
@@ -361,6 +373,55 @@ class Stats
         }
         return $arr_out;
     }
+
+	//--------------------------------------------------------------------
+
+	/**
+     * Get Hands List.
+     * Returns the internal hands_list object.
+     *
+     * @static
+     * @return array            hands_list Array
+     */
+    public static function get_hands_list()
+    {
+        return self::$hands_list;
+    }
+
+    //--------------------------------------------------------------------
+
+    /**
+     * Get Hands Array.
+     * Returns an id => value array of hands.
+     *
+     * @static
+     * @return array            hands_list Array
+     */
+    public static function get_hands_array($only_invisible = true)
+    {
+        $arr_out = array();
+        foreach (self::$hands_list as $hand => $details) {
+            if(($details['visible'] === false && !$only_invisible) ||$details['visible'] == true)  {
+               $arr_out = $arr_out + array($details['id'] => $hand);
+            }
+        }
+        return $arr_out;
+    }
+
+	//--------------------------------------------------------------------
+
+	/**
+     * Get Award List.
+     * Returns the internal award_list object.
+     *
+     * @static
+     * @return array            award_list Array
+     */
+    public static function get_award_list()
+    {
+        return self::$award_list;
+    }
+	
 	//--------------------------------------------------------------------
 
 	/**
@@ -723,21 +784,32 @@ class Stats
 		} // END switch
 		
 		/*------------------------------------
+		/	LEVEL
+		/-----------------------------------*/
+        if (!isset($params['level']) || empty($params['level']))
+        {
+			$params['level'] = LEVEL_MAJOR;
+		}
+		if (isset($params['level']) && !empty($params['level']))
+		{
+            if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
+            $where_str .= 'level_id = '.$params['level'];
+        }
+
+		/*------------------------------------
 		/	SPLITS
 		/-----------------------------------*/
         if (!isset($params['split']) || empty($params['split']))
         {
 			$params['split'] = SPLIT_SEASON;
 		}
-		if (isset($params['split']) || !empty($params['split']))
+		if (isset($params['split']) && !empty($params['split']))
 		{
             $split = get_split($params['split'], $tbl);
-            if (!empty($split)) {
-				if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
-				$where_str .= $split;
-			}
+            if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
+            $where_str .= $split;
         }
-		
+
         $query .= $where_str;
 
         /*------------------------------------
@@ -755,21 +827,22 @@ class Stats
         /*------------------------------------
 		/	GROUPING FOR SUM AND AVG
 		/-----------------------------------*/
-        if (isset($params['totals_row']) && $params['totals_row'] == 1) {
-			if (!empty($identifier['team'])) 
-			{
-				$query .= " GROUP BY ".$_table_def[$stats_type][$stat_scope].'.'.$identifier['team'];
-			} 
-			else if (!empty($identifier['league'])) 
-			{
-				$query .= " GROUP BY ".$_table_def[$stats_type][$stat_scope].'.'.$identifier['league'];
-			}
+        if ($stat_scope != STATS_CAREER) {
+            if (isset($params['totals_row']) && $params['totals_row'] == 1) {
+                if (!empty($identifier['team']))
+                {
+                    $query .= " GROUP BY ".$_table_def[$stats_type][$stat_scope].'.'.$identifier['team'];
+                }
+                else if (!empty($identifier['league']))
+                {
+                    $query .= " GROUP BY ".$_table_def[$stats_type][$stat_scope].'.'.$identifier['league'];
+                }
+            }
+            else if (!empty($identifier['player']))
+            {
+                $query .= " GROUP BY ".$_table_def[$stats_type][$stat_scope].'.'.$identifier['player'];
+            }
         }
-		else if (!empty($identifier['player']))
-		{
-            $query .= " GROUP BY ".$_table_def[$stats_type][$stat_scope].'.'.$identifier['player'];
-        } 
-
 		/*------------------------------------
 		/	ORDERING AND SORTING
 		/-----------------------------------*/
@@ -952,6 +1025,7 @@ define('ID_TEAM','team');
 define('ID_LEAGUE','league');
 define('ID_PLAYER','player');
 define('ID_GAME','game');
+define('ID_SUB_LEAGUE','sub_league');
 
 define('TYPE_OFFENSE', 'offense');
 define('TYPE_DEFENSE', 'defense');
@@ -980,6 +1054,10 @@ define('SPLIT_PRESEASOM', 1);
 define('SPLIT_PLAYOFFS', 2);
 define('SPLIT_NONE', 3);
 define('SPLIT_DEFENSE', 4);
+
+define('LEVEL_MAJOR', 1);
+define('LEVEL_MINOR', 2);
+define('LEVEL_INT', 3);
 
 define('RANGE_GAME_ID_LIST', 0);
 define('RANGE_DATE_LIST', 1);

@@ -379,7 +379,7 @@ if(!function_exists('field_map'))
 				"INT"	=>array('id'=>7),
 				"WL"	=>array('id'=>8),
 				"COL"	=>array('id'=>9),
-				"HS"	=>array('id'=>10),
+				"HS"	=>array('id'=>10)
 			),
 			'splits' =>
 			array(
@@ -387,7 +387,14 @@ if(!function_exists('field_map'))
                 "REG"	=>array('id'=>1),
                 "ST"	=>array('id'=>2),
                 "PS"	=>array('id'=>21),
-                "OS"	=>array('id'=>100),
+                "OS"	=>array('id'=>100)
+			),
+			'hands' =>
+			array(
+				"UN"	=>array('id'=>0),
+				"RH"	=>array('id'=>1),
+				"LH"	=>array('id'=>2),
+				"SW"	=>array('id'=>3)
 			)
 		);
 		return $map;

@@ -106,7 +106,7 @@ class Players_model extends Base_ootp_model {
         if ($player_id === false) { return; }
         $details = array();
         $this->db->dbprefix = '';
-        $this->db->select('players.player_id,first_name,last_name,players.nick_name as playerNickname,teams.team_id, teams.name AS team_name, teams.nickName as teamNickname, position,role, date_of_birth,weight,height,bats,throws,draft_year,draft_round,draft_pick,draft_team_id,retired,injury_is_injured, injury_dtd_injury, injury_career_ending, injury_dl_left, injury_left, injury_id, logo_file, players.city_of_birth_id, age');
+        $this->db->select('players.player_id,first_name,last_name,players.nick_name as playerNickname,players.`Uniform Number` as uniform_num, teams.team_id, teams.name AS team_name, teams.nickName as teamNickname, position,role, date_of_birth,weight,height,bats,throws,draft_year,draft_round,draft_pick,draft_team_id,retired,injury_is_injured, injury_dtd_injury, injury_career_ending, injury_dl_left, injury_left, injury_id, logo_file, players.city_of_birth_id, age',false);
         $this->db->join('teams','teams.team_id = players.team_id','right outer');
         $this->db->where('players.player_id',$player_id);
         $query = $this->db->get($this->table);
@@ -395,18 +395,18 @@ class Players_model extends Base_ootp_model {
      *	@version					1.0.1
      *
      */
-    public function get_player_awards($league_id, $player_id = false) {
+    public function get_player_awards($league_id, $player_id = false, $award_list) {
 
         if ($player_id === false) { $player_id = $this->player_id; }
 
         $awards = array();
         if (!$this->use_prefix) $this->db->dbprefix = '';
-        $this->db->select("award_id,year,position");
+        $this->db->select("award_id,year,sub_league_id");
         $this->db->from('players_awards');
         $this->db->where('league_id',$league_id);
         $this->db->where('player_id',$player_id);
         $this->db->where_in('award_id',array(4,5,6,7,9));
-        $this->db->order_by('award_id','award_id,year,position');
+        $this->db->order_by('award_id','award_id,year,sub_league_id');
         $query = $this->db->get();
         $prevAW=-1;
         $cnt=0;
@@ -418,9 +418,9 @@ class Players_model extends Base_ootp_model {
             $gg = array();
             $as = array();
             foreach($query->result_array() as $row) {
-                $awid=$row['award_id'];
+                $awid=get_award($row['award_id'],$award_list);
                 $yr=$row['year'];
-                $pos=$row['position'];
+                $sl=$row['sub_league_id'];
                 if ($prevAW!=$awid) {
                     $awardsByYear[$awid]=$yr;
                 } else {
@@ -428,11 +428,11 @@ class Players_model extends Base_ootp_model {
                 } // END if
 
                 switch ($awid) {
-                    case 4: $poy[$yr]=1; break;
-                    case 5: $boy[$yr]=1; break;
-                    case 6: $roy[$yr]=1; break;
-                    case 7: $gg[$yr][$pos]=1; break;
-                    case 9: $as[$yr]=1; break;
+                    case 'POY': $poy[$yr][$sl]=1; break;
+                    case 'BOY': $boy[$yr][$sl]=1; break;
+                    case 'ROY': $roy[$yr][$sl]=1; break;
+                    case 'GG': $gg[$yr][$sl]=1; break;
+                    case 'AS': $as[$yr][$sl]=1; break;
                 } // END switch
                 $cnt++;
                 $prevAW=$awid;
@@ -440,12 +440,13 @@ class Players_model extends Base_ootp_model {
 
             } // END foreach
             $awards['byYear'] = $awardsByYear;
-            $awards['poy'] = $poy;
-            $awards['boy'] = $boy;
-            $awards['roy'] = $roy;
-            $awards['gg'] = $gg;
-            $awards['as'] = $as;
+            $awards['POY'] = $poy;
+            $awards['BOY'] = $boy;
+            $awards['ROY'] = $roy;
+            $awards['GG'] = $gg;
+            $awards['AS'] = $as;
         } // END if
+        //echo($this->db->last_query()."<br />");
         if (!$this->use_prefix) $this->db->dbprefix = $this->dbprefix;
         return $awards;
     }
