@@ -103,6 +103,8 @@ if(!function_exists('stat_list'))
 					"FPTS"	=>array('lang' => "FPTS"),
 					"PR15"	=>array('lang' => "PR15"),
 					"INJURY"=>array('lang' => "INJ"),
+					"YEAR"=>array('lang' => "YEAR"),
+					"SEASON"=>array('lang' => "SEASON"),
 				),
 			'offense'=>
                 array(
@@ -275,7 +277,7 @@ if(!function_exists('award_list'))
 
 /**
  *	LEVEL LIST.
- *	This function returns an array that defines the levels for this sport.
+ *	This function returns an array that defines the league levels for this sport.
  *
  *	@return		Array	Level Categories
  */
@@ -285,14 +287,14 @@ if(!function_exists('level_list'))
 	{
 	  $levels =
 		array(
-			"ML"	=>array('lang'=>"ML"),
-			"AAA"	=>array('lang'=>"AAA"),
-			"AA"	=>array('lang'=>"AA"),
-			"A_L"	=>array('lang'=>"A"),
-			"SS"	=>array('lang'=>"SS"),
-			"R_L"	=>array('lang'=>"R"),
+			"MAJ"	=>array('lang'=>"MAJ"),
+			"MI1"	=>array('lang'=>"MI1"),
+			"MI2"	=>array('lang'=>"MI2"),
+			"MI3"	=>array('lang'=>"MI3"),
+			"MI4"	=>array('lang'=>"MI4"),
+			"MI5"	=>array('lang'=>"MI5"),
 			"INT"	=>array('lang'=>"INT"),
-			"WL"	=>array('lang'=>"WL"),
+			"WNT"	=>array('lang'=>"WNT"),
 			"COL"	=>array('lang'=>"COL"),
 			"HS"	=>array('lang'=>"HS"),
 		);
@@ -327,7 +329,7 @@ if(!function_exists('split_list'))
 
 /**
  *	HAND LIST.
- *	Converts a hand index ID to a string.
+ *	This function returns an array that defines the player hands for this sport.
  *
  *	@return		Array	Hand List
  *
@@ -471,6 +473,14 @@ if(!function_exists('stats_class'))
 				array_push($fields,$field);
 			}
 		}
+		if (in_array('YEAR',$extended))
+		{
+			array_push($fields,'YEAR');
+		}
+        if (in_array('SEASON',$extended))
+		{
+			array_push($fields,'SEASON');
+		}
         if (in_array('POS',$extended))
         {
             array_push($fields,'POS');
@@ -516,7 +526,23 @@ if(!function_exists('stats_class'))
 } // END if
 
 //---------------------------------------------------------------
-
+/**
+ * Format Stats.
+ * Formats stats fields for display.
+ *
+ * @static
+ * @param 	string 		$stat_type		TYPE_OFFENSE or similar
+ * @param 	Array 		$stats			Array of raw stats data
+ * @param 	Array 		$categories		Stat categories to be formatted
+ * @param 	Int 		$stat_list		Master list of stats
+ * @param 	Int 		$position_list	Master list of positions
+ * @param 	Int 		$hands_list		Master list of hands
+ * @param 	Int 		$level_list		Master list of g
+ * @param 	Boolean 	$debug			TRUE to enable debug messaging, FALSE to disable
+ * @return 	Array         				Array of formatted stats
+ *
+ * @since 	0.3
+ */
 if(!function_exists('format_stats')) 
 {
 	function format_stats($stat_type = TYPE_OFFENSE, $stats = false, $categories = false, $stat_list = false,

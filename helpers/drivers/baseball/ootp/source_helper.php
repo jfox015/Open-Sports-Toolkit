@@ -52,7 +52,9 @@ if(!function_exists('identifier_map'))
 			'game'			=>		'game_id',
 			'year'			=>		'year',
 			'date'			=>		'date',
-			'time'			=>		'time'
+			'time'			=>		'time',
+			'level'			=>		'level_id',
+			'split'			=>		'split_id'
 		);
         return $fields;
 	}
@@ -190,6 +192,8 @@ if(!function_exists('field_map'))
 					"LVL"	=>array('field' => "players.level_id"),
 					"TH"	=>array('field' => "players.throws"),
 					"BA"	=>array('field' => "players.bats"),
+					"YEAR"	=>array('field' => "year"),
+					"SEASON"=>array('field' => "season"),
 					"FPTS"	=>array('field' => "fpts"),
 					"PR15"	=>array('field' => "pr15"),
 					"INJURY"	=>array('field' => "injury", 'formula' => 'players.injury_is_injured, players.injury_dtd_injury, players.injury_career_ending, players.injury_dl_left, players.injury_left, players.injury_id'),
@@ -341,7 +345,7 @@ if(!function_exists('field_map'))
 				"LF"	=>array('id'=>7),
 				"CF"	=>array('id'=>8),
 				"RF"	=>array('id'=>9),
-				"DH"	=>array('id'=>11),
+				"DH"	=>array('id'=>10),
 				"OF"	=>array('id'=>20),
 				"IF"	=>array('id'=>22),
 				"MI"	=>array('id'=>23),
@@ -370,14 +374,14 @@ if(!function_exists('field_map'))
 			),
 			'levels' => 
 			array(
-				"ML"	=>array('id'=>1),
-				"AAA"	=>array('id'=>2),
-				"AA"	=>array('id'=>3),
-				"A_L"	=>array('id'=>4),
-				"SS"	=>array('id'=>5),
-				"R_L"	=>array('id'=>6),
+				"MAJ"	=>array('id'=>1),
+				"MI1"	=>array('id'=>2),
+				"MI2"	=>array('id'=>3),
+				"MI3"	=>array('id'=>4),
+				"MI4"	=>array('id'=>5),
+				"MI5"	=>array('id'=>6),
 				"INT"	=>array('id'=>7),
-				"WL"	=>array('id'=>8),
+				"WNT"	=>array('id'=>8),
 				"COL"	=>array('id'=>9),
 				"HS"	=>array('id'=>10)
 			),

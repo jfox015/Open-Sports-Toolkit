@@ -140,14 +140,14 @@ $lang['full_AS']		= 'All-Star';
 $lang['full_CUS']		= 'Custom';
 $lang['full_UN']		= 'Unknown';
 // LEVELS
-$lang['full_ML']		= 'Major Leagues';
-$lang['full_AAA']		= 'Triple A';
-$lang['full_AA']		= 'Double A';
-$lang['full_A_L']		= 'Single A';
-$lang['full_SS']		= 'Short Season';
-$lang['full_R_L']		= 'Rookie';
+$lang['full_MAJ']		= 'Major League';
+$lang['full_MI1']		= 'Triple A';
+$lang['full_MI2']		= 'Double A';
+$lang['full_MI3']		= 'Single A';
+$lang['full_MI4']		= 'Short Season A';
+$lang['full_MI5']		= 'Rookie Ball A';
 $lang['full_INT']		= 'International';
-$lang['full_WL']		= 'Winter League';
+$lang['full_WNT']		= 'Winter League';
 $lang['full_COL']		= 'College';
 $lang['full_HS']		= 'High School';
 // LEVELS
@@ -160,3 +160,6 @@ $lang['full_DEF']		= 'Defense';
 $lang['full_RH']		= 'Right';
 $lang['full_LH']		= 'Left';
 $lang['full_SW']		= 'Switch';
+// YEAR
+$lang['full_YEAR']		= 'Year';
+$lang['full_SEASON']	= 'Season';

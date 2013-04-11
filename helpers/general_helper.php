@@ -280,7 +280,32 @@ function get_pitch_rating($pitch,$ir,$gb,$mvmnt,$velo)
 		return $pos_str;
     }
 }
+//--------------------------------------------------------------------
 
+/**
+ * Get Position Number.
+ * Returns the ID for a position.
+ *
+ * @static
+ * @param 	string 		$pos	Position Name
+ * @return 	string|int          Position ID
+ */
+if (!function_exists('get_pos_num'))
+{
+    function get_pos_num($pos_str, $position_list = false)
+    {
+        $pos = '';
+        if ($position_list === false || count($position_list) == 0)
+        {
+            return false;
+        }
+		if (isset($position_list[$pos_str]))
+		{
+			$pos = $position_list[$pos_str]['id'];
+		}
+		return $pos;
+    }
+}
 //--------------------------------------------------------------------
 	
 /**
@@ -391,29 +416,30 @@ function get_pitch_rating($pitch,$ir,$gb,$mvmnt,$velo)
 //--------------------------------------------------------------------
 
 /**
- * Get Position Number.
+ * Get Level Number.
  * Returns the ID for a position.
  *
  * @static
  * @param 	string 		$pos	Position Name
  * @return 	string|int          Position ID
  */
-if (!function_exists('get_pos_num'))
+if (!function_exists('get_level_num'))
 {
-    function get_pos_num($pos_str, $position_list = false)
+    function get_level_num($lvl_str, $level_list = false)
     {
-        $pos = '';
-        if ($position_list === false || count($position_list) == 0)
+        $lvl = '';
+        if ($level_list === false || count($level_list) == 0)
         {
             return false;
         }
-		if (isset($position_list[$pos_str]))
+        if (isset($level_list[$lvl_str]))
 		{
-			$pos = $position_list[$pos_str]['id'];
+			$lvl = $level_list[$lvl_str]['id'];
 		}
-		return $pos;
+		return $lvl;
     }
 }
+
 /**
  *	GET ASSET PATHS.
  *	A function to create correct paths to OOTP assets like logos and playerpictures. The structure 

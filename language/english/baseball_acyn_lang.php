@@ -142,14 +142,14 @@ $lang['acyn_AS']		= 'AS';
 $lang['acyn_CUS']		= 'CUS';
 $lang['acyn_UN']		= '?';
 // LEVELS
-$lang['acyn_ML']		= 'ML';
-$lang['acyn_AAA']		= 'AAA';
-$lang['acyn_AA']		= 'AA';
-$lang['acyn_A_L']		= 'A';
-$lang['acyn_SS']		= 'SS';
-$lang['acyn_R_L']		= 'R';
+$lang['acyn_MAJ']		= 'ML';
+$lang['acyn_MI1']		= 'AAA';
+$lang['acyn_MI2']		= 'AA';
+$lang['acyn_MI3']		= 'A';
+$lang['acyn_MI4']		= 'SS';
+$lang['acyn_MI5']		= 'R';
 $lang['acyn_INT']		= 'INT';
-$lang['acyn_WL']		= 'WL';
+$lang['acyn_WNT']		= 'WL';
 $lang['acyn_COL']		= 'COL';
 $lang['acyn_HS']		= 'HS';
 // LEVELS
@@ -162,3 +162,5 @@ $lang['acyn_DEF']		= 'DEF';
 $lang['acyn_RH']		= 'R';
 $lang['acyn_LH']		= 'L';
 $lang['acyn_SW']		= 'S';
+$lang['acyn_YEAR']		= 'YR';
+$lang['acyn_SEASON']	= 'SN';

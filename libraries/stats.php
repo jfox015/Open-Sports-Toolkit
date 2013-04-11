@@ -322,7 +322,7 @@ class Stats
                 $query->free_result();
             }
 		} // END if
-        echo(self::$ci->db->last_query()."<br />");
+        //echo(self::$ci->db->last_query()."<br />");
 		return array('stats'=>$stats, 'headers'=>$headers, 'totals' =>$totals);
 	}
 
@@ -591,7 +591,7 @@ class Stats
 	 * @return	void
 	 * @access	private
 	 */
-    protected  static function make_headers($stats_type = false, $stats_class = false)
+    public  static function make_headers($stats_type = false, $stats_class = false)
     {
         $stats_list = self::$stat_list;
         $headers = array();
@@ -744,9 +744,11 @@ class Stats
 		/*------------------------------------
 		/	DATA RANGE
 		/-----------------------------------*/
-		switch ($range) {
+		switch ($range) 
+		{
 			case RANGE_SEASON:
-				if (isset($params['year']) && !empty($params['year'])) {
+				if (isset($params['year']) && !empty($params['year'])) 
+				{
 					if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
 					$where_str .= $_table_def[$stats_type][$stat_scope].".".$identifier['year']."	= ".$params['year'];
 				}
@@ -790,26 +792,48 @@ class Stats
         {
 			$params['level'] = LEVEL_MAJOR;
 		}
-		if (isset($params['level']) && !empty($params['level']))
+		if (isset($params['identifier']) && $params['identifier'] = $identifier['player']) 
 		{
-            if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
-            $where_str .= 'level_id = '.$params['level'];
-        }
-
+			$lvl_operator = '';
+			$lvl = '';
+			if (isset($params['level_min']) && !empty($params['level_min']))
+			{
+				$lvl_operator = '>';
+				$lvl = $params['level_min'];
+			} 
+			if (isset($params['level_max']) && !empty($params['level_max']))
+			{
+				$lvl_operator = '<';
+				$lvl = $params['level_max'];
+			} 
+			if (empty($lvl) || empty($lvl_operator))
+			{
+				$lvl_operator = '=';
+				$lvl = $params['level'];
+			}
+			if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
+			$where_str .= $identifier['level'].' '.$lvl_operator.' '.get_level_num($lvl,self::$level_list);
+		}
 		/*------------------------------------
 		/	SPLITS
 		/-----------------------------------*/
-        if (!isset($params['split']) || empty($params['split']))
+        if (isset($params['split']) && !empty($params['split']))
         {
-			$params['split'] = SPLIT_SEASON;
+            $split = $params['split'];
 		}
-		if (isset($params['split']) && !empty($params['split']))
-		{
-            $split = get_split($params['split'], $tbl);
-            if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
-            $where_str .= $split;
+        else
+        {
+            $split = SPLIT_SEASON;
         }
+        $split_str = get_split($split, $tbl);
+        if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
+        $where_str .= $split_str;
 
+        /*-----------------------------------------------------------
+		/
+		/	FINALIZED AND COMMIT THE WHERE STRING TO THE QUERY
+		/
+		/-----------------------------------------------------------*/
         $query .= $where_str;
 
         /*------------------------------------
@@ -824,11 +848,14 @@ class Stats
             $query .= ' AND '.$_table_def[$stats_type][$stat_scope].'.'.$params['identifier'].' NOT IN '.$params['where_not_in'];
         }
 
-        /*------------------------------------
-		/	GROUPING FOR SUM AND AVG
-		/-----------------------------------*/
-        if ($stat_scope != STATS_CAREER) {
-            if (isset($params['totals_row']) && $params['totals_row'] == 1) {
+        /*----------------------------------------
+		/	GROUPING FOR SUM AND AVG QUERIES
+		/----------------------------------------*/
+		// NOTE: Not all queries need this.
+		$make_totals = (isset($params['totals_row']) && $params['totals_row'] == 1);
+        if ($stat_scope != STATS_CAREER || ($stat_scope == STATS_CAREER && $make_totals)) {
+            if ($make_totals) 
+			{
                 if (!empty($identifier['team']))
                 {
                     $query .= " GROUP BY ".$_table_def[$stats_type][$stat_scope].'.'.$identifier['team'];
@@ -837,10 +864,10 @@ class Stats
                 {
                     $query .= " GROUP BY ".$_table_def[$stats_type][$stat_scope].'.'.$identifier['league'];
                 }
-            }
-            else if (!empty($identifier['player']))
-            {
-                $query .= " GROUP BY ".$_table_def[$stats_type][$stat_scope].'.'.$identifier['player'];
+				else if (!empty($identifier['player']))
+				{
+					$query .= " GROUP BY ".$_table_def[$stats_type][$stat_scope].'.'.$identifier['player'];
+				}
             }
         }
 		/*------------------------------------
@@ -1055,9 +1082,16 @@ define('SPLIT_PLAYOFFS', 2);
 define('SPLIT_NONE', 3);
 define('SPLIT_DEFENSE', 4);
 
-define('LEVEL_MAJOR', 1);
-define('LEVEL_MINOR', 2);
-define('LEVEL_INT', 3);
+define('LEVEL_MAJOR', "MAJ");
+define('LEVEL_MINOR_FIRST', "MI1");
+define('LEVEL_MINOR_SECOND', "MI2");
+define('LEVEL_MINOR_THIRD', "MI3");
+define('LEVEL_MINOR_FOURTH', "MI4");
+define('LEVEL_MINOR_FIFTH', "MI5");
+define('LEVEL_INT', "INT");
+define('LEVEL_WINTER', "WNT");
+define('LEVEL_COLLEGE', "COL");
+define('LEVEL_HIGH_SCHOOL',"HS");
 
 define('RANGE_GAME_ID_LIST', 0);
 define('RANGE_DATE_LIST', 1);
