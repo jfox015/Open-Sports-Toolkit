@@ -197,8 +197,7 @@ class Players_model extends Base_ootp_model {
         $this->db->dbprefix = '';
         // GET PLAYER POSITION
         $this->db->select('first_name, last_name');
-        //$this->db->join("players","fantasy_players.player_id = players.player_id", "right outer");
-        $this->db->where('id',$player_id);
+         $this->db->where('player_id',$player_id);
         $query = $this->db->get($this->table);
         if ($query->num_rows() > 0) {
             $row = $query->row();

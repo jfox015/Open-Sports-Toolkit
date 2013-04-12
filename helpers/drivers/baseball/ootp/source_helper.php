@@ -186,6 +186,8 @@ if(!function_exists('field_map'))
 					"TNACR"	=>array('field' => "team_acr", 'formula' => 'teams.abbr as team_acr'),
 					"PN"	=>array('field' => "player_name", 'formula' => 'players.first_name, players.last_name'),
                     "PNABBR"=>array('field' => "player_abbr_name", 'formula' => 'CONCAT(SUBSTRING(players.first_name,1,1),". ",players.last_name) as player_abbr_name'),
+                    "PN_NL"	=>array('field' => "player_name", 'formula' => 'players.first_name, players.last_name'),
+                    "PNABBR_NL"=>array('field' => "player_abbr_name", 'formula' => 'CONCAT(SUBSTRING(players.first_name,1,1),". ",players.last_name) as player_abbr_name'),
                     "AGE"	=>array('field' => "players.age"),
 					"POS"	=>array('field' => "position", 'formula' => 'if(players.position=1, players.role, players.position) as position'),
 					"ROLE"	=>array('field' => "players.role"),

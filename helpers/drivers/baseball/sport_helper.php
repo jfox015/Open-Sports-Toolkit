@@ -86,25 +86,27 @@ if(!function_exists('stat_list'))
 		$stats = array(
             'general'=>
 				array(
-					"FN"	=>array('lang' => "FN"),
-					"LN"	=>array('lang' => "LN"),
-					"PN"	=>array('lang' => "PN"),
-					"PNABBR"=>array('lang' => "PNABBR"),
-					"PID"	=>array('lang' => "PID"),
-					"TN"	=>array('lang' => "TN"),
-					"TNACR"	=>array('lang' => "TNACR"),
-					"TID"	=>array('lang' => "TID"),
-					"AGE"	=>array('lang' => "AGE"),
-					"POS"	=>array('lang' => "POS"),
-					"ROLE"	=>array('lang' => "ROLE"),
-					"LVL"	=>array('lang' => "LVL"),
-					"TH"	=>array('lang' => "TH"),
-					"BA"	=>array('lang' => "BA"),
-					"FPTS"	=>array('lang' => "FPTS"),
-					"PR15"	=>array('lang' => "PR15"),
-					"INJURY"=>array('lang' => "INJ"),
-					"YEAR"=>array('lang' => "YEAR"),
-					"SEASON"=>array('lang' => "SEASON"),
+					"FN"		=>array('lang' => "FN"),
+					"LN"		=>array('lang' => "LN"),
+					"PID"		=>array('lang' => "PID"),
+					"TID"		=>array('lang' => "TID"),
+					"TN"		=>array('lang' => "TN"),
+					"TNACR"		=>array('lang' => "TNACR"),
+					"PN"		=>array('lang' => "PN"),
+					"PNABBR"	=>array('lang' => "PNABBR"),
+					"PN_NL"		=>array('lang' => "PN"),
+					"PNABBR_NL"	=>array('lang' => "PNABBR"),
+					"AGE"		=>array('lang' => "AGE"),
+					"POS"		=>array('lang' => "POS"),
+					"ROLE"		=>array('lang' => "ROLE"),
+					"LVL"		=>array('lang' => "LVL"),
+					"TH"		=>array('lang' => "TH"),
+					"BA"		=>array('lang' => "BA"),
+					"YEAR"		=>array('lang' => "YEAR"),
+					"SEASON"	=>array('lang' => "SEASON"),
+					"FPTS"		=>array('lang' => "FPTS"),
+					"PR15"		=>array('lang' => "PR15"),
+					"INJURY"	=>array('lang' => "INJ"),
 				),
 			'offense'=>
                 array(
@@ -448,9 +450,24 @@ if(!function_exists('stats_class'))
 			foreach($genArr as $field) {
 				array_push($fields,$field);
 			}
-		} else if (in_array('PNABBR',$extended))
+		} 
+		else if (in_array('PNABBR',$extended))
 		{
 			$genArr = array('PNABBR','PID');
+			foreach($genArr as $field) {
+				array_push($fields,$field);
+			}
+		}
+        else if (in_array('NAME_NL',$extended))
+		{
+			$genArr = array('PN_NL','PID');
+			foreach($genArr as $field) {
+				array_push($fields,$field);
+			}
+		} 
+		else if (in_array('PNABBR_NL',$extended))
+		{
+			$genArr = array('PNABBR_NL','PID');
 			foreach($genArr as $field) {
 				array_push($fields,$field);
 			}
@@ -714,18 +731,37 @@ if(!function_exists('format_extended_fields'))
 			// PLAYER NAME
 			case 'PN':
 			case 'PNABBR':
+			case 'PN_NL':
+			case 'PNABBR_NL':
 				
 				if (isset($row['player_abbr_name']) && !empty($row['player_abbr_name']))
 				{
 					$name = $row['player_abbr_name'];
 				}
-				else 
+				else
 				{
 					$name = $row['first_name']." ".$row['last_name'];
 				}
 				if (isset($row['player_id'])) 
 				{
-					$val = anchor('players/profile/' . $row['player_id'],$name,array('target'=>'_blank'));
+					if ($field == 'PN' || $field == 'PNABBR') {
+						if (function_exists('get_player_link')) 
+						{
+							$val = get_player_link($row['player_id'],$name);
+						}
+						else if (file_exists($settings['osp.asset_url'].'players/player_'.$row['player_id'].'.html'))
+						{
+							$val = '<a href="'.$settings['osp.asset_url'].'players/player_'.$row['player_id'].'.html">'.$name.'</a>';
+						}
+						else
+						{
+							$val = $name;
+						}
+					}
+					else
+					{
+						$val = $name;
+					}
 				}
 				else 
 				{
