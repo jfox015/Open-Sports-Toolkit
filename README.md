@@ -5,7 +5,7 @@ Formerly know as the _OOTP Web Toolkit_, the Open Sports Toolkit (OST) is a coll
 ## Features
 
 - Abstract sports statistics generation and display API. You specify the sport and source and OST gets the stats.
-- Stats Abstraction Library API for adding additional sports and data sources.
+- Stats Abstraction Library for adding additional sports and data sources.
 - Standardized data models for working with statstic and meta based data sources
 - Helper functions library that serves as specific drivers for sports data sources
 - Standard langauge files and translations

@@ -27,6 +27,7 @@ $lang['full_RC']		= 'Runs Created';
 $lang['full_RC_27']	= 'Runs Created (27 Outs)';
 $lang['full_ISO']	= 'Isolated Power';
 $lang['full_TAVG']	= 'Total Average';
+$lang['full_WOBA']	= 'Weighted On Base Average';
 $lang['full_OPS']	= 'On Base Percentage + Slugging Percentage';
 $lang['full_VORP']	= 'Value over Replacement Player';
 $lang['full_GIDP']	= 'Grounded into Double Play';

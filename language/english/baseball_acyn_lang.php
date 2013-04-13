@@ -26,6 +26,7 @@ $lang['acyn_SLG']	= 'SLG';
 $lang['acyn_RC']		= 'RC';
 $lang['acyn_RC_27']	= 'RC27';
 $lang['acyn_ISO']	= 'ISO';
+$lang['acyn_WOBA']	= 'WOBA';
 $lang['acyn_TAVG']	= 'TAVG';
 $lang['acyn_OPS']	= 'OPS';
 $lang['acyn_VORP']	= 'VORP';

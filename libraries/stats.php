@@ -826,9 +826,10 @@ class Stats
             $split = SPLIT_SEASON;
         }
         $split_str = get_split($split, $tbl);
-        if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
-        $where_str .= $split_str;
-
+        if (!empty($split_str)) {
+            if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
+            $where_str .= $split_str;
+        }
         /*-----------------------------------------------------------
 		/
 		/	FINALIZED AND COMMIT THE WHERE STRING TO THE QUERY
@@ -916,7 +917,7 @@ class Stats
         }
 		if ($debug === true)
 		{
-			echo ("query = ".$query."<br /><br />");
+			//echo ("query = ".$query."<br /><br />");
 		}
         return $query;
 

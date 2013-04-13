@@ -405,7 +405,7 @@ class Players_model extends Base_ootp_model {
         $this->db->where('league_id',$league_id);
         $this->db->where('player_id',$player_id);
         $this->db->where_in('award_id',array(4,5,6,7,9));
-        $this->db->order_by('award_id','award_id,year,sub_league_id');
+        $this->db->order_by('award_id,year,sub_league_id');
         $query = $this->db->get();
         $prevAW=-1;
         $cnt=0;

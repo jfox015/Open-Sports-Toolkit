@@ -121,6 +121,7 @@ if(!function_exists('stat_list'))
                     "3B"  => array('lang' => "3B"),
                     "HR"  => array('lang' => "HR"),
                     "SB"  => array('lang' => "SB"),
+                    "CS"  => array('lang' => "CS"),
                     "RBI" => array('lang' => "RBI"),
                     "R" => array('lang' => "R"),
                     "BB" => array('lang' => "BB"),
@@ -384,10 +385,10 @@ if(!function_exists('stats_class'))
 					$fieldList = array('AVG','G','AB','R','H','2B','3B','HR','RBI','BB','SO','SB','OBP','SLG','OPS');
 					break;
 				case CLASS_EXPANDED:
-					$fieldList = array('AVG','G','AB','R','H','2B','3B','HR','RBI','BB','SO','SB','CS','OBP','SLG','OPS','wOBA','XBH','OPSPLUS');
+					$fieldList = array('AVG','G','AB','R','H','2B','3B','HR','RBI','BB','SO','SB','CS','OBP','SLG','OPS','XBH');
 					break;
 				case CLASS_EXTENDED:
-					$fieldList = array('AVG','G','PA','HP','SF','ISO','TB');
+					$fieldList = array('AVG','G','PA','HBP','TB','GIDP','SH','SF','IBB','ISO','WOBA');
 					break;
 				case CLASS_STANDARD:
 				default:
@@ -412,7 +413,7 @@ if(!function_exists('stats_class'))
 					$fieldList = array('W','L','SV','ERA','G','GS','IP','CG','SHO','HA','RA','ER','HRA','BB','SO','WHIP');
 					break;
 				case CLASS_EXPANDED:
-					$fieldList = array('W','L','SV','ERA','G','GS','IP','CG','SHO','HA','RA','ER','BB','SO','HRA','BB_9','K_9','HR_9','WHIP','BIFP','ERAPLUS');
+					$fieldList = array('W','L','SV','ERA','G','GS','IP','CG','SHO','HA','RA','ER','BB','SO','HRA','BB_IP','SO_IP','HR_IP','WHIP');
 					break;
 				case CLASS_EXTENDED:
 					$fieldList = array('SO','BS','QS','QS%','CG%','SHO%','GF');
@@ -498,6 +499,11 @@ if(!function_exists('stats_class'))
 		{
 			array_push($fields,'SEASON');
 		}
+       if (in_array('AGE',$extended))
+		{
+			array_push($fields,'AGE');
+		}
+
         if (in_array('POS',$extended))
         {
             array_push($fields,'POS');
@@ -617,6 +623,7 @@ if(!function_exists('format_stats'))
 					case 'WOBA':
 					case 'OAVG':
 					case 'BABIP':
+					case 'ISO':
 						$val=sprintf("%.3f",$row[$col]);
 						if ($val<1) {$val=strstr($val,".");}
 						$newRow[$col] = $val;
