@@ -290,6 +290,10 @@ class Players_model extends Base_ootp_model {
        if (players.team_id = 0, "", teams.name) as teamname, if (players.team_id = 0, "",teams.nickname) as teamnick', false);
         $this->db->join('teams', 'teams.team_id = players.team_id', 'right outer');
         switch ($search_type) {
+            case 'name':
+                $this->db->like('players.first_name', $search_param, 'both');
+                $this->db->or_like('players.last_name', $search_param, 'both');
+                break;
             case 'alpha':
                 $this->db->like('players.last_name', $search_param, 'after');
                 break;

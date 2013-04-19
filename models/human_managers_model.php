@@ -96,7 +96,7 @@ class Human_managers_model extends Base_ootp_model {
 		$users = $this->user_model->find_all();
 		
 		$human_managers = $this->get_unowned_team_managers($league_id, $exclusions);
-		if (count($human_managers) > 0) {
+		if (isset($human_managers) && is_array($human_managers) && count($human_managers) > 0) {
 			foreach ($human_managers as $row) {
 				$match = false;
 				$userCount = 0;
