@@ -1,16 +1,19 @@
 # Open Sports Toolkit
 
-Formerly know as the _OOTP Web Toolkit_, the Open Sports Toolkit (OST) is a collection of helpers, data models, classes, views and language files for sports mod developers to use as a starting point to build dynamic sports based, data driven  web sites and tools.
+Develop sport independant stats driven web sites faster and easier. The Open Sports Toolkit (OST) is a MVC based mod written for CodeIgniter 2.1.4+ apps built using the Bonfire library version 0.6 and up. it contains a collection of helpers, data models, classes, views and language files for sports web site developers to use as a starting point to build dynamic sports based, data driven web sites and tools.
+
+This library was formerly know as the _OOTP Web Toolkit_.
 
 ## Features
 
-- Abstract sports statistics generation and display API. You specify the sport and source and OST gets the stats.
+- Abstract sports statistics generation and display API. You specify the sport and data source and OST gets the stats.
 - Stats Abstraction Library for adding additional sports and data sources.
 - Standardized data models for working with statstic and meta based data sources
 - Helper functions library that serves as specific drivers for sports data sources
 - Standard langauge files and translations
 - Basic Stats Table View
 - Twitter Bootsrap integration
+- MVC design built on Codeigniter 2.1.x+ and Bonfire 0.6+
 
 ## Keep Current on the Mod
 

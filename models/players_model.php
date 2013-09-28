@@ -105,8 +105,20 @@ class Players_model extends Base_ootp_model {
 
         if ($player_id === false) { return; }
         $details = array();
-        $this->db->dbprefix = '';
-        $this->db->select('players.player_id,first_name,last_name,players.nick_name as playerNickname,players.`Uniform Number` as uniform_num, teams.team_id, teams.name AS team_name, teams.nickName as teamNickname, position,role, date_of_birth,weight,height,bats,throws,draft_year,draft_round,draft_pick,draft_team_id,retired,injury_is_injured, injury_dtd_injury, injury_career_ending, injury_dl_left, injury_left, injury_id, logo_file, players.city_of_birth_id, age',false);
+        $ver = intval($settings['osp.source_version']);
+		$this->db->dbprefix = '';
+		
+		$select = 'players.player_id,first_name,last_name,players.nick_name as playerNickname,teams.team_id, teams.name AS team_name, teams.nickName as teamNickname, position,role, date_of_birth,weight,height,bats,throws,draft_year,draft_round,draft_pick,draft_team_id,retired,injury_is_injured, injury_dtd_injury, injury_career_ending, injury_dl_left, injury_left, injury_id, logo_file, players.city_of_birth_id, age';
+		
+		if ($ver < 14) 
+		{
+			$select .= ', players.`Uniform Number` as uniform_num';
+		} 
+		else 
+		{
+			$select .= ', players.uniform_number as uniform_num';
+		}
+        $this->db->select($select,false);
         $this->db->join('teams','teams.team_id = players.team_id','right outer');
         $this->db->where('players.player_id',$player_id);
         $query = $this->db->get($this->table);
@@ -121,7 +133,6 @@ class Players_model extends Base_ootp_model {
 			{
 				if(isset($details['city_of_birth_id']) && $details['city_of_birth_id'] != 0)
 				{
-					$ver = intval($settings['osp.source_version']);
 					$select = 'cities.name as birthCity, nations.short_name as birthNation';
 					if ($ver < 12) {
 						$select .= ',cities.region as birthRegion';

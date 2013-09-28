@@ -290,7 +290,9 @@ class Stats
 		}
 		else 
 		{
+			$stats_data = NULL;
 			$query = self::$ci->db->query($sql);
+			//print(self::$ci->db->last_query()."<br />");
 			if ($query->num_rows() > 0)
 			{
 				$stats_data = $query->result_array();

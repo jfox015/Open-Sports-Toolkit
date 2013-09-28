@@ -572,7 +572,7 @@ if(!function_exists('format_stats'))
                           $position_list = false, $hands_list = false, $level_list = false, $debug = false)
 	{
 		// ERROR HANDLING
-		if ($stats === false || $categories === false || $stat_list === false)
+		if ($stats === false || !is_array($stats) || sizeof($stats) <= 0 || $categories === false || $stat_list === false)
 		{	
 			return false;
 		}
