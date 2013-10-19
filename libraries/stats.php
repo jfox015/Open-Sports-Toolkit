@@ -240,7 +240,7 @@ class Stats
      * @param 	Boolean 	$debug           	 	TRUE to display debug trace info, FALSE to disable
      * @return 	mixed		        				Array of stats, SQL query on debug, FALSE on error
      */
-    public static function get_stats($type = false, $id = false, $stats_type = TYPE_OFFENSE, $stats_class = false, $stat_scope = STATS_CAREER, $range = RANGE_SEASON, $params = array(), $debug = false)
+    public static function get_stats($type = false, $id = false, $stats_type = TYPE_OFFENSE, $stats_class = false, $stat_scope = STATS_CAREER, $range = RANGE_SEASON, $params = array(), $options = array(), $debug = false)
 	{
 		if ($type === false)
 		{
@@ -257,6 +257,7 @@ class Stats
 		$headers = array();
         $totals = array();
 		$where = array();
+		$make_totals = false;
 
 		if ($id !== false) 
 		{
@@ -281,51 +282,58 @@ class Stats
 		{
 			$params['where'] = $where;
 		} // END if
+
 		
 		$sql = self::_get_stats_query($type, $stats_type, $stats_class, $stat_scope, $range, $params, $debug);
+
+		//echo("SQL = ".$sql."<br /><br />");
+		$query = self::$ci->db->query($sql);
+		if ($query->num_rows() > 0)
+		{
+			$stats_data = $query->result_array();
+			$fields = $query->list_fields();
+		} // END if
+		$query->free_result();
+
+		$headers = self::make_headers($stats_type, $stats_class, self::$stat_list);
 		
+		if (!function_exists('format_stats'))
+		{
+			self::$error .= "Stats library is not properly loaded.";
+			return false;
+		} 
+		else
+		{
+			$stats = format_stats($stats_type, $stats_data, $stats_class, self::$stat_list, self::$position_list,
+				self::$hands_list, self::$level_list, $debug);
+		} // END if
+		
+
+		/*if (!isset($options['no_totals'])) 
+		{
+			$params['totals_row'] = true;
+			if (isset($options['team_totals'])) { $params['team_totals'] = true; }
+			if (isset($options['totals_class'])) { $stats_class = $options['totals_class']; }
+			
+			$sql = self::_get_stats_query($type, $stats_type, $stats_class, $stat_scope, $range, $params, $debug);
+			
+			//echo("Totals SQL = ".$sql."<br /><br />");
+			$query = self::$ci->db->query($sql);
+			
+			if ($query->num_rows() > 0)
+			{
+				$totals = $query->result_array();
+			} // END if
+			$query->free_result();
+		}*/
 		if ($debug === true)
 		{
 			return $sql;
 		}
 		else 
-		{
-			$stats_data = NULL;
-			$query = self::$ci->db->query($sql);
-			//print(self::$ci->db->last_query()."<br />");
-			if ($query->num_rows() > 0)
-			{
-				$stats_data = $query->result_array();
-				$fields = $query->list_fields();
-			} // END if
-			$query->free_result();
-
-            $headers = self::make_headers($stats_type, $stats_class, self::$stat_list);
-			
-			if (!function_exists('format_stats'))
-			{
-				self::$error .= "Stats library is not properly loaded.";
-				return false;
-			} 
-			else
-			{
-				$stats = format_stats($stats_type, $stats_data, $stats_class, self::$stat_list, self::$position_list,
-                    self::$hands_list, self::$level_list, $debug);
-			} // END if
-
-            if (isset($params['totals'])) {
-                $params['totals_row'] = true;
-                $sql = self::_get_stats_query($type, $stats_type, $stats_class, $stat_scope, $range, $params, $debug);
-                $query = self::$ci->db->query($sql);
-                if ($query->num_rows() > 0)
-                {
-                    $totals = $query->result_array();
-                } // END if
-                $query->free_result();
-            }
+		{	
+			return array('stats'=>$stats, 'headers'=>$headers, 'totals' =>$totals);
 		} // END if
-        //echo(self::$ci->db->last_query()."<br />");
-		return array('stats'=>$stats, 'headers'=>$headers, 'totals' =>$totals);
 	}
 
 	//--------------------------------------------------------------------
@@ -721,10 +729,10 @@ class Stats
         {
             foreach($params['where'] as $col => $val) {
                 if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
-                if ($col == $params['identifier'])
-				{
+                //if ($col == $params['identifier'])
+				//{
 					$where_str .= $tbl.".";
-				}
+				//}
 				$where_str .= $col .' = '.self::$ci->db->escape($val);
             }
         }
@@ -832,6 +840,7 @@ class Stats
             if ($where_str != ' WHERE ') { $where_str .= ' AND '; }
             $where_str .= $split_str;
         }
+		
         /*-----------------------------------------------------------
 		/
 		/	FINALIZED AND COMMIT THE WHERE STRING TO THE QUERY
@@ -857,21 +866,18 @@ class Stats
 		// NOTE: Not all queries need this.
 		$make_totals = (isset($params['totals_row']) && $params['totals_row'] == 1);
         if ($stat_scope != STATS_CAREER || ($stat_scope == STATS_CAREER && $make_totals)) {
-            if ($make_totals) 
+			if (!empty($identifier['player']) && !isset($params['team_totals']))
 			{
-                if (!empty($identifier['team']))
-                {
-                    $query .= " GROUP BY ".$_table_def[$stats_type][$stat_scope].'.'.$identifier['team'];
-                }
-                else if (!empty($identifier['league']))
-                {
-                    $query .= " GROUP BY ".$_table_def[$stats_type][$stat_scope].'.'.$identifier['league'];
-                }
-				else if (!empty($identifier['player']))
-				{
-					$query .= " GROUP BY ".$_table_def[$stats_type][$stat_scope].'.'.$identifier['player'];
-				}
-            }
+				$query .= " GROUP BY ".$_table_def[$stats_type][$stat_scope].'.'.$identifier['player'];
+			}
+			else if (!empty($identifier['team']))
+			{
+				$query .= " GROUP BY ".$_table_def[$stats_type][$stat_scope].'.'.$identifier['team'];
+			}
+			else if (!empty($identifier['league']))
+			{
+				$query .= " GROUP BY ".$_table_def[$stats_type][$stat_scope].'.'.$identifier['league'];
+			}
         }
 		/*------------------------------------
 		/	ORDERING AND SORTING
@@ -1064,6 +1070,7 @@ define('TYPE_INJURY', 'injury');
 define('TYPE_TEAM', 'team');
 define('TYPE_LEAGUE', 'league');
 define('TYPE_PLAYER', 'player');
+define('TYPE_MIXED_OFFENSE', 'offense');
 
 define('STATS_CAREER', 0);
 define('STATS_SEASON', 1);

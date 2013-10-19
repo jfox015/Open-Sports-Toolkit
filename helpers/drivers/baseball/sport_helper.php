@@ -572,7 +572,7 @@ if(!function_exists('format_stats'))
                           $position_list = false, $hands_list = false, $level_list = false, $debug = false)
 	{
 		// ERROR HANDLING
-		if ($stats === false || !is_array($stats) || sizeof($stats) <= 0 || $categories === false || $stat_list === false)
+		if ($stats === false || $categories === false || $stat_list === false)
 		{	
 			return false;
 		}
@@ -804,6 +804,42 @@ if(!function_exists('format_extended_fields'))
 			echo($col." = ".$newVal."<br />");
 		}
 		return $newVal;
+	}
+}
+
+if(!function_exists('compile_stats')) 
+{
+    function compile_stats($stats = false, $debug = false)
+	{
+		foreach($stats as $field => $value) {
+			switch ($field) 
+			{
+				case 'avg';
+					$stats['avg'] = $stats['h'] / $stats['ab'];
+					break;
+				case 'age';
+					$stats['age'] = '';
+					break;
+				case 'obp';
+					$stats['obp'] = ($stats['h']+$stats['bb']+$stats['hp'])/($stats['ab']+$stats['bb']+$stats['hp']+$stats['sf']);
+					break;
+				case 'whip';
+					$stats['whip'] = ($stats['bb']+$stats['ha'])/$stats['ip'];
+					break;
+				case 'era';
+					$stats['era'] = ($stats['er']*9)/$stats['ip'];
+					break;
+				case 'slg';
+					$stats['slg'] = ($stats['h']+($stats['d']*2)+($stats['t']*3)+($stats['hr']*4))/$stats['ab'];
+					break;
+				case 'ops';
+					$obp = ($stats['h']+$stats['bb']+$stats['hp'])/($stats['ab']+$stats['bb']+$stats['hp']+$stats['sf']);
+					$slg = ($stats['h']+($stats['d']*2)+($stats['t']*3)+($stats['hr']*4))/$stats['ab'];
+					$stats['ops'] = $obp + $slg;
+					break;
+			}
+		}
+		return $stats;
 	}
 }
 
