@@ -745,7 +745,7 @@ if(!function_exists('format_extended_fields'))
 				{
 					$name = $row['player_abbr_name'];
 				}
-				else
+				else if (isset($row['first_name']) && !empty($row['first_name']) && isset($row['last_name']) && !empty($row['last_name']))
 				{
 					$name = $row['first_name']." ".$row['last_name'];
 				}
@@ -770,9 +770,13 @@ if(!function_exists('format_extended_fields'))
 						$val = $name;
 					}
 				}
-				else 
+				else if (isset($name))
 				{
 					$val = $name;
+				}
+				else 
+				{
+					$val = "";
 				}
 				$newVal = $val;
 				break;
@@ -784,7 +788,7 @@ if(!function_exists('format_extended_fields'))
 				{
 					$name = $row['team_acr'];
 				}
-				else 
+				else if (isset($row['teamname']) && !empty($row['teamname']) && isset($row['teamnick']) && !empty($row['teamnick']))
 				{
 					$name = $row['teamname']." ".$row['teamnick'];
 				}
@@ -792,9 +796,13 @@ if(!function_exists('format_extended_fields'))
 				{
 					$val = anchor('teams/' . $row['team_id'],$name,array('target'=>'_blank'));
 				}
-				else 
+				else if (isset($name))
 				{
 					$val = $name;
+				}
+				else 
+				{
+					$val = "";
 				}
 				$newVal = $val;
 				break;
@@ -815,26 +823,30 @@ if(!function_exists('compile_stats'))
 			switch ($field) 
 			{
 				case 'avg';
-					$stats['avg'] = $stats['h'] / $stats['ab'];
+					$stats['avg'] = (isset($stats['ab'])) ? $stats['h'] / $stats['ab'] : 0;
 					break;
 				case 'age';
 					$stats['age'] = '';
 					break;
 				case 'obp';
-					$stats['obp'] = ($stats['h']+$stats['bb']+$stats['hp'])/($stats['ab']+$stats['bb']+$stats['hp']+$stats['sf']);
+					$hp = (isset($stats['hp'])) ? $stats['hp'] : 0;
+					$sf = (isset($stats['sf'])) ? $stats['sf'] : 0;
+					$stats['obp'] = (isset($stats['ab'])) ? ($stats['h']+$stats['bb']+$hp)/($stats['ab']+$stats['bb']+$hp+$sf) : 0;
 					break;
 				case 'whip';
-					$stats['whip'] = ($stats['bb']+$stats['ha'])/$stats['ip'];
+					$stats['whip'] = (isset($stats['ip'])) ? ($stats['bb']+$stats['ha'])/$stats['ip'] : 0;
 					break;
 				case 'era';
-					$stats['era'] = ($stats['er']*9)/$stats['ip'];
+					$stats['era'] = (isset($stats['ip'])) ? ($stats['er']*9)/$stats['ip'] : 0;
 					break;
 				case 'slg';
-					$stats['slg'] = ($stats['h']+($stats['d']*2)+($stats['t']*3)+($stats['hr']*4))/$stats['ab'];
+					$stats['slg'] = (isset($stats['ab'])) ? ($stats['h']+($stats['d']*2)+($stats['t']*3)+($stats['hr']*4))/$stats['ab'] : 0;
 					break;
 				case 'ops';
-					$obp = ($stats['h']+$stats['bb']+$stats['hp'])/($stats['ab']+$stats['bb']+$stats['hp']+$stats['sf']);
-					$slg = ($stats['h']+($stats['d']*2)+($stats['t']*3)+($stats['hr']*4))/$stats['ab'];
+					$hp = (isset($stats['hp'])) ? $stats['hp'] : 0;
+					$sf = (isset($stats['sf'])) ? $stats['sf'] : 0;
+					$obp = (isset($stats['ab'])) ? ($stats['h']+$stats['bb']+$hp)/($stats['ab']+$stats['bb']+$hp+$sf) : 0;
+					$slg = (isset($stats['ab'])) ? ($stats['h']+($stats['d']*2)+($stats['t']*3)+($stats['hr']*4))/$stats['ab'] : 0;
 					$stats['ops'] = $obp + $slg;
 					break;
 			}
